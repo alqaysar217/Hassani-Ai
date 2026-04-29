@@ -12,7 +12,7 @@ import {
   SidebarInset, 
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Search, Settings2, MoreHorizontal } from 'lucide-react';
+import { Sparkles, Search, Settings2, Menu } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { automaticIntentRouting } from '@/ai/flows/automatic-intent-routing';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
@@ -78,7 +78,7 @@ export default function HassaniApp() {
       switch (intent) {
         case 'image':
           const imgRes = await aiImageCreation(text);
-          aiResponse = `Generated image for: "${text}"`;
+          aiResponse = `تم إنشاء الصورة لـ: "${text}"`;
           msgType = 'image';
           metadata = { mediaUrl: imgRes.media };
           break;
@@ -90,7 +90,7 @@ export default function HassaniApp() {
           break;
         case 'diagram':
           const diagramRes = await generateDiagram({ description: text, diagramType: 'erd' });
-          aiResponse = diagramRes.diagramExplanation || "Diagram structure ready.";
+          aiResponse = diagramRes.diagramExplanation || "هيكل المخطط جاهز.";
           msgType = 'diagram';
           metadata = { 
             diagramSyntax: diagramRes.diagramSyntax, 
@@ -118,8 +118,8 @@ export default function HassaniApp() {
       console.error(error);
       toast({
         variant: 'destructive',
-        title: "Assistant Error",
-        description: "Please check your connection and try again."
+        title: "خطأ في المساعد",
+        description: "يرجى التحقق من الاتصال والمحاولة مرة أخرى."
       });
     } finally {
       setIsLoading(false);
@@ -140,57 +140,57 @@ export default function HassaniApp() {
         />
         
         <SidebarInset className="flex flex-col h-full w-full relative">
-          {/* iOS Style Sticky Header */}
-          <header className="h-16 flex items-center justify-between px-4 glass-morphism sticky top-0 z-30 shrink-0">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger className="hover:bg-muted rounded-full" />
-              <div className="flex flex-col -space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-primary/70">Assistant</span>
-                <h1 className="text-base font-bold flex items-center gap-1.5">
-                  Hassani AI <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                </h1>
+          {/* Mobile Luxury Header */}
+          <header className="h-16 flex items-center justify-between px-5 glass-morphism sticky top-0 z-30 shrink-0">
+            {/* Right Side: Logo and Name */}
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl luxury-gradient flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                <Sparkles className="h-5 w-5 fill-white" />
+              </div>
+              <div className="flex flex-col">
+                <h1 className="text-lg font-extrabold tracking-tight text-secondary">حساني الذكي</h1>
+                <div className="flex items-center gap-1">
+                  <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase">نشط الآن</span>
+                </div>
               </div>
             </div>
 
+            {/* Left Side: Sidebar Trigger */}
             <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
-                <Search className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="rounded-full h-10 w-10" onClick={() => setIsSettingsOpen(true)}>
-                <Settings2 className="h-5 w-5" />
-              </Button>
+               <SidebarTrigger className="h-10 w-10 hover:bg-primary/5 rounded-full text-primary" />
             </div>
           </header>
 
           {/* Main Conversation Area */}
           <div className="flex-1 flex flex-col relative overflow-hidden">
             <ScrollArea ref={scrollRef} className="flex-1">
-              <div className="max-w-3xl mx-auto px-4 py-6 pb-12 space-y-6">
+              <div className="max-w-3xl mx-auto px-5 py-8 space-y-8">
                 {(!currentConversation || currentConversation.messages.length === 0) ? (
-                  <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6 space-y-8 animate-fade-in">
+                  <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6 space-y-8 animate-fade-in-up">
                     <div className="relative">
-                      <div className="h-24 w-24 rounded-[32px] bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white shadow-2xl shadow-primary/30">
-                        <Sparkles className="h-12 w-12" />
+                      <div className="h-28 w-28 rounded-[38px] luxury-gradient flex items-center justify-center text-white shadow-2xl shadow-primary/30">
+                        <Sparkles className="h-14 w-14" />
                       </div>
-                      <div className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-background border-4 border-background flex items-center justify-center shadow-lg">
-                        <div className="h-3 w-3 rounded-full bg-green-500" />
+                      <div className="absolute -bottom-2 -right-2 h-10 w-10 rounded-full bg-white border-4 border-background flex items-center justify-center shadow-xl">
+                        <div className="h-4 w-4 rounded-full bg-green-500 animate-pulse" />
                       </div>
                     </div>
-                    <div className="space-y-3">
-                      <h2 className="text-3xl font-extrabold tracking-tight">Salam, I'm Hassani</h2>
-                      <p className="text-muted-foreground leading-relaxed max-w-[280px] mx-auto">
-                        Your intelligent partner for code, art, and creative thinking.
+                    <div className="space-y-4">
+                      <h2 className="text-4xl font-extrabold tracking-tight text-secondary">أهلاً بك، أنا حساني</h2>
+                      <p className="text-muted-foreground leading-relaxed max-w-[300px] mx-auto text-lg">
+                        شريكك الذكي للإبداع، البرمجة، والتخطيط المستقبلي.
                       </p>
                     </div>
                     
-                    <div className="grid grid-cols-1 gap-3 w-full max-w-[320px]">
-                      <Button variant="outline" className="rounded-2xl h-14 justify-start px-6 gap-4 border-primary/10 hover:border-primary/30" onClick={() => handleSendMessage("Suggest a weekend trip plan")}>
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">🌍</div>
-                        Plan a travel
+                    <div className="grid grid-cols-1 gap-4 w-full max-w-[340px]">
+                      <Button variant="outline" className="rounded-2xl h-16 justify-start px-6 gap-4 border-primary/20 hover:border-primary/40 bg-white/50" onClick={() => handleSendMessage("خطط لرحلة سياحية مميزة")}>
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-xl">🌍</div>
+                        <span className="font-bold text-secondary">خطط لرحلة</span>
                       </Button>
-                      <Button variant="outline" className="rounded-2xl h-14 justify-start px-6 gap-4 border-primary/10 hover:border-primary/30" onClick={() => handleSendMessage("Create a modern login form UI")}>
-                        <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">💻</div>
-                        Generate UI Code
+                      <Button variant="outline" className="rounded-2xl h-16 justify-start px-6 gap-4 border-primary/20 hover:border-primary/40 bg-white/50" onClick={() => handleSendMessage("صمم لي واجهة تطبيق فاخرة")}>
+                        <div className="h-10 w-10 rounded-full bg-amber-500/10 flex items-center justify-center text-xl">✨</div>
+                        <span className="font-bold text-secondary">توليد تصاميم إبداعية</span>
                       </Button>
                     </div>
                   </div>
@@ -201,15 +201,15 @@ export default function HassaniApp() {
                 )}
                 
                 {isLoading && (
-                  <div className="flex justify-start items-center gap-3 animate-slide-up">
-                    <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                      <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+                  <div className="flex justify-start items-center gap-3 animate-fade-in">
+                    <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Sparkles className="h-5 w-5 text-primary animate-pulse" />
                     </div>
-                    <div className="bg-card px-4 py-2.5 rounded-2xl rounded-tl-sm border border-border/50 flex items-center gap-2 shadow-sm">
-                      <span className="flex gap-1">
-                        <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                        <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                        <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce"></span>
+                    <div className="bg-white px-5 py-3 rounded-2xl rounded-tr-sm border border-primary/10 flex items-center gap-2 shadow-sm">
+                      <span className="flex gap-1.5">
+                        <span className="w-2 h-2 bg-primary/50 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                        <span className="w-2 h-2 bg-primary/50 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                        <span className="w-2 h-2 bg-primary/50 rounded-full animate-bounce"></span>
                       </span>
                     </div>
                   </div>

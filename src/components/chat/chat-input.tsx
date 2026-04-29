@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Paperclip, Sparkles, Image as ImageIcon, Code, Layout, Music, Mic } from 'lucide-react';
+import { Send, Paperclip, Sparkles, Image as ImageIcon, Code, Music, Mic } from 'lucide-react';
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -11,10 +11,10 @@ interface ChatInputProps {
 }
 
 const suggestions = [
-  { icon: <Sparkles className="h-4 w-4" />, label: "Chat", hint: "" },
-  { icon: <ImageIcon className="h-4 w-4" />, label: "Image", hint: "Generate an image of a " },
-  { icon: <Code className="h-4 w-4" />, label: "Code", hint: "Explain this code: " },
-  { icon: <Music className="h-4 w-4" />, label: "Song", hint: "Write a song about " },
+  { icon: <Sparkles className="h-4 w-4" />, label: "دردشة", hint: "" },
+  { icon: <ImageIcon className="h-4 w-4" />, label: "صور", hint: "صمم لي صورة لـ " },
+  { icon: <Code className="h-4 w-4" />, label: "برمجة", hint: "اشرح لي هذا الكود: " },
+  { icon: <Music className="h-4 w-4" />, label: "تخطيط", hint: "ساعدني في التخطيط لـ " },
 ];
 
 export function ChatInput({ onSend, disabled }: ChatInputProps) {
@@ -43,15 +43,15 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   }, [input]);
 
   return (
-    <div className="p-3 pb-6 border-t bg-background/80 backdrop-blur-md safe-bottom sticky bottom-0 z-30">
+    <div className="p-4 pb-8 border-t bg-white/80 backdrop-blur-xl safe-bottom sticky bottom-0 z-30 mobile-app-shadow">
       {/* Scrollable Suggestions Bar */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-1 no-scrollbar px-2">
+      <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-2 no-scrollbar px-1">
         {suggestions.map((s, i) => (
           <Button
             key={i}
             variant="secondary"
             size="sm"
-            className="rounded-full flex-shrink-0 text-xs gap-1.5 h-8 px-4 font-medium"
+            className="rounded-2xl flex-shrink-0 text-sm gap-2 h-10 px-5 font-bold bg-primary/5 hover:bg-primary/10 text-primary border border-primary/10 transition-all active:scale-95"
             onClick={() => {
               setInput(s.hint);
               textareaRef.current?.focus();
@@ -63,9 +63,9 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         ))}
       </div>
 
-      <div className="flex items-end gap-2 bg-muted/40 rounded-[24px] p-2 pr-1.5 border border-border/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-200">
-        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full text-muted-foreground hover:bg-background/50">
-          <Paperclip className="h-5 w-5" />
+      <div className="flex items-end gap-3 bg-muted/60 rounded-[30px] p-2 pr-2 border border-primary/10 focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-300">
+        <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full text-muted-foreground hover:bg-white hover:text-primary transition-colors">
+          <Paperclip className="h-6 w-6" />
         </Button>
         
         <Textarea
@@ -73,8 +73,8 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={onKeyDown}
-          placeholder="Ask Hassani anything..."
-          className="min-h-[40px] max-h-[160px] border-0 focus-visible:ring-0 bg-transparent resize-none py-2 px-1 text-base md:text-[15px] leading-normal"
+          placeholder="اسأل حساني أي شيء..."
+          className="min-h-[44px] max-h-[160px] border-0 focus-visible:ring-0 bg-transparent resize-none py-3 px-1 text-base leading-relaxed font-medium placeholder:text-muted-foreground/60"
           disabled={disabled}
         />
 
@@ -83,13 +83,13 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
             size="icon" 
             onClick={handleSend}
             disabled={disabled}
-            className="h-10 w-10 rounded-full bg-primary hover:bg-primary/90 transition-all active:scale-90 shadow-md shadow-primary/20"
+            className="h-11 w-11 rounded-full luxury-gradient transition-all active:scale-90 shadow-lg shadow-primary/30"
           >
-            <Send className="h-5 w-5 fill-white" />
+            <Send className="h-5 w-5 fill-white rotate-180" />
           </Button>
         ) : (
-          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full text-muted-foreground">
-            <Mic className="h-5 w-5" />
+          <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full text-muted-foreground hover:text-primary">
+            <Mic className="h-6 w-6" />
           </Button>
         )}
       </div>

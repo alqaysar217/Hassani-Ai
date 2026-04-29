@@ -26,85 +26,78 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] rounded-3xl overflow-hidden bg-background">
-        <DialogHeader>
-          <DialogTitle className="text-xl">Settings</DialogTitle>
-          <DialogDescription>
-            Personalize your Hassani AI experience.
+      <DialogContent className="sm:max-w-[425px] rounded-[32px] overflow-hidden bg-background border-none shadow-2xl">
+        <DialogHeader className="text-right">
+          <DialogTitle className="text-2xl font-extrabold text-secondary">الإعدادات</DialogTitle>
+          <DialogDescription className="text-muted-foreground font-medium">
+            قم بتخصيص تجربة حساني الذكي الخاصة بك.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="grid gap-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-primary/10 text-primary">
-                <Moon className="h-5 w-5" />
+        <div className="grid gap-6 py-6">
+          <div className="flex items-center justify-between p-4 bg-muted/30 rounded-2xl border border-primary/5">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-2xl luxury-gradient text-white shadow-md">
+                <Sun className="h-6 w-6" />
               </div>
               <div className="space-y-0.5">
-                <Label>Dark Mode</Label>
-                <p className="text-xs text-muted-foreground">Always dark by default</p>
+                <Label className="text-lg font-bold text-secondary">الوضع الفاتح</Label>
+                <p className="text-xs text-muted-foreground">التصميم اللؤلؤي والذهبي</p>
               </div>
             </div>
-            <Switch checked disabled />
+            <Switch checked={false} disabled />
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500">
-                <Globe className="h-5 w-5" />
-              </div>
-              <Label>Language</Label>
+              <Globe className="h-5 w-5 text-primary" />
+              <Label className="font-bold text-secondary">اللغة</Label>
             </div>
-            <Select defaultValue="en">
-              <SelectTrigger className="rounded-xl">
-                <SelectValue placeholder="Select Language" />
+            <Select defaultValue="ar">
+              <SelectTrigger className="rounded-2xl h-12 border-primary/10">
+                <SelectValue placeholder="اختر اللغة" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="rounded-2xl">
+                <SelectItem value="ar">العربية</SelectItem>
                 <SelectItem value="en">English</SelectItem>
-                <SelectItem value="es">Spanish</SelectItem>
-                <SelectItem value="fr">French</SelectItem>
-                <SelectItem value="de">German</SelectItem>
-                <SelectItem value="jp">Japanese</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500">
-                <Key className="h-5 w-5" />
-              </div>
-              <Label>External API Key (Optional)</Label>
+              <Key className="h-5 w-5 text-primary" />
+              <Label className="font-bold text-secondary">مفتاح API الخارجي (اختياري)</Label>
             </div>
             <div className="relative">
               <Input 
                 type="password"
                 placeholder="sk-..."
-                className="rounded-xl pr-10"
+                className="rounded-2xl h-12 pr-12 border-primary/10 bg-white"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
               />
-              <Key className="absolute right-3 top-2.5 h-4 w-4 opacity-40" />
+              <Key className="absolute right-4 top-3.5 h-5 w-5 opacity-30" />
             </div>
-            <p className="text-[10px] text-muted-foreground">
-              Keys are stored only locally in your browser.
+            <p className="text-[11px] text-muted-foreground font-medium">
+              يتم تخزين المفاتيح محلياً فقط في متصفحك لضمان الخصوصية.
             </p>
           </div>
 
-          <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/50 border border-border">
-            <Shield className="h-5 w-5 text-green-500 shrink-0" />
+          <div className="flex items-start gap-4 p-4 rounded-2xl bg-primary/5 border border-primary/10">
+            <Shield className="h-6 w-6 text-primary shrink-0" />
             <div className="space-y-1">
-              <p className="text-xs font-semibold">Privacy Note</p>
-              <p className="text-[10px] text-muted-foreground">
-                Hassani does not store sensitive user data on external servers. Conversations are kept in your local environment.
+              <p className="text-sm font-extrabold text-secondary">ملاحظة الخصوصية</p>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                حساني لا يقوم بتخزين بيانات المستخدم الحساسة على خوادم خارجية. يتم الاحتفاظ بالمحادثات في بيئتك المحلية فقط.
               </p>
             </div>
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button className="bg-primary hover:bg-primary/90 rounded-xl" onClick={() => onOpenChange(false)}>Save changes</Button>
+        <DialogFooter className="flex-row gap-3 sm:justify-center">
+          <Button className="flex-1 luxury-gradient hover:opacity-90 rounded-2xl h-14 font-bold text-lg shadow-lg shadow-primary/20" onClick={() => onOpenChange(false)}>حفظ التغييرات</Button>
+          <Button variant="ghost" className="rounded-2xl h-14 font-bold px-8" onClick={() => onOpenChange(false)}>إلغاء</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
