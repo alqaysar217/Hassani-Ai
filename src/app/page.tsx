@@ -10,11 +10,9 @@ import {
   SidebarProvider, 
   SidebarTrigger, 
   SidebarInset, 
-  SidebarContent,
-  useSidebar
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Menu, History, MoreVertical, Search, Github, Twitter } from 'lucide-react';
+import { Sparkles, Search, Settings2, MoreHorizontal } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { automaticIntentRouting } from '@/ai/flows/automatic-intent-routing';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
@@ -43,10 +41,13 @@ export default function HassaniApp() {
 
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTo({
-        top: scrollRef.current.scrollHeight,
-        behavior: 'smooth'
-      });
+      const viewport = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (viewport) {
+        viewport.scrollTo({
+          top: viewport.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
     }
   }, [currentConversation?.messages, isLoading]);
 
@@ -68,18 +69,16 @@ export default function HassaniApp() {
     setIsLoading(true);
 
     try {
-      // Step 1: Detect Intent
       const { intent } = await automaticIntentRouting(text);
       
       let aiResponse;
       let msgType: MessageType = 'text';
       let metadata = {};
 
-      // Step 2: Route to specific AI flows
       switch (intent) {
         case 'image':
           const imgRes = await aiImageCreation(text);
-          aiResponse = `Here is the image I generated based on: "${text}"`;
+          aiResponse = `Generated image for: "${text}"`;
           msgType = 'image';
           metadata = { mediaUrl: imgRes.media };
           break;
@@ -90,24 +89,14 @@ export default function HassaniApp() {
           metadata = { code: codeRes.code, explanation: codeRes.explanation };
           break;
         case 'diagram':
-          // Defaulting to ERD if not specified, but the flow usually handles it.
-          // Note: In a real app we might refine the diagramType from the text.
           const diagramRes = await generateDiagram({ description: text, diagramType: 'erd' });
-          aiResponse = diagramRes.diagramExplanation || "Generated your diagram structure.";
+          aiResponse = diagramRes.diagramExplanation || "Diagram structure ready.";
           msgType = 'diagram';
           metadata = { 
             diagramSyntax: diagramRes.diagramSyntax, 
             diagramExplanation: diagramRes.diagramExplanation 
           };
           break;
-        case 'music':
-          // Music is mocked since we don't have a specific flow, using general as base
-          const musicRes = await intelligentConversationalAi({ query: text });
-          aiResponse = musicRes.response;
-          msgType = 'music';
-          break;
-        case 'question':
-        case 'planning':
         default:
           const chatRes = await intelligentConversationalAi({ query: text });
           aiResponse = chatRes.response;
@@ -130,7 +119,7 @@ export default function HassaniApp() {
       toast({
         variant: 'destructive',
         title: "Assistant Error",
-        description: "Something went wrong while thinking. Please try again."
+        description: "Please check your connection and try again."
       });
     } finally {
       setIsLoading(false);
@@ -150,45 +139,59 @@ export default function HassaniApp() {
           onOpenSettings={() => setIsSettingsOpen(true)}
         />
         
-        <SidebarInset className="flex flex-col h-full w-full">
-          {/* Top Navigation Bar */}
-          <header className="h-14 flex items-center justify-between px-4 glass-morphism z-20">
-            <div className="flex items-center gap-3">
-              <SidebarTrigger className="md:hidden" />
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-                  <Sparkles className="h-5 w-5 text-white" />
-                </div>
-                <h1 className="text-lg font-bold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  Hassani
+        <SidebarInset className="flex flex-col h-full w-full relative">
+          {/* iOS Style Sticky Header */}
+          <header className="h-16 flex items-center justify-between px-4 glass-morphism sticky top-0 z-30 shrink-0">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger className="hover:bg-muted rounded-full" />
+              <div className="flex flex-col -space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-primary/70">Assistant</span>
+                <h1 className="text-base font-bold flex items-center gap-1.5">
+                  Hassani AI <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
                 </h1>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Search className="h-5 w-5 text-muted-foreground" />
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
+                <Search className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="icon" className="rounded-full md:hidden">
-                <History className="h-5 w-5 text-muted-foreground" />
+              <Button variant="ghost" size="icon" className="rounded-full h-10 w-10" onClick={() => setIsSettingsOpen(true)}>
+                <Settings2 className="h-5 w-5" />
               </Button>
             </div>
           </header>
 
-          {/* Main Chat Area */}
-          <main className="flex-1 relative overflow-hidden flex flex-col">
-            <ScrollArea ref={scrollRef} className="flex-1 p-4 md:p-6 lg:px-[15%]">
-              <div className="space-y-4 max-w-4xl mx-auto pb-20 pt-4">
+          {/* Main Conversation Area */}
+          <div className="flex-1 flex flex-col relative overflow-hidden">
+            <ScrollArea ref={scrollRef} className="flex-1">
+              <div className="max-w-3xl mx-auto px-4 py-6 pb-12 space-y-6">
                 {(!currentConversation || currentConversation.messages.length === 0) ? (
-                  <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 animate-fade-in">
-                    <div className="h-20 w-20 rounded-3xl bg-primary/10 flex items-center justify-center text-primary mb-2 shadow-inner">
-                      <Sparkles className="h-10 w-10" />
+                  <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6 space-y-8 animate-fade-in">
+                    <div className="relative">
+                      <div className="h-24 w-24 rounded-[32px] bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white shadow-2xl shadow-primary/30">
+                        <Sparkles className="h-12 w-12" />
+                      </div>
+                      <div className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-background border-4 border-background flex items-center justify-center shadow-lg">
+                        <div className="h-3 w-3 rounded-full bg-green-500" />
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <h2 className="text-3xl font-bold tracking-tight">How can I help you today?</h2>
-                      <p className="text-muted-foreground max-w-md mx-auto px-4">
-                        I can generate images, write code, create diagrams, or just chat with you about anything.
+                    <div className="space-y-3">
+                      <h2 className="text-3xl font-extrabold tracking-tight">Salam, I'm Hassani</h2>
+                      <p className="text-muted-foreground leading-relaxed max-w-[280px] mx-auto">
+                        Your intelligent partner for code, art, and creative thinking.
                       </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 gap-3 w-full max-w-[320px]">
+                      <Button variant="outline" className="rounded-2xl h-14 justify-start px-6 gap-4 border-primary/10 hover:border-primary/30" onClick={() => handleSendMessage("Suggest a weekend trip plan")}>
+                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">🌍</div>
+                        Plan a travel
+                      </Button>
+                      <Button variant="outline" className="rounded-2xl h-14 justify-start px-6 gap-4 border-primary/10 hover:border-primary/30" onClick={() => handleSendMessage("Create a modern login form UI")}>
+                        <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">💻</div>
+                        Generate UI Code
+                      </Button>
                     </div>
                   </div>
                 ) : (
@@ -198,24 +201,24 @@ export default function HassaniApp() {
                 )}
                 
                 {isLoading && (
-                  <div className="flex justify-start animate-in fade-in slide-in-from-bottom-2">
-                    <div className="chat-bubble-ai px-6 py-4 flex items-center gap-2">
-                      <div className="flex gap-1">
-                        <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                        <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                        <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce"></span>
-                      </div>
-                      <span className="text-sm font-medium opacity-60">Hassani is thinking...</span>
+                  <div className="flex justify-start items-center gap-3 animate-slide-up">
+                    <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+                      <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+                    </div>
+                    <div className="bg-card px-4 py-2.5 rounded-2xl rounded-tl-sm border border-border/50 flex items-center gap-2 shadow-sm">
+                      <span className="flex gap-1">
+                        <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                        <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                        <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce"></span>
+                      </span>
                     </div>
                   </div>
                 )}
               </div>
             </ScrollArea>
 
-            <div className="lg:px-[15%]">
-               <ChatInput onSend={handleSendMessage} disabled={isLoading} />
-            </div>
-          </main>
+            <ChatInput onSend={handleSendMessage} disabled={isLoading} />
+          </div>
         </SidebarInset>
 
         <SettingsDialog 

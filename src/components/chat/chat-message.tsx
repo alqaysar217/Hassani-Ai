@@ -4,7 +4,7 @@ import React from 'react';
 import { Message } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Copy, Music, Layout, Check, ExternalLink } from 'lucide-react';
+import { Copy, Check, Layout, Music, MoreHorizontal } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 
@@ -19,7 +19,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
-    toast({ title: "Copied to clipboard" });
+    toast({ title: "Copied" });
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -27,116 +27,96 @@ export function ChatMessage({ message }: ChatMessageProps) {
 
   return (
     <div className={cn(
-      "flex w-full mb-6 animate-in fade-in slide-in-from-bottom-2 duration-300",
+      "flex w-full group transition-all duration-300",
       isAI ? "justify-start" : "justify-end"
     )}>
       <div className={cn(
-        "max-w-[85%] md:max-w-[70%] lg:max-w-[60%] px-4 py-3 shadow-sm",
-        isAI 
-          ? "chat-bubble-ai border border-border" 
-          : "chat-bubble-user"
+        "relative flex flex-col gap-1.5 max-w-[88%] md:max-w-[80%] lg:max-w-[70%]",
+        isAI ? "items-start" : "items-end"
       )}>
-        {/* Main Content */}
-        {message.type === 'text' && (
-          <p className="whitespace-pre-wrap leading-relaxed text-sm md:text-base">
-            {message.content}
-          </p>
-        )}
-
-        {/* Code Block Support */}
-        {message.type === 'code' && (
-          <div className="space-y-4">
-            {message.metadata?.explanation && (
-              <p className="text-sm md:text-base leading-relaxed mb-2 italic">
-                {message.metadata.explanation}
-              </p>
-            )}
-            <div className="relative group rounded-xl overflow-hidden bg-black/40 border border-white/10">
-              <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/10">
-                <span className="text-xs font-code opacity-70">Source Code</span>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8 hover:bg-white/10"
-                  onClick={() => copyToClipboard(message.metadata?.code || "")}
-                >
-                  {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
-                </Button>
-              </div>
-              <pre className="p-4 font-code text-xs md:text-sm overflow-x-auto text-blue-200">
-                <code>{message.metadata?.code || message.content}</code>
-              </pre>
-            </div>
-          </div>
-        )}
-
-        {/* Image Display */}
-        {message.type === 'image' && (
-          <div className="space-y-3">
-             <div className="relative aspect-square w-full max-w-sm rounded-2xl overflow-hidden border border-border bg-muted">
-                <Image 
-                  src={message.metadata?.mediaUrl || message.content} 
-                  alt="AI Generated Image" 
-                  fill 
-                  className="object-cover"
-                  unoptimized
-                />
-             </div>
-             <p className="text-xs opacity-70">{message.content}</p>
-          </div>
-        )}
-
-        {/* Diagram Display */}
-        {message.type === 'diagram' && (
-          <div className="space-y-4">
-             <div className="flex items-center gap-2 text-primary">
-                <Layout className="h-5 w-5" />
-                <span className="font-semibold text-sm">Diagram Structure</span>
-             </div>
-             {message.metadata?.diagramExplanation && (
-               <p className="text-sm opacity-90">{message.metadata.diagramExplanation}</p>
-             )}
-             <div className="relative group rounded-xl overflow-hidden bg-white/5 border border-white/10 p-4">
-               <pre className="font-code text-xs md:text-sm overflow-x-auto">
-                 <code>{message.metadata?.diagramSyntax}</code>
-               </pre>
-               <Button 
-                variant="outline" 
-                size="sm" 
-                className="mt-4 gap-2 border-primary/20 hover:bg-primary/10"
-                onClick={() => copyToClipboard(message.metadata?.diagramSyntax || "")}
-               >
-                 <Copy className="h-3 w-3" />
-                 Copy Syntax
-               </Button>
-             </div>
-          </div>
-        )}
-
-        {/* Music Display Placeholder */}
-        {message.type === 'music' && (
-          <div className="space-y-4 p-2">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
-                <Music className="h-6 w-6 text-primary animate-pulse" />
-              </div>
-              <div>
-                <p className="font-medium text-sm">Synthesized Melody</p>
-                <p className="text-xs opacity-60">Generated by Hassani</p>
-              </div>
-            </div>
-            <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-               <div className="h-full bg-primary w-1/3 animate-pulse" />
-            </div>
-            <p className="text-xs italic opacity-80">{message.content}</p>
-          </div>
-        )}
-
-        {/* Message Actions */}
-        <div className="mt-1 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <span className="text-[10px] opacity-40 font-medium">
-            {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        {/* Timestamp/Label */}
+        <div className="flex items-center gap-2 px-1">
+          <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-tighter">
+            {isAI ? "Hassani" : "You"} • {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
+        </div>
+
+        <div className={cn(
+          "px-4 py-3 shadow-sm transition-transform active:scale-[0.99]",
+          isAI ? "chat-bubble-ai" : "chat-bubble-user"
+        )}>
+          {/* Main Content */}
+          {message.type === 'text' && (
+            <p className="whitespace-pre-wrap leading-relaxed text-[15px] md:text-base">
+              {message.content}
+            </p>
+          )}
+
+          {/* Code Block Support */}
+          {message.type === 'code' && (
+            <div className="space-y-3">
+              {message.metadata?.explanation && (
+                <p className="text-[14px] leading-relaxed mb-2">
+                  {message.metadata.explanation}
+                </p>
+              )}
+              <div className="rounded-xl overflow-hidden bg-zinc-950 border border-white/5">
+                <div className="flex items-center justify-between px-3 py-1.5 bg-white/5">
+                  <span className="text-[10px] font-mono opacity-50 uppercase tracking-widest">Code</span>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-7 w-7 hover:bg-white/10"
+                    onClick={() => copyToClipboard(message.metadata?.code || "")}
+                  >
+                    {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5" />}
+                  </Button>
+                </div>
+                <pre className="p-4 font-code text-xs md:text-sm overflow-x-auto text-indigo-200 no-scrollbar">
+                  <code>{message.metadata?.code || message.content}</code>
+                </pre>
+              </div>
+            </div>
+          )}
+
+          {/* Image Display */}
+          {message.type === 'image' && (
+            <div className="space-y-3">
+               <div className="relative aspect-square w-full min-w-[240px] rounded-xl overflow-hidden border border-border/50 bg-muted">
+                  <Image 
+                    src={message.metadata?.mediaUrl || message.content} 
+                    alt="AI Generated" 
+                    fill 
+                    className="object-cover"
+                    unoptimized
+                  />
+               </div>
+            </div>
+          )}
+
+          {/* Diagram Display */}
+          {message.type === 'diagram' && (
+            <div className="space-y-3">
+               <div className="flex items-center gap-2 text-primary font-bold text-sm">
+                  <Layout className="h-4 w-4" /> Diagram Ready
+               </div>
+               <div className="rounded-xl overflow-hidden bg-muted/30 border border-border/50 p-4">
+                 <pre className="font-code text-xs overflow-x-auto no-scrollbar">
+                   <code>{message.metadata?.diagramSyntax}</code>
+                 </pre>
+               </div>
+            </div>
+          )}
+        </div>
+
+        {/* Action Menu (Visible on hover/long press) */}
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 mt-1">
+          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full">
+            <MoreHorizontal className="h-3.5 w-3.5" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={() => copyToClipboard(message.content)}>
+            <Copy className="h-3.5 w-3.5" />
+          </Button>
         </div>
       </div>
     </div>
