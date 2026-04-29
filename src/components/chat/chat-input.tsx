@@ -33,7 +33,7 @@ interface ChatInputProps {
 }
 
 const modes = [
-  { id: 'text' as MessageType, icon: <Sparkles className="h-4 w-4" />, label: "دردشة ذكية", color: "text-amber-500" },
+  { id: 'text' as MessageType, icon: <Zap className="h-4 w-4" />, label: "دردشة ذكية", color: "text-amber-500" },
   { id: 'image' as MessageType, icon: <ImageIcon className="h-4 w-4" />, label: "توليد صور", color: "text-blue-500" },
   { id: 'code' as MessageType, icon: <Code className="h-4 w-4" />, label: "مساعد برمجـي", color: "text-emerald-500" },
   { id: 'diagram' as MessageType, icon: <Layout className="h-4 w-4" />, label: "مخططات هندسية", color: "text-purple-500" },
@@ -54,7 +54,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
       onSend(input, selectedMode);
       setInput('');
       setAttachedFile(null);
-      setSelectedMode('text'); // العودة للوضع الافتراضي بعد الإرسال
+      setSelectedMode('text');
     }
   };
 
@@ -82,7 +82,6 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   return (
     <div className="p-4 bg-white/80 backdrop-blur-2xl border-t border-primary/10 safe-bottom sticky bottom-0 z-30 shadow-[0_-8px_30px_-10px_rgba(197,160,89,0.1)]">
       <div className="max-w-3xl mx-auto space-y-3">
-        {/* File Preview */}
         {attachedFile && (
           <div className="flex items-center gap-2 bg-primary/5 p-2 pr-4 rounded-2xl border border-primary/10 animate-fade-in w-fit">
             <Paperclip className="h-4 w-4 text-primary" />
@@ -98,7 +97,6 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           </div>
         )}
 
-        {/* Selected Mode Indicator (Small Toast-like) */}
         {selectedMode !== 'text' && (
           <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full w-fit animate-slide-in-right">
             <span className={cn("shrink-0", currentModeInfo.color)}>{currentModeInfo.icon}</span>
@@ -109,10 +107,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           </div>
         )}
 
-        {/* Main Input Container */}
         <div className="bg-muted/40 rounded-[28px] border border-primary/5 p-2 transition-all duration-300 focus-within:ring-2 focus-within:ring-primary/10 focus-within:bg-white focus-within:border-primary/20">
-          
-          {/* Row 1: Full Width Textarea */}
           <div className="px-2">
             <Textarea
               ref={textareaRef}
@@ -125,10 +120,8 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
             />
           </div>
 
-          {/* Row 2: Control Buttons */}
           <div className="flex items-center justify-between pt-1 border-t border-primary/5 mt-1 px-1">
             <div className="flex items-center gap-1">
-              {/* Smart Options Plus Button */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button 
@@ -139,24 +132,23 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                     <Plus className="h-6 w-6" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 rounded-3xl p-2 shadow-2xl border-primary/10">
-                  <div className="px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-b border-primary/5 mb-1">القدرات الذكية</div>
+                <DropdownMenuContent align="end" className="w-56 rounded-3xl p-2 shadow-2xl border-primary/10 bg-white" dir="rtl">
+                  <div className="px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-b border-primary/5 mb-1 text-right">القدرات الذكية</div>
                   {modes.map((m) => (
                     <DropdownMenuItem 
                       key={m.id}
                       onClick={() => setSelectedMode(m.id)}
-                      className="rounded-2xl gap-3 py-3 cursor-pointer group focus:bg-primary/5"
+                      className="rounded-2xl gap-3 py-3 cursor-pointer group focus:bg-primary/5 flex items-center justify-start text-right"
                     >
-                      <div className={cn("p-2 rounded-xl transition-colors bg-muted group-focus:bg-white group-focus:shadow-sm", m.color)}>
+                      <div className={cn("p-2 rounded-xl transition-colors bg-muted group-focus:bg-white group-focus:shadow-sm shrink-0", m.color)}>
                         {m.icon}
                       </div>
-                      <span className="font-bold text-secondary">{m.label}</span>
+                      <span className="font-bold text-secondary flex-1">{m.label}</span>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Attachment Button */}
               <input 
                 type="file" 
                 ref={fileInputRef} 
@@ -173,7 +165,6 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
               </Button>
             </div>
 
-            {/* Action Button: Send or Voice */}
             <div className="flex items-center">
               {input.trim() || attachedFile ? (
                 <Button 
