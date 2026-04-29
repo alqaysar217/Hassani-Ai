@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -51,7 +52,7 @@ export default function HassaniApp() {
     }
   }, [currentConversation?.messages, isLoading]);
 
-  const handleSendMessage = async (text: string) => {
+  const handleSendMessage = async (text: string, selectedMode?: MessageType) => {
     let activeId = currentId;
     if (!activeId) {
       activeId = createNewConversation();
@@ -69,7 +70,12 @@ export default function HassaniApp() {
     setIsLoading(true);
 
     try {
-      const { intent } = await automaticIntentRouting(text);
+      // Use selected mode if provided and not just 'text', otherwise route automatically
+      let intent: any = selectedMode;
+      if (!selectedMode || selectedMode === 'text') {
+        const res = await automaticIntentRouting(text);
+        intent = res.intent;
+      }
       
       let aiResponse;
       let msgType: MessageType = 'text';
