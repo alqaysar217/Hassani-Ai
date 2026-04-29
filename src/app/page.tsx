@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -143,7 +142,6 @@ export default function HassaniApp() {
         <SidebarInset className="flex flex-col h-full w-full relative overflow-hidden">
           {/* Mobile Luxury Header */}
           <header className="h-16 flex items-center justify-between px-5 glass-morphism sticky top-0 z-30 shrink-0 border-b border-primary/5">
-            {/* Right Side: Logo and Name */}
             <div className="flex items-center gap-3">
               <div className="h-9 w-9 rounded-xl luxury-gradient flex items-center justify-center text-white shadow-lg shadow-primary/20">
                 <Sparkles className="h-5 w-5 fill-white" />
@@ -152,18 +150,16 @@ export default function HassaniApp() {
                 <h1 className="text-lg font-extrabold tracking-tight text-secondary">حساني الذكي</h1>
                 <div className="flex items-center gap-1">
                   <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase">نشط الآن</span>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">نشط الآن</span>
                 </div>
               </div>
             </div>
 
-            {/* Left Side: Sidebar Trigger (Hidden by default, shown as menu) */}
             <SidebarTrigger className="h-10 w-10 hover:bg-primary/5 rounded-full text-primary transition-transform active:scale-90">
                <Menu className="h-6 w-6" />
             </SidebarTrigger>
           </header>
 
-          {/* Main Conversation Area */}
           <div className="flex-1 flex flex-col relative overflow-hidden bg-[radial-gradient(circle_at_top_right,rgba(197,160,89,0.05),transparent)]">
             <ScrollArea ref={scrollRef} className="flex-1">
               <div className="max-w-3xl mx-auto px-5 py-8 space-y-8">
@@ -179,20 +175,9 @@ export default function HassaniApp() {
                     </div>
                     <div className="space-y-4">
                       <h2 className="text-4xl font-extrabold tracking-tight text-secondary">أهلاً بك، أنا حساني</h2>
-                      <p className="text-muted-foreground leading-relaxed max-w-[300px] mx-auto text-lg">
+                      <p className="text-muted-foreground leading-relaxed max-w-[300px] mx-auto text-lg font-medium">
                         شريكك الذكي للإبداع، البرمجة، والتخطيط المستقبلي.
                       </p>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 gap-4 w-full max-w-[340px]">
-                      <Button variant="outline" className="rounded-2xl h-16 justify-start px-6 gap-4 border-primary/20 hover:border-primary/40 bg-white/50 shadow-sm" onClick={() => handleSendMessage("خطط لرحلة سياحية مميزة")}>
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-xl">🌍</div>
-                        <span className="font-bold text-secondary">خطط لرحلة</span>
-                      </Button>
-                      <Button variant="outline" className="rounded-2xl h-16 justify-start px-6 gap-4 border-primary/20 hover:border-primary/40 bg-white/50 shadow-sm" onClick={() => handleSendMessage("صمم لي واجهة تطبيق فاخرة")}>
-                        <div className="h-10 w-10 rounded-full bg-amber-500/10 flex items-center justify-center text-xl">✨</div>
-                        <span className="font-bold text-secondary">توليد تصاميم إبداعية</span>
-                      </Button>
                     </div>
                   </div>
                 ) : (
