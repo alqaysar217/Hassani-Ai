@@ -138,16 +138,28 @@ export default function HassaniApp() {
   if (!user) {
     return (
       <div className="h-svh w-full flex flex-col items-center justify-center bg-background px-6">
-        <div className="max-w-md w-full space-y-8 text-center">
-          <div className="space-y-4 animate-fade-in">
+        <div className="max-w-md w-full space-y-10 text-center">
+          <div className="space-y-6 animate-fade-in flex flex-col items-center">
+            <div className="relative h-32 w-32 shadow-2xl rounded-3xl overflow-hidden mb-4">
+               <Image 
+                src="/logo-hassani.png" 
+                alt="حساني" 
+                fill 
+                className="object-cover"
+                onError={(e) => {
+                  // Fallback if logo not found
+                  e.currentTarget.src = "https://picsum.photos/seed/hassani/200/200";
+                }}
+              />
+            </div>
             <h1 className="text-7xl font-black text-secondary tracking-tighter">حساني</h1>
-            <p className="text-muted-foreground font-medium text-lg">مساعدك الشخصي الذي يفهكم</p>
+            <p className="text-muted-foreground font-medium text-lg">رفيقك الذكي الذي يفهكم ويبتكر معكم</p>
           </div>
           <Button 
             onClick={handleLogin}
             className="w-full h-16 rounded-2xl luxury-gradient text-white font-bold text-xl shadow-2xl transition-all active:scale-95"
           >
-            ابدأ الآن
+            ابدأ رحلتك الآن
           </Button>
         </div>
       </div>
@@ -170,8 +182,16 @@ export default function HassaniApp() {
         <SidebarInset className="flex flex-col h-full w-full relative overflow-hidden">
           <header className="h-16 flex items-center justify-between px-5 glass-morphism sticky top-0 z-30 shrink-0 border-b border-primary/5">
             <div className="flex items-center gap-3">
-              <div className="relative h-9 w-9 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg">
-                <Brain className="h-5 w-5" />
+              <div className="relative h-9 w-9 overflow-hidden rounded-xl shadow-lg border border-primary/10">
+                <Image 
+                  src="/logo-hassani.png" 
+                  alt="حساني" 
+                  fill 
+                  className="object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = "https://picsum.photos/seed/hassani/40/40";
+                  }}
+                />
               </div>
               <h1 className="text-xl font-black text-secondary tracking-tight">حساني</h1>
             </div>
@@ -182,6 +202,7 @@ export default function HassaniApp() {
                 size="icon" 
                 onClick={handleLogout}
                 className="h-10 w-10 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-xl"
+                title="تسجيل الخروج"
               >
                 <LogOut className="h-5 w-5" />
               </Button>
@@ -196,9 +217,17 @@ export default function HassaniApp() {
               <div className="max-w-3xl mx-auto px-5 py-8 space-y-8">
                 {(!currentConversation || currentConversation.messages.length === 0) ? (
                   <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-10 animate-fade-in-up">
-                    <div className="relative">
-                      <div className="h-28 w-28 bg-primary/10 rounded-3xl flex items-center justify-center transform rotate-3 shadow-2xl">
-                        <Rocket className="h-16 w-16 text-primary" />
+                    <div className="relative group">
+                      <div className="h-32 w-32 bg-white rounded-3xl flex items-center justify-center transform group-hover:rotate-6 transition-transform shadow-2xl overflow-hidden border border-primary/5">
+                        <Image 
+                          src="/logo-hassani.png" 
+                          alt="حساني" 
+                          fill 
+                          className="object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = "https://picsum.photos/seed/hassani/128/128";
+                          }}
+                        />
                       </div>
                       <div className="absolute -top-3 -right-3 h-10 w-10 bg-secondary rounded-full flex items-center justify-center text-white shadow-xl">
                         <Sparkles className="h-5 w-5" />
@@ -208,11 +237,11 @@ export default function HassaniApp() {
                     <div className="space-y-4">
                       <h2 className="text-5xl font-black text-secondary">أهلاً {user.displayName?.split(' ')[0]}</h2>
                       <p className="text-muted-foreground max-w-md mx-auto font-medium text-lg leading-relaxed">
-                        أنا "حساني"، رفيقك الذكي في رحلة الإبداع وحل المشكلات. ماذا سننجز معاً اليوم؟
+                        أنا "حساني"، رفيقك في رحلة الإبداع وحل المشكلات المعقدة. ماذا سننجز معاً اليوم؟
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-xl">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-xl px-2">
                       {[
                         { text: "حل مشكلة برمجية معقدة", icon: <Code2 className="h-4 w-4" /> },
                         { text: "توليد فكرة إبداعية لمشروع", icon: <Lightbulb className="h-4 w-4" /> },
@@ -222,7 +251,7 @@ export default function HassaniApp() {
                         <Button 
                           key={item.text} 
                           variant="outline" 
-                          className="h-16 rounded-2xl border-primary/10 hover:bg-primary/5 hover:border-primary/30 flex items-center justify-start gap-3 px-5 transition-all"
+                          className="h-16 rounded-2xl border-primary/10 hover:bg-primary/5 hover:border-primary/30 flex items-center justify-start gap-3 px-5 transition-all shadow-sm"
                           onClick={() => handleSendMessage(item.text)}
                         >
                           <div className="h-8 w-8 rounded-lg bg-primary/5 flex items-center justify-center text-primary shrink-0">

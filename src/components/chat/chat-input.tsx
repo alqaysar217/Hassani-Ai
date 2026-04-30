@@ -15,7 +15,7 @@ import {
   Zap,
   Music,
   Brain,
-  Layout
+  Rocket
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MessageType } from '@/lib/types';
@@ -36,7 +36,7 @@ const modes = [
   { id: 'image' as MessageType, icon: <ImageIcon className="h-4 w-4" />, label: "توليد صور", color: "text-blue-500" },
   { id: 'code' as MessageType, icon: <Code className="h-4 w-4" />, label: "مساعد برمجـي", color: "text-emerald-500" },
   { id: 'music' as MessageType, icon: <Music className="h-4 w-4" />, label: "ألحان وصوت", color: "text-purple-500" },
-  { id: 'planning' as MessageType, icon: <Brain className="h-4 w-4" />, label: "تخطيط استراتيجي", color: "text-rose-500" },
+  { id: 'planning' as MessageType, icon: <Rocket className="h-4 w-4" />, label: "تخطيط مخصص", color: "text-rose-500" },
 ];
 
 export function ChatInput({ onSend, disabled }: ChatInputProps) {
@@ -79,12 +79,12 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const currentModeInfo = modes.find(m => m.id === selectedMode) || modes[0];
 
   return (
-    <div className="p-4 bg-white/90 backdrop-blur-3xl border-t border-primary/5 safe-bottom sticky bottom-0 z-30 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.05)]">
-      <div className="max-w-3xl mx-auto space-y-4">
+    <div className="p-4 bg-white/95 backdrop-blur-3xl border-t border-primary/5 safe-bottom sticky bottom-0 z-30 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.08)]">
+      <div className="max-w-3xl mx-auto space-y-3">
         
         {attachedFile && (
           <div className="flex items-center gap-2 bg-primary/5 p-2 pr-4 rounded-xl border border-primary/10 animate-fade-in w-fit">
-            <Paperclip className="h-4 w-4 text-primary" />
+            <ImageIcon className="h-4 w-4 text-primary" />
             <span className="text-xs font-bold text-secondary truncate max-w-[150px]">{attachedFile.name}</span>
             <Button 
               variant="ghost" 
@@ -97,34 +97,34 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           </div>
         )}
 
-        <div className="bg-muted/30 rounded-[28px] border border-primary/5 overflow-hidden transition-all duration-300 focus-within:ring-4 focus-within:ring-primary/5 focus-within:bg-white focus-within:border-primary/20 p-2">
-          {/* Row 1: Search/Input Area */}
-          <div className="px-3">
+        <div className="bg-muted/30 rounded-[24px] border border-primary/5 overflow-hidden transition-all duration-300 focus-within:ring-4 focus-within:ring-primary/5 focus-within:bg-white focus-within:border-primary/20 p-1">
+          {/* Row 1: Input Area */}
+          <div className="px-4">
             <Textarea
               ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKeyDown}
               placeholder="تحدث مع حساني..."
-              className="min-h-[50px] max-h-[200px] border-0 focus-visible:ring-0 bg-transparent resize-none py-4 text-lg font-medium placeholder:text-muted-foreground/40 no-scrollbar"
+              className="min-h-[56px] max-h-[180px] border-0 focus-visible:ring-0 bg-transparent resize-none py-4 text-lg font-medium placeholder:text-muted-foreground/30 no-scrollbar"
               disabled={disabled}
             />
           </div>
 
-          {/* Row 2: Action Buttons */}
-          <div className="flex items-center justify-between pt-1 border-t border-primary/5 mt-1 px-2 pb-1">
-            <div className="flex items-center gap-1.5">
+          {/* Row 2: Tools Bar */}
+          <div className="flex items-center justify-between pt-1 border-t border-primary/5 mt-1 px-2 pb-1.5">
+            <div className="flex items-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-11 w-11 rounded-2xl bg-primary/5 text-primary hover:bg-primary/10 shadow-sm">
+                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl bg-primary/5 text-primary hover:bg-primary/10 transition-all shadow-sm">
                     <Plus className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 border-primary/10 shadow-2xl">
+                <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 border-primary/10 shadow-2xl backdrop-blur-xl bg-white/90">
                   {modes.map((mode) => (
                     <DropdownMenuItem 
                       key={mode.id} 
-                      className="rounded-xl gap-3 py-3 cursor-pointer"
+                      className="rounded-xl gap-3 py-3 cursor-pointer focus:bg-primary/5"
                       onClick={() => setSelectedMode(mode.id)}
                     >
                       <div className={cn("p-2 rounded-lg bg-current/10 shrink-0", mode.color)}>
@@ -146,8 +146,9 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-11 w-11 rounded-2xl text-muted-foreground hover:text-primary hover:bg-primary/5"
+                className="h-10 w-10 rounded-2xl text-muted-foreground hover:text-primary hover:bg-primary/5"
                 onClick={() => fileInputRef.current?.click()}
+                title="إرفاق صورة"
               >
                 <Paperclip className="h-5 w-5" />
               </Button>
@@ -165,7 +166,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                 <Button 
                   onClick={handleSend}
                   disabled={disabled}
-                  className="h-11 w-11 rounded-2xl luxury-gradient shadow-lg shadow-primary/20 shrink-0 transition-all active:scale-90"
+                  className="h-10 w-10 rounded-2xl luxury-gradient shadow-lg shadow-primary/20 shrink-0 transition-all active:scale-90"
                 >
                   <Send className="h-5 w-5 fill-white rotate-180" />
                 </Button>
@@ -173,7 +174,8 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                 <Button 
                   variant="ghost"
                   size="icon"
-                  className="h-11 w-11 rounded-2xl bg-secondary/5 text-secondary hover:bg-secondary/10 shrink-0 transition-all active:scale-90"
+                  className="h-10 w-10 rounded-2xl bg-secondary/5 text-secondary hover:bg-secondary/10 shrink-0 transition-all active:scale-90"
+                  title="تحدث بالصوت"
                 >
                   <Mic className="h-5 w-5" />
                 </Button>
