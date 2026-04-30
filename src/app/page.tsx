@@ -252,7 +252,7 @@ export default function HassaniApp() {
                         <Button 
                           key={item.text} 
                           variant="outline" 
-                          className="h-16 rounded-2xl border-primary/10 hover:bg-primary/5 hover:border-primary/30 flex items-center justify-start gap-4 px-5 transition-all shadow-sm group"
+                          className="h-16 rounded-2xl border-primary/10 hover:bg-primary/5 hover:border-primary/30 flex flex-row items-center justify-start gap-4 px-5 transition-all shadow-sm group"
                           onClick={() => handleSendMessage(item.text)}
                         >
                           <div className={`h-10 w-10 rounded-xl bg-current/10 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${item.color}`}>
