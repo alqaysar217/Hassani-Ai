@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -17,7 +16,6 @@ import {
   Code2, 
   Lightbulb, 
   Menu, 
-  Layout, 
   Rocket, 
   Brain, 
   ImageIcon, 
@@ -28,6 +26,11 @@ import {
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
+import { automaticIntentRouting } from '@/ai/flows/automatic-intent-routing';
+import { aiCodeAssistance } from '@/ai/flows/ai-code-assistance-flow';
+import { generateDiagram } from '@/ai/flows/ai-diagram-generation-flow';
+import { aiImageCreation } from '@/ai/flows/ai-image-creation-flow';
+import { aiPlanning } from '@/ai/flows/ai-planning-flow';
 import { Message, MessageType } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useAuth, useFirestore } from '@/firebase';
@@ -162,7 +165,7 @@ export default function HassaniApp() {
       id: crypto.randomUUID(),
       role: 'user',
       content: text,
-      type: file ? 'image' : 'text',
+      type: file ? 'image' : type,
       timestamp: Date.now(),
       metadata: file ? { mediaUrl: imageBase64 } : {}
     };
@@ -171,22 +174,65 @@ export default function HassaniApp() {
     setIsLoading(true);
 
     try {
-      const { response } = await intelligentConversationalAi({ 
-        query: text,
-        imageHeader: imageBase64 || undefined
-      });
+      let intent = type;
+      if (type === 'text') {
+        const { intent: detectedIntent } = await automaticIntentRouting({ query: text });
+        intent = detectedIntent === 'programming' ? 'code' : detectedIntent as MessageType;
+      }
+
+      let aiResponse: string = "";
+      let aiMetadata: any = {};
+      let finalType: MessageType = 'text';
+
+      switch (intent) {
+        case 'code':
+          const codeResult = await aiCodeAssistance({ codeRequest: text });
+          aiResponse = codeResult.explanation;
+          aiMetadata = { code: codeResult.code, explanation: codeResult.explanation };
+          finalType = 'code';
+          break;
+        case 'image':
+          const imageResult = await aiImageCreation({ prompt: text });
+          aiResponse = lang === 'ar' ? "تفضل، لقد قمت بإنشاء هذه الصورة لك بناءً على طلبك:" : "Here is the image I created for you based on your request:";
+          aiMetadata = { mediaUrl: imageResult.media };
+          finalType = 'image';
+          break;
+        case 'diagram':
+          // محاولة تحديد نوع المخطط من النص
+          let dType: 'useCase' | 'erd' | 'dfd' = 'useCase';
+          if (text.toLowerCase().includes('erd') || text.includes('قواعد')) dType = 'erd';
+          else if (text.toLowerCase().includes('dfd') || text.includes('بيانات')) dType = 'dfd';
+          
+          const diagramResult = await generateDiagram({ description: text, diagramType: dType });
+          aiResponse = diagramResult.diagramExplanation || (lang === 'ar' ? "تفضل المخطط المطلوب:" : "Here is the requested diagram:");
+          aiMetadata = { diagramSyntax: diagramResult.diagramSyntax, diagramExplanation: diagramResult.diagramExplanation };
+          finalType = 'diagram';
+          break;
+        case 'planning':
+          const planningResult = await aiPlanning({ request: text });
+          aiResponse = planningResult.plan;
+          finalType = 'planning';
+          break;
+        default:
+          const { response } = await intelligentConversationalAi({ 
+            query: text,
+            imageHeader: imageBase64 || undefined
+          });
+          aiResponse = response;
+      }
 
       const aiMsg: Message = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: response,
-        type: 'text',
-        timestamp: Date.now()
+        content: aiResponse,
+        type: finalType,
+        timestamp: Date.now(),
+        metadata: aiMetadata
       };
 
       addMessage(convId, aiMsg);
     } catch (err: any) {
-      toast({ variant: 'destructive', title: "Error", description: "Connection failed." });
+      toast({ variant: 'destructive', title: lang === 'ar' ? "خطأ في الاتصال" : "Connection Error", description: err.message });
     } finally {
       setIsLoading(false);
     }
@@ -206,7 +252,7 @@ export default function HassaniApp() {
         <div className="max-w-md w-full space-y-10 text-center">
           <div className="space-y-6 animate-fade-in flex flex-col items-center">
             <div className="relative h-20 w-20 shadow-2xl rounded-2xl overflow-hidden mb-4 border border-primary/10">
-               <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" onError={(e) => { e.currentTarget.src = "https://picsum.photos/seed/hassani/200/200"; }} />
+               <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" />
             </div>
             <h1 className="text-5xl font-black text-foreground tracking-tighter dark:text-foreground">{lang === 'ar' ? 'حساني' : 'Hassani'}</h1>
             <p className="text-muted-foreground font-medium text-lg leading-relaxed">
@@ -255,7 +301,7 @@ export default function HassaniApp() {
           <header className="h-14 flex items-center justify-between px-5 glass-morphism sticky top-0 z-30 shrink-0">
             <div className="flex items-center gap-2">
               <div className="relative h-6 w-6 overflow-hidden rounded-lg shadow-lg border border-primary/10">
-                <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" onError={(e) => { e.currentTarget.src = "https://picsum.photos/seed/hassani/40/40"; }} />
+                <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" />
               </div>
               <h1 className="text-base font-black text-foreground tracking-tight dark:text-foreground">{lang === 'ar' ? 'حساني' : 'Hassani'}</h1>
             </div>
@@ -269,11 +315,11 @@ export default function HassaniApp() {
               <div className="max-w-3xl mx-auto px-5 py-8 space-y-8">
                 {(!currentConversation || currentConversation.messages.length === 0) ? (
                   <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-8 animate-fade-in-up">
-                    <div className="h-20 w-20 bg-card rounded-2xl flex items-center justify-center shadow-2xl overflow-hidden border border-primary/10 relative">
-                      <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" onError={(e) => { e.currentTarget.src = "https://picsum.photos/seed/hassani/128/128"; }} />
+                    <div className="h-16 w-16 bg-card rounded-2xl flex items-center justify-center shadow-2xl overflow-hidden border border-primary/10 relative">
+                      <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" />
                     </div>
                     <div className="space-y-3">
-                      <h2 className="text-3xl font-black text-center text-foreground dark:text-foreground">
+                      <h2 className="text-3xl font-black text-center text-foreground dark:text-white">
                         {lang === 'ar' ? `أهلاً ${userName}` : `Hello ${userName}`}
                       </h2>
                       <p className="text-muted-foreground font-bold text-lg min-h-[1.5em] flex items-center justify-center">
@@ -287,10 +333,10 @@ export default function HassaniApp() {
                           key={item.text} 
                           variant="outline" 
                           dir={lang === 'ar' ? 'rtl' : 'ltr'}
-                          className="h-14 rounded-2xl border-primary/10 hover:bg-primary/5 flex items-center justify-between px-4 shadow-sm group overflow-hidden" 
+                          className="h-14 rounded-2xl border-primary/10 hover:bg-primary/5 flex items-center justify-between px-4 shadow-sm group overflow-hidden bg-card/50 backdrop-blur-sm" 
                           onClick={() => handleSendMessage(item.text, item.type as MessageType)}
                         >
-                          <span className="font-bold text-foreground dark:text-foreground text-sm truncate">{item.text}</span>
+                          <span className="font-bold text-foreground dark:text-white text-sm truncate">{item.text}</span>
                           <div className={`h-8 w-8 rounded-lg bg-current/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform ${item.color}`}>
                             {item.icon}
                           </div>

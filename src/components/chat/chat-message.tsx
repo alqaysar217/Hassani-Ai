@@ -1,11 +1,10 @@
-
 "use client"
 
 import React from 'react';
 import { Message } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Copy, Check, Layout, MoreHorizontal, Brain, User } from 'lucide-react';
+import { Copy, Check, Layout, MoreHorizontal, Brain, User, Database, GitBranch, Users } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 
@@ -52,7 +51,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
           "px-6 py-5 shadow-sm transition-all duration-300",
           isAI ? "chat-bubble-ai rounded-[28px] rounded-tr-sm" : "chat-bubble-user rounded-[28px] rounded-tl-sm"
         )}>
-          {message.type === 'text' && (
+          {(message.type === 'text' || message.type === 'planning') && (
             <p className="whitespace-pre-wrap leading-relaxed text-lg font-medium">
               {message.content || ""}
             </p>
@@ -77,9 +76,41 @@ export function ChatMessage({ message }: ChatMessageProps) {
                     {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
-                <pre className="p-6 font-code text-sm overflow-x-auto text-amber-50 no-scrollbar dir-ltr" dir="ltr">
+                <pre className="p-6 font-code text-sm overflow-x-auto text-amber-50 no-scrollbar" dir="ltr">
                   <code>{message.metadata?.code || message.content || ""}</code>
                 </pre>
+              </div>
+            </div>
+          )}
+
+          {message.type === 'diagram' && (
+            <div className="space-y-4">
+              {message.metadata?.diagramExplanation && (
+                <p className="text-lg leading-relaxed mb-3">
+                  {message.metadata.diagramExplanation}
+                </p>
+              )}
+              <div className="rounded-2xl overflow-hidden bg-secondary border border-white/5 shadow-2xl">
+                <div className="flex items-center justify-between px-5 py-3 bg-white/5 border-b border-white/5">
+                  <div className="flex items-center gap-2">
+                    <Layout className="h-4 w-4 text-primary" />
+                    <span className="text-xs font-black opacity-60 uppercase tracking-widest">Mermaid Diagram</span>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-9 w-9 hover:bg-white/10 text-white/70 rounded-xl"
+                    onClick={() => copyToClipboard(message.metadata?.diagramSyntax || "")}
+                  >
+                    {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
+                  </Button>
+                </div>
+                <div className="p-6 bg-white flex flex-col items-center justify-center overflow-x-auto">
+                   <pre className="text-[10px] text-slate-800 font-code" dir="ltr">
+                     {message.metadata?.diagramSyntax}
+                   </pre>
+                   <p className="mt-4 text-[10px] text-slate-400 italic font-medium">(Diagram Render Preview - Copy syntax to view in Mermaid editor)</p>
+                </div>
               </div>
             </div>
           )}
