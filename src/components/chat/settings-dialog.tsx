@@ -19,6 +19,8 @@ import { updateProfile } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 interface SettingsDialogProps {
   open: boolean;
@@ -40,7 +42,6 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     const fetchProfile = async () => {
       if (!user || !open) return;
       
-      // نبدأ بالقيم الافتراضية من Auth لضمان عدم بقاء الحقول فارغة
       setName(user.displayName || '');
       setPhotoUrl(user.photoURL || '');
 
@@ -52,7 +53,6 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
           if (data.photoURL) setPhotoUrl(data.photoURL);
         }
       } catch (error: any) {
-        // في حالة وجود خطأ "Offline"، نكتفي بالبيانات المحملة من Auth ولا نعرض خطأ مزعجاً للمستخدم
         console.warn("Firestore fetch failed, using local profile:", error.message);
       }
     };
@@ -80,39 +80,47 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     }
   };
 
-  const handleUpdateProfile = async () => {
+  const handleUpdateProfile = () => {
     if (!auth.currentUser || !user) return;
     
     setIsUpdating(true);
-    try {
-      // تحديث Firestore
-      const userRef = doc(db, 'users', user.uid);
-      await setDoc(userRef, {
-        displayName: name,
-        photoURL: photoUrl,
-        updatedAt: Date.now()
-      }, { merge: true });
+    
+    const userRef = doc(db, 'users', user.uid);
+    const updateData = {
+      displayName: name,
+      photoURL: photoUrl,
+      updatedAt: Date.now()
+    };
 
-      // تحديث الاسم في Auth
-      await updateProfile(auth.currentUser, {
-        displayName: name
+    // تحديث Firestore فوراً بدون await (Optimistic Write)
+    setDoc(userRef, updateData, { merge: true })
+      .catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: userRef.path,
+          operation: 'update',
+          requestResourceData: updateData,
+        });
+        errorEmitter.emit('permission-error', permissionError);
       });
 
+    // تحديث Auth وإغلاق النافذة
+    updateProfile(auth.currentUser, {
+      displayName: name
+    }).then(() => {
       toast({
-        title: "تم تحديث البيانات",
-        description: "تم حفظ التغييرات بنجاح.",
+        title: "تم إرسال التحديث",
+        description: "سيتم تطبيق التغييرات لحظياً.",
       });
+      setIsUpdating(false);
       onOpenChange(false);
-      // لا نحتاج لعمل reload للصفحة لأننا نستخدم Snapshots في المكونات الأخرى
-    } catch (error: any) {
+    }).catch((error: any) => {
       toast({
         variant: "destructive",
         title: "خطأ في التحديث",
-        description: error.message || "تعذر تحديث بيانات الملف الشخصي.",
+        description: error.message,
       });
-    } finally {
       setIsUpdating(false);
-    }
+    });
   };
 
   return (
