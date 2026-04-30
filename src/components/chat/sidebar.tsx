@@ -71,8 +71,8 @@ export function ChatSidebar({
   return (
     <Sidebar side={lang === 'ar' ? 'right' : 'left'} className="border-primary/5">
       <SidebarHeader className="p-6">
-        <div className="flex items-center gap-4 mb-8">
-          <div className="relative h-10 w-10 overflow-hidden rounded-2xl shadow-lg border border-primary/10">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="relative h-7 w-7 overflow-hidden rounded-xl shadow-lg border border-primary/10">
             <Image 
               src="/logo-hassani.png" 
               alt="Hassani" 
@@ -81,7 +81,7 @@ export function ChatSidebar({
               onError={(e) => { e.currentTarget.src = "https://picsum.photos/seed/hassani/40/40"; }} 
             />
           </div>
-          <span className="text-2xl font-black text-foreground tracking-tighter">{lang === 'ar' ? 'حساني' : 'Hassani'}</span>
+          <span className="text-lg font-black text-foreground tracking-tighter">{lang === 'ar' ? 'حساني' : 'Hassani'}</span>
         </div>
         <Button onClick={onNew} className="w-full justify-center gap-3 luxury-gradient text-white rounded-2xl h-14 shadow-xl shadow-primary/20 font-black text-lg">
           <Plus className="h-6 w-6" />

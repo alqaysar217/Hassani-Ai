@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -193,10 +192,10 @@ export default function HassaniApp() {
       <div className="h-svh w-full flex flex-col items-center justify-center bg-background px-6">
         <div className="max-w-md w-full space-y-10 text-center">
           <div className="space-y-6 animate-fade-in flex flex-col items-center">
-            <div className="relative h-32 w-32 shadow-2xl rounded-3xl overflow-hidden mb-4 border-2 border-primary/10">
+            <div className="relative h-24 w-24 shadow-2xl rounded-3xl overflow-hidden mb-4 border-2 border-primary/10">
                <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" onError={(e) => { e.currentTarget.src = "https://picsum.photos/seed/hassani/200/200"; }} />
             </div>
-            <h1 className="text-7xl font-black text-foreground tracking-tighter">{lang === 'ar' ? 'حساني' : 'Hassani'}</h1>
+            <h1 className="text-6xl font-black text-foreground tracking-tighter">{lang === 'ar' ? 'حساني' : 'Hassani'}</h1>
             <p className="text-muted-foreground font-medium text-lg leading-relaxed">
               {lang === 'ar' ? 'رفيقك الذكي الذي يفهمكم ويبتكر معكم في كل خطوة' : 'Your smart companion that understands and innovates with you.'}
             </p>
@@ -228,12 +227,12 @@ export default function HassaniApp() {
         />
         
         <SidebarInset className="flex flex-col h-full w-full relative overflow-hidden" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-          <header className="h-16 flex items-center justify-between px-5 glass-morphism sticky top-0 z-30 shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="relative h-9 w-9 overflow-hidden rounded-xl shadow-lg border border-primary/10">
+          <header className="h-14 flex items-center justify-between px-5 glass-morphism sticky top-0 z-30 shrink-0">
+            <div className="flex items-center gap-2.5">
+              <div className="relative h-7 w-7 overflow-hidden rounded-xl shadow-lg border border-primary/10">
                 <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" onError={(e) => { e.currentTarget.src = "https://picsum.photos/seed/hassani/40/40"; }} />
               </div>
-              <h1 className="text-xl font-black text-foreground tracking-tight">{lang === 'ar' ? 'حساني' : 'Hassani'}</h1>
+              <h1 className="text-lg font-black text-foreground tracking-tight">{lang === 'ar' ? 'حساني' : 'Hassani'}</h1>
             </div>
             <SidebarTrigger className="h-10 w-10 hover:bg-primary/5 rounded-xl text-primary transition-colors">
                <Menu className="h-6 w-6" />
@@ -245,15 +244,15 @@ export default function HassaniApp() {
               <div className="max-w-3xl mx-auto px-5 py-8 space-y-8">
                 {(!currentConversation || currentConversation.messages.length === 0) ? (
                   <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-10 animate-fade-in-up">
-                    <div className="h-32 w-32 bg-card rounded-3xl flex items-center justify-center shadow-2xl overflow-hidden border border-primary/10 relative">
+                    <div className="h-24 w-24 bg-card rounded-3xl flex items-center justify-center shadow-2xl overflow-hidden border border-primary/10 relative">
                       <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" onError={(e) => { e.currentTarget.src = "https://picsum.photos/seed/hassani/128/128"; }} />
                     </div>
                     <div className="space-y-4">
-                      <h2 className="text-5xl font-black text-center text-foreground">
+                      <h2 className="text-4xl font-black text-center text-foreground">
                         {lang === 'ar' ? `أهلاً ${userName}` : `Hello ${userName}`}
                       </h2>
-                      <p className="text-muted-foreground font-bold text-xl min-h-[1.5em] flex items-center justify-center">
-                        {displayText}<span className="w-1 h-6 bg-primary ml-1 animate-pulse shrink-0"></span>
+                      <p className="text-muted-foreground font-bold text-lg min-h-[1.5em] flex items-center justify-center">
+                        {displayText}<span className="w-1 h-5 bg-primary ml-1 animate-pulse shrink-0"></span>
                       </p>
                     </div>
 
@@ -267,6 +266,7 @@ export default function HassaniApp() {
                         <Button 
                           key={item.text} 
                           variant="outline" 
+                          dir={lang === 'ar' ? 'rtl' : 'ltr'}
                           className="h-16 rounded-2xl border-primary/10 hover:bg-primary/5 flex items-center gap-4 px-5 shadow-sm group overflow-hidden" 
                           onClick={() => handleSendMessage(item.text)}
                         >
