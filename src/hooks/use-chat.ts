@@ -1,5 +1,5 @@
 
-"use client"
+'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import { Conversation, Message } from '@/lib/types';
@@ -13,10 +13,11 @@ import {
   setDoc, 
   addDoc, 
   deleteDoc, 
-  updateDoc,
-  serverTimestamp 
+  updateDoc 
 } from 'firebase/firestore';
 import { useFirestore, useUser } from '@/firebase';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 export function useChat() {
   const db = useFirestore();
@@ -25,46 +26,63 @@ export function useChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentId, setCurrentId] = useState<string | null>(null);
 
-  // جلب المحادثات الخاصة بالمستخدم
   useEffect(() => {
     if (!db || !user) return;
 
+    const conversationsRef = collection(db, 'conversations');
     const q = query(
-      collection(db, 'conversations'),
+      conversationsRef,
       where('userId', '==', user.uid),
       orderBy('updatedAt', 'desc')
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const convs = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Conversation[];
-      setConversations(convs);
-    });
+    const unsubscribe = onSnapshot(
+      q, 
+      (snapshot) => {
+        const convs = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Conversation[];
+        setConversations(convs);
+      },
+      async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: conversationsRef.path,
+          operation: 'list',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      }
+    );
 
     return () => unsubscribe();
   }, [db, user]);
 
-  // جلب الرسائل للمحادثة الحالية
   useEffect(() => {
     if (!db || !currentId) {
       setMessages([]);
       return;
     }
 
-    const q = query(
-      collection(db, 'conversations', currentId, 'messages'),
-      orderBy('timestamp', 'asc')
-    );
+    const messagesRef = collection(db, 'conversations', currentId, 'messages');
+    const q = query(messagesRef, orderBy('timestamp', 'asc'));
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const msgs = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Message[];
-      setMessages(msgs);
-    });
+    const unsubscribe = onSnapshot(
+      q, 
+      (snapshot) => {
+        const msgs = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Message[];
+        setMessages(msgs);
+      },
+      async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: messagesRef.path,
+          operation: 'list',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      }
+    );
 
     return () => unsubscribe();
   }, [db, currentId]);
@@ -79,11 +97,22 @@ export function useChat() {
     if (!db || !user) return null;
     
     const id = crypto.randomUUID();
-    setDoc(doc(db, 'conversations', id), {
+    const docRef = doc(db, 'conversations', id);
+    const data = {
       title: 'محادثة جديدة',
       userId: user.uid,
       updatedAt: Date.now()
-    });
+    };
+
+    setDoc(docRef, data)
+      .catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'create',
+          requestResourceData: data,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
     
     setCurrentId(id);
     return id;
@@ -92,32 +121,62 @@ export function useChat() {
   const addMessage = (conversationId: string, message: Message) => {
     if (!db) return;
 
-    // إضافة الرسالة للمجموعة الفرعية
-    addDoc(collection(db, 'conversations', conversationId, 'messages'), message);
+    const messagesRef = collection(db, 'conversations', conversationId, 'messages');
+    
+    addDoc(messagesRef, message)
+      .catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: messagesRef.path,
+          operation: 'create',
+          requestResourceData: message,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
 
-    // تحديث عنوان المحادثة وتاريخها إذا كانت أول رسالة
+    const conversationRef = doc(db, 'conversations', conversationId);
+    const updateData: any = { updatedAt: Date.now() };
+    
     if (messages.length === 0 && message.role === 'user') {
-      const newTitle = message.content.slice(0, 30) + (message.content.length > 30 ? '...' : '');
-      updateDoc(doc(db, 'conversations', conversationId), {
-        title: newTitle,
-        updatedAt: Date.now()
-      });
-    } else {
-      updateDoc(doc(db, 'conversations', conversationId), {
-        updatedAt: Date.now()
-      });
+      updateData.title = message.content.slice(0, 30) + (message.content.length > 30 ? '...' : '');
     }
+
+    updateDoc(conversationRef, updateData)
+      .catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: conversationRef.path,
+          operation: 'update',
+          requestResourceData: updateData,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
   };
 
   const deleteConversation = (id: string) => {
     if (!db) return;
-    deleteDoc(doc(db, 'conversations', id));
+    const docRef = doc(db, 'conversations', id);
+    deleteDoc(docRef)
+      .catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'delete',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
     if (currentId === id) setCurrentId(null);
   };
 
   const renameConversation = (id: string, title: string) => {
     if (!db) return;
-    updateDoc(doc(db, 'conversations', id), { title });
+    const docRef = doc(db, 'conversations', id);
+    updateDoc(docRef, { title })
+      .catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'update',
+          requestResourceData: { title },
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
   };
 
   return {
