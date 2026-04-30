@@ -107,7 +107,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKeyDown}
               placeholder="تحدث مع حساني..."
-              className="min-h-[44px] max-h-[200px] border-0 focus-visible:ring-0 bg-transparent resize-none py-3 text-lg font-medium placeholder:text-muted-foreground/30 no-scrollbar"
+              className="min-h-[38px] max-h-[200px] border-0 focus-visible:ring-0 bg-transparent resize-none py-2 text-base font-medium placeholder:text-muted-foreground/30 no-scrollbar"
               disabled={disabled}
             />
           </div>
