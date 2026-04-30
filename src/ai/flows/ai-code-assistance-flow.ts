@@ -22,8 +22,8 @@ export async function aiCodeAssistance(input: { codeRequest: string }) {
         messages: [
           {
             role: 'system',
-            content: `أنت حساني، خبير برمجيات. قدم الكود والشرح بصيغة JSON:
-            { "code": "markdown_code", "explanation": "شرح باللغة العربية" }`
+            content: `أنت حساني، خبير برمجيات محترف. قدم الكود والشرح باللغة العربية حصراً وبصيغة JSON واضحة:
+            { "code": "كود البرمجة هنا", "explanation": "شرح الكود باللغة العربية" }`
           },
           { role: 'user', content: input.codeRequest }
         ],
@@ -37,6 +37,6 @@ export async function aiCodeAssistance(input: { codeRequest: string }) {
     }
     throw new Error(data.error?.message || "فشل في توليد المساعدة البرمجية");
   } catch (error: any) {
-    throw new Error("خطأ OpenRouter: " + error.message);
+    throw new Error("خطأ في الاتصال بالمساعد البرمجي: " + error.message);
   }
 }

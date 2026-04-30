@@ -1,7 +1,7 @@
 
 'use server';
 /**
- * @fileOverview خبير استراتيجي يستخدم OpenRouter.
+ * @fileOverview خبير استراتيجي يستخدم OpenRouter للتخطيط.
  */
 
 const OPENROUTER_API_KEY = "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";
@@ -22,9 +22,9 @@ export async function aiPlanning(input: { request: string }) {
         messages: [
           {
             role: 'system',
-            content: `أنت حساني، خبير استراتيجي. أنشئ خطة مفصلة للطلب التالي.
+            content: `أنت حساني، خبير استراتيجي ومخطط أعمال. أنشئ خطة مفصلة واحترافية باللغة العربية للطلب التالي.
             أرجع النتيجة بصيغة JSON:
-            { "plan": "النص الكامل للخطة بصيغة markdown", "steps": ["خطوة 1", "خطوة 2"] }`
+            { "plan": "النص الكامل للخطة بصيغة markdown احترافية", "steps": ["خطوة 1", "خطوة 2"] }`
           },
           { role: 'user', content: input.request }
         ],
@@ -38,6 +38,6 @@ export async function aiPlanning(input: { request: string }) {
     }
     throw new Error(data.error?.message || "فشل في توليد الخطة");
   } catch (error: any) {
-    throw new Error("خطأ OpenRouter: " + error.message);
+    throw new Error("خطأ في نظام التخطيط: " + error.message);
   }
 }

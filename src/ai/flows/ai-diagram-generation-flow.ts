@@ -24,7 +24,7 @@ export async function generateDiagram(input: { description: string, diagramType:
             role: 'system',
             content: `أنت خبير مخططات Mermaid. قم بتوليد مخطط ${input.diagramType} للوصف التالي.
             أرجع النتيجة بصيغة JSON فقط:
-            { "diagramSyntax": "mermaid_code", "diagramExplanation": "شرح موجز بالعربية" }`
+            { "diagramSyntax": "كود mermaid هنا", "diagramExplanation": "شرح موجز بالعربية للمخطط" }`
           },
           { role: 'user', content: input.description }
         ],
@@ -38,6 +38,6 @@ export async function generateDiagram(input: { description: string, diagramType:
     }
     throw new Error(data.error?.message || "فشل في توليد المخطط");
   } catch (error: any) {
-    throw new Error("خطأ OpenRouter: " + error.message);
+    throw new Error("خطأ في توليد المخطط: " + error.message);
   }
 }

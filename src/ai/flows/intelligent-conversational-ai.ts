@@ -1,7 +1,7 @@
 
 'use server';
 /**
- * @fileOverview استخدام OpenRouter كمحرك أساسي للذكاء الاصطناعي بناءً على رغبة المستخدم.
+ * @fileOverview استخدام OpenRouter كمحرك أساسي للذكاء الاصطناعي.
  */
 
 import { z } from 'genkit';
@@ -55,10 +55,15 @@ export async function intelligentConversationalAi(
     
     if (data.choices && data.choices[0]) {
       return { response: data.choices[0].message.content };
+    } else if (data.error) {
+      if (data.error.message.includes("User not found")) {
+        return { response: "خطأ: مفتاح OpenRouter غير صالح أو الحساب لا يحتوي على رصيد كافٍ. يرجى التأكد من حسابك في OpenRouter." };
+      }
+      throw new Error(data.error.message);
     } else {
-      throw new Error(data.error?.message || "فشل الاتصال بمحرك OpenRouter");
+      throw new Error("فشل الاتصال بمحرك OpenRouter");
     }
   } catch (error: any) {
-    return { response: "عذراً، حدث خطأ في الاتصال بمحرك OpenRouter: " + error.message };
+    return { response: "عذراً، حدث خطأ في الاتصال: " + error.message };
   }
 }
