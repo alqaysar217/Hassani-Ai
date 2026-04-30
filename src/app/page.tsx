@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -222,7 +223,6 @@ export default function HassaniApp() {
 
   const userName = profile?.displayName || user.displayName?.split(' ')[0] || (lang === 'ar' ? "مستخدم" : "User");
 
-  // القائمة المرتبة حسب طلب المستخدم الجديد
   const quickActions = [
     { text: lang === 'ar' ? "حل مشكلة برمجية" : "Solve Code Problem", icon: <Code2 className="h-4 w-4" />, color: "text-emerald-500", type: 'code' },
     { text: lang === 'ar' ? "تخطيط قواعد البيانات" : "DB Planning", icon: <Rocket className="h-4 w-4" />, color: "text-rose-500", type: 'planning' },
@@ -287,13 +287,13 @@ export default function HassaniApp() {
                           key={item.text} 
                           variant="outline" 
                           dir={lang === 'ar' ? 'rtl' : 'ltr'}
-                          className="h-14 rounded-2xl border-primary/10 hover:bg-primary/5 flex items-center gap-3 px-4 shadow-sm group overflow-hidden" 
+                          className="h-14 rounded-2xl border-primary/10 hover:bg-primary/5 flex items-center justify-between px-4 shadow-sm group overflow-hidden" 
                           onClick={() => handleSendMessage(item.text, item.type as MessageType)}
                         >
+                          <span className="font-bold text-foreground dark:text-foreground text-sm truncate">{item.text}</span>
                           <div className={`h-8 w-8 rounded-lg bg-current/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform ${item.color}`}>
                             {item.icon}
                           </div>
-                          <span className="font-bold text-foreground dark:text-foreground text-sm truncate">{item.text}</span>
                         </Button>
                       ))}
                     </div>
