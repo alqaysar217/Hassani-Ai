@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview استخدام OpenRouter كمحرك أساسي للذكاء الاصطناعي.
@@ -17,7 +16,7 @@ const IntelligentConversationalAiOutputSchema = z.object({
 });
 export type IntelligentConversationalAiOutput = z.infer<typeof IntelligentConversationalAiOutputSchema>;
 
-const OPENROUTER_API_KEY = "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";
+const OPENROUTER_API_KEY = "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";
 const MODEL = "google/gemini-2.0-flash-001";
 
 export async function intelligentConversationalAi(
@@ -56,8 +55,8 @@ export async function intelligentConversationalAi(
     if (data.choices && data.choices[0]) {
       return { response: data.choices[0].message.content };
     } else if (data.error) {
-      if (data.error.message.includes("User not found")) {
-        return { response: "خطأ: مفتاح OpenRouter غير صالح أو الحساب لا يحتوي على رصيد كافٍ. يرجى التأكد من حسابك في OpenRouter." };
+      if (data.error.message.includes("User not found") || data.error.message.includes("API key")) {
+        return { response: "خطأ في الاتصال: يبدو أن هناك مشكلة في مفتاح OpenRouter أو الرصيد. يرجى مراجعة حسابك." };
       }
       throw new Error(data.error.message);
     } else {

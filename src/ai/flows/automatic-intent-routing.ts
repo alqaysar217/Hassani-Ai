@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview يكتشف هذا التدفق نية المستخدم باستخدام OpenRouter.
@@ -6,7 +5,7 @@
 
 import { z } from 'genkit';
 
-const OPENROUTER_API_KEY = "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";
+const OPENROUTER_API_KEY = "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";
 const MODEL = "google/gemini-2.0-flash-001";
 
 const AutomaticIntentRoutingOutputSchema = z.object({
