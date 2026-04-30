@@ -165,21 +165,21 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
         dir={isRtl ? 'rtl' : 'ltr'}
       >
         <div className="bg-primary/5 p-8 border-b border-primary/10">
-          <DialogHeader className="text-start">
-            <DialogTitle className="text-3xl font-black text-secondary">{t.title}</DialogTitle>
+          <DialogHeader>
+            <DialogTitle className="text-3xl font-black text-foreground dark:text-foreground">{t.title}</DialogTitle>
             <DialogDescription className="text-muted-foreground font-medium">{t.desc}</DialogDescription>
           </DialogHeader>
         </div>
         
         <Tabs defaultValue="profile" className="w-full" dir={isRtl ? 'rtl' : 'ltr'}>
-          <TabsList className="w-full justify-start h-14 bg-transparent border-b border-primary/5 px-8 gap-8 rounded-none overflow-x-auto no-scrollbar flex-row-reverse rtl:flex-row">
+          <TabsList className="w-full justify-start h-14 bg-transparent border-b border-primary/5 px-8 gap-8 rounded-none overflow-x-auto no-scrollbar">
             <TabsTrigger value="profile" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none font-bold px-0 pb-4 h-full shrink-0">{t.profile}</TabsTrigger>
             <TabsTrigger value="appearance" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none font-bold px-0 pb-4 h-full shrink-0">{t.appearance}</TabsTrigger>
             <TabsTrigger value="language" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none font-bold px-0 pb-4 h-full shrink-0">{t.language}</TabsTrigger>
           </TabsList>
 
           <div className="p-8 min-h-[380px]">
-            <TabsContent value="profile" className="m-0 space-y-8 animate-fade-in outline-none text-start">
+            <TabsContent value="profile" className="m-0 space-y-8 animate-fade-in outline-none">
               <div className="flex flex-col items-center gap-6">
                 <div className="relative group">
                   <Avatar className="h-32 w-32 border-4 border-white dark:border-secondary shadow-2xl">
@@ -202,13 +202,13 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                   </Button>
                 </div>
                 <div className="w-full space-y-3">
-                  <Label className="font-black text-secondary text-sm flex items-center gap-2">
+                  <Label className="font-black text-foreground dark:text-foreground text-sm flex items-center gap-2">
                     <User className="h-4 w-4 text-primary" />
                     {t.nameLabel}
                   </Label>
                   <Input 
                     placeholder={lang === 'ar' ? "ادخل اسمك..." : "Enter your name..."}
-                    className="rounded-2xl h-14 px-6 border-primary/10 bg-muted/20 focus:bg-background transition-all text-lg font-bold text-start"
+                    className="rounded-2xl h-14 px-6 border-primary/10 bg-muted/20 focus:bg-background transition-all text-lg font-bold"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
@@ -216,8 +216,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               </div>
             </TabsContent>
 
-            <TabsContent value="appearance" className="m-0 space-y-6 animate-fade-in outline-none text-start">
-              <Label className="font-black text-secondary text-sm flex items-center gap-2 mb-4">
+            <TabsContent value="appearance" className="m-0 space-y-6 animate-fade-in outline-none">
+              <Label className="font-black text-foreground dark:text-foreground text-sm flex items-center gap-2 mb-4">
                 <Palette className="h-4 w-4 text-primary" />
                 {t.themeLabel}
               </Label>
@@ -247,8 +247,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               </div>
             </TabsContent>
 
-            <TabsContent value="language" className="m-0 space-y-6 animate-fade-in outline-none text-start">
-              <Label className="font-black text-secondary text-sm flex items-center gap-2 mb-4">
+            <TabsContent value="language" className="m-0 space-y-6 animate-fade-in outline-none">
+              <Label className="font-black text-foreground dark:text-foreground text-sm flex items-center gap-2 mb-4">
                 <Languages className="h-4 w-4 text-primary" />
                 {t.langLabel}
               </Label>
