@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -93,7 +92,7 @@ export default function HassaniApp() {
     try {
       let intent: any = selectedMode;
       if (!selectedMode || selectedMode === 'text') {
-        const res = await automaticIntentRouting(text);
+        const res = await automaticIntentRouting({ query: text });
         intent = res.intent;
       }
       
@@ -103,7 +102,7 @@ export default function HassaniApp() {
 
       switch (intent) {
         case 'image':
-          const imgRes = await aiImageCreation(text);
+          const imgRes = await aiImageCreation({ prompt: text });
           aiResponse = `تم إنشاء الصورة لـ: "${text}"`;
           msgType = 'image';
           metadata = { mediaUrl: imgRes.media };

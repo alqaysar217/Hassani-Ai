@@ -11,9 +11,9 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-const AutomaticIntentRoutingInputSchema = z
-  .string()
-  .describe('The user\'s query for which to detect the intent.');
+const AutomaticIntentRoutingInputSchema = z.object({
+  query: z.string().describe('The user\'s query for which to detect the intent.'),
+});
 export type AutomaticIntentRoutingInput = z.infer<typeof AutomaticIntentRoutingInputSchema>;
 
 const AutomaticIntentRoutingOutputSchema = z.object({
@@ -37,7 +37,7 @@ const automaticIntentRoutingPrompt = ai.definePrompt({
 
 Analyze the following user query and respond ONLY with a JSON object containing a single 'intent' field, matching one of the categories above. Do not include any other text or explanation.
 
-User Query: "{{{input}}}"`,
+User Query: "{{{query}}}"`,
 });
 
 const automaticIntentRoutingFlow = ai.defineFlow(

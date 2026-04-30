@@ -10,9 +10,9 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-const AiImageCreationInputSchema = z
-  .string()
-  .describe('A text description of the image to be generated.');
+const AiImageCreationInputSchema = z.object({
+  prompt: z.string().describe('A text description of the image to be generated.'),
+});
 export type AiImageCreationInput = z.infer<typeof AiImageCreationInputSchema>;
 
 const AiImageCreationOutputSchema = z.object({
@@ -35,7 +35,7 @@ const aiImageCreationFlow = ai.defineFlow(
   async (input) => {
     const { media } = await ai.generate({
       model: 'googleai/imagen-4.0-fast-generate-001',
-      prompt: input,
+      prompt: input.prompt,
     });
 
     if (!media) {
