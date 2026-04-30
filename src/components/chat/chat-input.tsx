@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { 
-  Send, 
+  SendHorizontal, 
   Paperclip, 
   ImageIcon, 
   Code, 
@@ -75,7 +75,6 @@ export function ChatInput({ onSend, disabled, lang = 'ar' }: ChatInputProps) {
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
-      // Adjust the minimum height calculation for mobile
       textareaRef.current.style.height = `${Math.max(textareaRef.current.scrollHeight, 24)}px`;
     }
   }, [input]);
@@ -83,7 +82,7 @@ export function ChatInput({ onSend, disabled, lang = 'ar' }: ChatInputProps) {
   const currentModeInfo = modes.find(m => m.id === selectedMode) || modes[0];
 
   return (
-    <div className="p-3 bg-background/95 backdrop-blur-3xl border-t border-primary/5 safe-bottom sticky bottom-0 z-30 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.08)]" dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className="p-3 bg-background/95 dark:bg-background/95 backdrop-blur-3xl border-t border-primary/5 safe-bottom sticky bottom-0 z-30 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.08)]" dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-3xl mx-auto space-y-2">
         
         {attachedFile && (
@@ -101,7 +100,7 @@ export function ChatInput({ onSend, disabled, lang = 'ar' }: ChatInputProps) {
           </div>
         )}
 
-        <div className="bg-muted/30 dark:bg-muted/50 rounded-[20px] border border-primary/5 overflow-hidden transition-all duration-300 focus-within:ring-4 focus-within:ring-primary/5 focus-within:bg-background focus-within:border-primary/20 p-0.5">
+        <div className="bg-muted/30 dark:bg-background rounded-[20px] border border-primary/5 overflow-hidden transition-all duration-300 focus-within:ring-4 focus-within:ring-primary/5 focus-within:bg-background focus-within:border-primary/20 p-0.5">
           <div className="px-3 pt-1">
             <Textarea
               ref={textareaRef}
@@ -110,7 +109,7 @@ export function ChatInput({ onSend, disabled, lang = 'ar' }: ChatInputProps) {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKeyDown}
               placeholder={isRtl ? "تحدث مع حساني..." : "Chat with Hassani..."}
-              className="min-h-[24px] max-h-[180px] border-0 focus-visible:ring-0 bg-transparent resize-none p-1 text-base font-medium placeholder:text-muted-foreground/30 no-scrollbar text-start leading-tight"
+              className="min-h-[24px] max-h-[180px] border-0 focus-visible:ring-0 bg-transparent resize-none p-1 text-base font-medium placeholder:text-muted-foreground/30 dark:placeholder:text-muted-foreground/50 no-scrollbar text-start leading-tight"
               disabled={disabled}
             />
           </div>
@@ -149,7 +148,7 @@ export function ChatInput({ onSend, disabled, lang = 'ar' }: ChatInputProps) {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-8 w-8 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/5"
+                className="h-8 w-8 rounded-xl text-muted-foreground dark:text-foreground/70 hover:text-primary hover:bg-primary/5"
                 onClick={() => fileInputRef.current?.click()}
                 title={isRtl ? "إرفاق صورة" : "Attach Image"}
               >
@@ -174,13 +173,13 @@ export function ChatInput({ onSend, disabled, lang = 'ar' }: ChatInputProps) {
                     isRtl && "rotate-180"
                   )}
                 >
-                  <Send className="h-4 w-4 fill-white" />
+                  <SendHorizontal className="h-4 w-4 fill-white" />
                 </Button>
               ) : (
                 <Button 
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-xl bg-foreground/5 text-foreground hover:bg-foreground/10 shrink-0 transition-all active:scale-90"
+                  className="h-8 w-8 rounded-xl bg-foreground/5 dark:bg-white/10 text-foreground dark:text-white hover:bg-foreground/10 shrink-0 transition-all active:scale-90"
                   title={isRtl ? "تحدث بالصوت" : "Voice Chat"}
                 >
                   <Mic className="h-4.5 w-4.5" />
