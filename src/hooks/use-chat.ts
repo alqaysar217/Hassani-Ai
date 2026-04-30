@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -11,7 +10,6 @@ import {
   onSnapshot, 
   doc, 
   setDoc, 
-  addDoc, 
   deleteDoc, 
   updateDoc 
 } from 'firebase/firestore';
@@ -93,7 +91,7 @@ export function useChat() {
     return { ...conv, messages };
   }, [conversations, currentId, messages]);
 
-  const createNewConversation = () => {
+  const createNewConversation = async () => {
     if (!db || !user) return null;
     
     const id = crypto.randomUUID();
@@ -104,29 +102,30 @@ export function useChat() {
       updatedAt: Date.now()
     };
 
-    setDoc(docRef, data)
-      .catch(async () => {
-        const permissionError = new FirestorePermissionError({
-          path: docRef.path,
-          operation: 'create',
-          requestResourceData: data,
-        });
-        errorEmitter.emit('permission-error', permissionError);
+    try {
+      await setDoc(docRef, data);
+      setCurrentId(id);
+      return id;
+    } catch (error) {
+      const permissionError = new FirestorePermissionError({
+        path: docRef.path,
+        operation: 'create',
+        requestResourceData: data,
       });
-    
-    setCurrentId(id);
-    return id;
+      errorEmitter.emit('permission-error', permissionError);
+      return null;
+    }
   };
 
   const addMessage = (conversationId: string, message: Message) => {
     if (!db) return;
 
-    const messagesRef = collection(db, 'conversations', conversationId, 'messages');
+    const messageRef = doc(db, 'conversations', conversationId, 'messages', message.id);
     
-    addDoc(messagesRef, message)
+    setDoc(messageRef, message)
       .catch(async () => {
         const permissionError = new FirestorePermissionError({
-          path: messagesRef.path,
+          path: messageRef.path,
           operation: 'create',
           requestResourceData: message,
         });

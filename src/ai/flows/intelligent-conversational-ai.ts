@@ -1,12 +1,18 @@
 'use server';
 /**
- * @fileOverview استخدام OpenRouter كمحرك أساسي للذكاء الاصطناعي.
+ * @fileOverview استخدام OpenRouter كمحرك أساسي للذكاء الاصطناعي مع دعم الذاكرة (Context).
  */
 
 import { z } from 'genkit';
 
+const MessageSchema = z.object({
+  role: z.enum(['user', 'assistant']),
+  content: z.string(),
+});
+
 const IntelligentConversationalAiInputSchema = z.object({
   query: z.string().describe('سؤال المستخدم أو طلبه.'),
+  history: z.array(MessageSchema).optional().describe('تاريخ المحادثة السابقة لسياق الذاكرة.'),
   imageHeader: z.string().optional().describe('بيانات الصورة بتنسيق base64 (اختياري).'),
 });
 export type IntelligentConversationalAiInput = z.infer<typeof IntelligentConversationalAiInputSchema>;
@@ -23,18 +29,29 @@ export async function intelligentConversationalAi(
   input: IntelligentConversationalAiInput
 ): Promise<IntelligentConversationalAiOutput> {
   try {
-    const contentPayload: any[] = [];
-    
+    const messages: any[] = [];
+
+    // إضافة تاريخ المحادثة للذاكرة
+    if (input.history && input.history.length > 0) {
+      input.history.forEach(msg => {
+        messages.push({ role: msg.role, content: msg.content });
+      });
+    }
+
+    // إضافة الطلب الحالي
+    const currentContent: any[] = [];
     if (input.query) {
-      contentPayload.push({ type: 'text', text: input.query });
+      currentContent.push({ type: 'text', text: input.query });
     }
     
     if (input.imageHeader) {
-      contentPayload.push({
+      currentContent.push({
         type: 'image_url',
         image_url: { url: input.imageHeader }
       });
     }
+
+    messages.push({ role: 'user', content: currentContent });
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -46,7 +63,7 @@ export async function intelligentConversationalAi(
       },
       body: JSON.stringify({
         model: MODEL,
-        messages: [{ role: 'user', content: contentPayload }]
+        messages: messages
       })
     });
 

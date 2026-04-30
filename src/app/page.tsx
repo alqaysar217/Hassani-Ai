@@ -144,7 +144,7 @@ export default function HassaniApp() {
 
   const handleSendMessage = async (text: string, type: MessageType = 'text', file: File | null = null) => {
     if (!currentId) {
-      const newId = createNewConversation();
+      const newId = await createNewConversation();
       if (newId) processMessage(newId, text, type, file);
     } else {
       processMessage(currentId, text, type, file);
@@ -180,6 +180,12 @@ export default function HassaniApp() {
         intent = detectedIntent === 'programming' ? 'code' : detectedIntent as MessageType;
       }
 
+      // جلب التاريخ للميموري
+      const history = currentConversation?.messages?.map(m => ({
+        role: m.role,
+        content: m.content
+      })) || [];
+
       let aiResponse: string = "";
       let aiMetadata: any = {};
       let finalType: MessageType = 'text';
@@ -198,7 +204,6 @@ export default function HassaniApp() {
           finalType = 'image';
           break;
         case 'diagram':
-          // محاولة تحديد نوع المخطط من النص
           let dType: 'useCase' | 'erd' | 'dfd' = 'useCase';
           if (text.toLowerCase().includes('erd') || text.includes('قواعد')) dType = 'erd';
           else if (text.toLowerCase().includes('dfd') || text.includes('بيانات')) dType = 'dfd';
@@ -216,6 +221,7 @@ export default function HassaniApp() {
         default:
           const { response } = await intelligentConversationalAi({ 
             query: text,
+            history: history, // إرسال التاريخ هنا لتفعيل الذاكرة
             imageHeader: imageBase64 || undefined
           });
           aiResponse = response;
