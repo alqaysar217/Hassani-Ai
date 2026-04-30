@@ -13,13 +13,14 @@ import {
   SidebarInset, 
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Menu, LogIn, ShieldCheck, Sparkles, Globe } from 'lucide-react';
+import { Menu, LogIn, ShieldCheck, Sparkles, Globe, AlertCircle, Copy } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
 import { Message, MessageType } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useAuth } from '@/firebase';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function HassaniApp() {
   const { user, loading: userLoading } = useUser();
@@ -37,6 +38,7 @@ export default function HassaniApp() {
   
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -53,6 +55,7 @@ export default function HassaniApp() {
   }, [currentConversation?.messages, isLoading]);
 
   const handleLogin = async () => {
+    setAuthError(null);
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
@@ -61,25 +64,80 @@ export default function HassaniApp() {
         description: "مرحباً بك في عالم حساني الذكي!"
       });
     } catch (error: any) {
+      console.error("Auth Error:", error);
       if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user') {
         return;
       }
       
-      let errorMsg = "حدث خطأ غير متوقع.";
       const currentDomain = window.location.hostname;
-
       if (error.code === 'auth/unauthorized-domain') {
-        errorMsg = `هذا النطاق (${currentDomain}) غير مصرح له. يرجى إضافته في إعدادات Firebase -> Authentication -> Settings -> Authorized domains.`;
-      } else if (error.code === 'auth/operation-not-allowed') {
-        errorMsg = "يجب تفعيل 'Google' في إعدادات Firebase Console.";
+        setAuthError(currentDomain);
+      } else {
+        toast({
+          variant: 'destructive',
+          title: "خطأ في تسجيل الدخول",
+          description: error.message || "حدث خطأ غير متوقع.",
+        });
       }
+    }
+  };
 
+  const handleSendMessage = async (text: string, type: MessageType = 'text', file: File | null = null) => {
+    if (!currentId) {
+      const newId = createNewConversation();
+      if (newId) {
+        processMessage(newId, text, type, file);
+      }
+    } else {
+      processMessage(currentId, text, type, file);
+    }
+  };
+
+  const processMessage = async (convId: string, text: string, type: MessageType, file: File | null) => {
+    let imageBase64 = "";
+    if (file) {
+      const reader = new FileReader();
+      imageBase64 = await new Promise((resolve) => {
+        reader.onload = (e) => resolve(e.target?.result as string);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    const userMsg: Message = {
+      id: crypto.randomUUID(),
+      role: 'user',
+      content: text,
+      type: file ? 'image' : 'text',
+      timestamp: Date.now(),
+      metadata: file ? { mediaUrl: imageBase64 } : {}
+    };
+
+    addMessage(convId, userMsg);
+    setIsLoading(true);
+
+    try {
+      const { response } = await intelligentConversationalAi({ 
+        query: text,
+        imageHeader: imageBase64 || undefined
+      });
+
+      const aiMsg: Message = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: response,
+        type: 'text',
+        timestamp: Date.now()
+      };
+
+      addMessage(convId, aiMsg);
+    } catch (err: any) {
       toast({
         variant: 'destructive',
-        title: "خطأ في تسجيل الدخول",
-        description: errorMsg,
-        duration: 10000,
+        title: "خطأ في الرد",
+        description: "تعذر الاتصال بمحرك OpenRouter."
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -96,13 +154,40 @@ export default function HassaniApp() {
 
   if (!user) {
     return (
-      <div className="h-svh w-full flex flex-col items-center justify-center bg-background px-6">
-        <div className="max-w-md w-full space-y-12 text-center">
+      <div className="h-svh w-full flex flex-col items-center justify-center bg-background px-6" dir="rtl">
+        <div className="max-w-md w-full space-y-8 text-center">
           <div className="space-y-4">
             <h1 className="text-5xl font-black text-secondary tracking-tight">حساني الذكي</h1>
             <p className="text-muted-foreground font-medium text-lg">مساعدك المتطور بمحرك OpenRouter</p>
           </div>
           
+          {authError && (
+            <Alert variant="destructive" className="text-right border-2 animate-bounce">
+              <AlertCircle className="h-5 w-5" />
+              <AlertTitle className="font-bold">خطأ: النطاق غير مصرح له</AlertTitle>
+              <AlertDescription className="space-y-3 mt-2">
+                <p className="text-sm">يجب إضافة هذا الرابط في إعدادات Firebase:</p>
+                <div className="flex items-center gap-2 bg-white/20 p-2 rounded-lg font-mono text-xs overflow-hidden">
+                  <span className="truncate flex-1">{authError}</span>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 hover:bg-white/30"
+                    onClick={() => {
+                      navigator.clipboard.writeText(authError);
+                      toast({ title: "تم نسخ الرابط" });
+                    }}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-[10px] opacity-80 leading-relaxed">
+                  اذهب إلى: Authentication {"→"} Settings {"→"} Authorized domains {"→"} Add domain
+                </p>
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="space-y-4">
             <Button 
               onClick={handleLogin}
@@ -111,16 +196,6 @@ export default function HassaniApp() {
               <LogIn className="h-6 w-6" />
               ابدأ الآن مع Google
             </Button>
-            
-            <div className="p-5 bg-primary/5 rounded-2xl border border-primary/10 text-right">
-              <div className="flex items-center gap-2 mb-2 text-primary font-bold">
-                <Globe className="h-5 w-5" />
-                <span>حل مشكلة النطاق:</span>
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                إذا ظهر لك خطأ "النطاق غير مصرح له"، انسخ الرابط الذي سيظهر في التنبيه الأحمر وضعه في قائمة "Authorized domains" في إعدادات Authentication بـ Firebase.
-              </p>
-            </div>
           </div>
         </div>
       </div>
