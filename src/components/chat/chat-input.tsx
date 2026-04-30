@@ -14,7 +14,8 @@ import {
   Zap,
   Music,
   Rocket,
-  Layout
+  Layout,
+  Brain
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MessageType } from '@/lib/types';
@@ -40,13 +41,16 @@ export function ChatInput({ onSend, disabled, lang = 'ar' }: ChatInputProps) {
 
   const isRtl = lang === 'ar';
 
+  // القائمة المرتبة حسب طلب المستخدم
   const modes = [
-    { id: 'text' as MessageType, icon: <Zap className="h-4 w-4" />, label: isRtl ? "دردشة ذكية" : "Smart Chat", color: "text-amber-500" },
-    { id: 'image' as MessageType, icon: <ImageIcon className="h-4 w-4" />, label: isRtl ? "توليد صور" : "Image Generation", color: "text-blue-500" },
-    { id: 'code' as MessageType, icon: <Code className="h-4 w-4" />, label: isRtl ? "مساعد برمجـي" : "Coding Assistant", color: "text-emerald-500" },
-    { id: 'diagram' as MessageType, icon: <Layout className="h-4 w-4" />, label: isRtl ? "إنشاء مخططات" : "Create Diagrams", color: "text-indigo-500" },
+    { id: 'code' as MessageType, icon: <Code className="h-4 w-4" />, label: isRtl ? "حل مشكلة برمجية" : "Solve Code Problem", color: "text-emerald-500" },
     { id: 'planning' as MessageType, icon: <Rocket className="h-4 w-4" />, label: isRtl ? "تخطيط قواعد البيانات" : "DB Planning", color: "text-rose-500" },
-    { id: 'music' as MessageType, icon: <Music className="h-4 w-4" />, label: isRtl ? "ألحان وصوت" : "Music & Audio", color: "text-purple-500" },
+    { id: 'text' as MessageType, icon: <Zap className="h-4 w-4" />, label: isRtl ? "توليد فكرة إبداعية" : "Generate Idea", color: "text-amber-500" },
+    { id: 'planning' as MessageType, icon: <Brain className="h-4 w-4" />, label: isRtl ? "تحليل نظام شامل" : "System Analysis", color: "text-blue-500" },
+    { id: 'diagram' as MessageType, icon: <Layout className="h-4 w-4" />, label: isRtl ? "إنشاء مخطط ERD" : "Create ERD", color: "text-indigo-500" },
+    { id: 'image' as MessageType, icon: <ImageIcon className="h-4 w-4" />, label: isRtl ? "توليد صور" : "Generate Images", color: "text-purple-500" },
+    { id: 'music' as MessageType, icon: <Music className="h-4 w-4" />, label: isRtl ? "توليد موسيقى" : "Generate Music", color: "text-pink-500" },
+    { id: 'diagram' as MessageType, icon: <Layout className="h-4 w-4" />, label: isRtl ? "إنشاء مخطط DFD" : "Create DFD", color: "text-cyan-500" },
   ];
 
   const handleSend = () => {
@@ -79,16 +83,16 @@ export function ChatInput({ onSend, disabled, lang = 'ar' }: ChatInputProps) {
     }
   }, [input]);
 
-  const currentModeInfo = modes.find(m => m.id === selectedMode) || modes[0];
+  const currentModeInfo = modes.find(m => m.id === selectedMode) || modes[2]; // Default to Smart Chat/Idea
 
   return (
-    <div className="p-3 bg-background/95 dark:bg-background/95 backdrop-blur-3xl border-t border-primary/5 safe-bottom sticky bottom-0 z-30 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.08)]" dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className="p-3 bg-background dark:bg-background backdrop-blur-3xl border-t border-primary/5 safe-bottom sticky bottom-0 z-30 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.08)]" dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-3xl mx-auto space-y-2">
         
         {attachedFile && (
           <div className="flex items-center gap-2 bg-primary/5 p-2 pr-4 rounded-xl border border-primary/10 animate-fade-in w-fit mb-1">
             <ImageIcon className="h-4 w-4 text-primary" />
-            <span className="text-xs font-bold text-foreground truncate max-w-[150px]">{attachedFile.name}</span>
+            <span className="text-xs font-bold text-foreground dark:text-foreground truncate max-w-[150px]">{attachedFile.name}</span>
             <Button 
               variant="ghost" 
               size="icon" 
@@ -101,7 +105,7 @@ export function ChatInput({ onSend, disabled, lang = 'ar' }: ChatInputProps) {
         )}
 
         <div className="bg-muted/30 dark:bg-background rounded-[20px] border border-primary/5 overflow-hidden transition-all duration-300 focus-within:ring-4 focus-within:ring-primary/5 focus-within:bg-background focus-within:border-primary/20 p-0.5">
-          <div className="px-3 pt-1">
+          <div className="px-2 pt-1">
             <Textarea
               ref={textareaRef}
               rows={1}
@@ -109,7 +113,7 @@ export function ChatInput({ onSend, disabled, lang = 'ar' }: ChatInputProps) {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKeyDown}
               placeholder={isRtl ? "تحدث مع حساني..." : "Chat with Hassani..."}
-              className="min-h-[24px] max-h-[180px] border-0 focus-visible:ring-0 bg-transparent resize-none p-1 text-base font-medium placeholder:text-muted-foreground/30 dark:placeholder:text-muted-foreground/50 no-scrollbar text-start leading-tight"
+              className="min-h-[24px] max-h-[180px] border-0 focus-visible:ring-0 bg-transparent resize-none p-1 text-base font-medium placeholder:text-muted-foreground/30 dark:placeholder:text-muted-foreground/50 no-scrollbar text-start leading-tight dark:text-white"
               disabled={disabled}
             />
           </div>
@@ -122,17 +126,17 @@ export function ChatInput({ onSend, disabled, lang = 'ar' }: ChatInputProps) {
                     <Plus className="h-4.5 w-4.5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-60 rounded-2xl p-1.5 border-primary/10 shadow-2xl backdrop-blur-xl bg-popover/90" dir={isRtl ? 'rtl' : 'ltr'}>
+                <DropdownMenuContent align="start" className="w-64 rounded-2xl p-1.5 border-primary/10 shadow-2xl backdrop-blur-xl bg-popover/90" dir={isRtl ? 'rtl' : 'ltr'}>
                   {modes.map((mode) => (
                     <DropdownMenuItem 
-                      key={mode.id} 
+                      key={mode.label} 
                       className="rounded-xl flex flex-row items-center gap-3 py-2.5 cursor-pointer focus:bg-primary/5"
                       onClick={() => setSelectedMode(mode.id)}
                     >
                       <div className={cn("p-1.5 rounded-lg bg-current/10 shrink-0", mode.color)}>
                         {mode.icon}
                       </div>
-                      <span className="font-bold text-foreground text-sm flex-1 text-start">{mode.label}</span>
+                      <span className="font-bold text-foreground dark:text-foreground text-sm flex-1 text-start">{mode.label}</span>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -170,7 +174,7 @@ export function ChatInput({ onSend, disabled, lang = 'ar' }: ChatInputProps) {
                   disabled={disabled}
                   className={cn(
                     "h-8 w-8 rounded-xl luxury-gradient shadow-lg shadow-primary/20 shrink-0 transition-all active:scale-90",
-                    isRtl && "rotate-180"
+                    isRtl && "scale-x-[-1]"
                   )}
                 >
                   <SendHorizontal className="h-4 w-4 fill-white" />

@@ -12,7 +12,7 @@ import {
   SidebarInset, 
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Code2, Lightbulb, Menu, Layout, Rocket } from 'lucide-react';
+import { Code2, Lightbulb, Menu, Layout, Rocket, Brain, ImageIcon, Music } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
 import { Message, MessageType } from '@/lib/types';
@@ -192,10 +192,10 @@ export default function HassaniApp() {
       <div className="h-svh w-full flex flex-col items-center justify-center bg-background px-6">
         <div className="max-w-md w-full space-y-10 text-center">
           <div className="space-y-6 animate-fade-in flex flex-col items-center">
-            <div className="relative h-24 w-24 shadow-2xl rounded-3xl overflow-hidden mb-4 border-2 border-primary/10">
+            <div className="relative h-20 w-20 shadow-2xl rounded-2xl overflow-hidden mb-4 border border-primary/10">
                <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" onError={(e) => { e.currentTarget.src = "https://picsum.photos/seed/hassani/200/200"; }} />
             </div>
-            <h1 className="text-6xl font-black text-foreground tracking-tighter">{lang === 'ar' ? 'حساني' : 'Hassani'}</h1>
+            <h1 className="text-5xl font-black text-foreground tracking-tighter dark:text-foreground">{lang === 'ar' ? 'حساني' : 'Hassani'}</h1>
             <p className="text-muted-foreground font-medium text-lg leading-relaxed">
               {lang === 'ar' ? 'رفيقك الذكي الذي يفهمكم ويبتكر معكم في كل خطوة' : 'Your smart companion that understands and innovates with you.'}
             </p>
@@ -209,6 +209,18 @@ export default function HassaniApp() {
   }
 
   const userName = profile?.displayName || user.displayName?.split(' ')[0] || (lang === 'ar' ? "مستخدم" : "User");
+
+  // القائمة المرتبة حسب طلب المستخدم
+  const quickActions = [
+    { text: lang === 'ar' ? "حل مشكلة برمجية" : "Solve Code Problem", icon: <Code2 className="h-4 w-4" />, color: "text-emerald-500", type: 'code' },
+    { text: lang === 'ar' ? "تخطيط قواعد البيانات" : "DB Planning", icon: <Rocket className="h-4 w-4" />, color: "text-rose-500", type: 'planning' },
+    { text: lang === 'ar' ? "توليد فكرة إبداعية" : "Generate Creative Idea", icon: <Lightbulb className="h-4 w-4" />, color: "text-amber-500", type: 'text' },
+    { text: lang === 'ar' ? "تحليل نظام شامل" : "Comprehensive System Analysis", icon: <Brain className="h-4 w-4" />, color: "text-blue-500", type: 'planning' },
+    { text: lang === 'ar' ? "إنشاء مخطط ERD" : "Create ERD Diagram", icon: <Layout className="h-4 w-4" />, color: "text-indigo-500", type: 'diagram' },
+    { text: lang === 'ar' ? "توليد صور" : "Generate Images", icon: <ImageIcon className="h-4 w-4" />, color: "text-purple-500", type: 'image' },
+    { text: lang === 'ar' ? "توليد موسيقى" : "Generate Music", icon: <Music className="h-4 w-4" />, color: "text-pink-500", type: 'music' },
+    { text: lang === 'ar' ? "إنشاء مخطط DFD" : "Create DFD Diagram", icon: <Layout className="h-4 w-4" />, color: "text-cyan-500", type: 'diagram' },
+  ];
 
   return (
     <SidebarProvider defaultOpen={false}>
@@ -228,14 +240,14 @@ export default function HassaniApp() {
         
         <SidebarInset className="flex flex-col h-full w-full relative overflow-hidden" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
           <header className="h-14 flex items-center justify-between px-5 glass-morphism sticky top-0 z-30 shrink-0">
-            <div className="flex items-center gap-2.5">
-              <div className="relative h-7 w-7 overflow-hidden rounded-xl shadow-lg border border-primary/10">
+            <div className="flex items-center gap-2">
+              <div className="relative h-6 w-6 overflow-hidden rounded-lg shadow-lg border border-primary/10">
                 <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" onError={(e) => { e.currentTarget.src = "https://picsum.photos/seed/hassani/40/40"; }} />
               </div>
-              <h1 className="text-lg font-black text-foreground tracking-tight">{lang === 'ar' ? 'حساني' : 'Hassani'}</h1>
+              <h1 className="text-base font-black text-foreground tracking-tight dark:text-foreground">{lang === 'ar' ? 'حساني' : 'Hassani'}</h1>
             </div>
-            <SidebarTrigger className="h-10 w-10 hover:bg-primary/5 rounded-xl text-primary transition-colors">
-               <Menu className="h-6 w-6" />
+            <SidebarTrigger className="h-9 w-9 hover:bg-primary/5 rounded-xl text-primary transition-colors">
+               <Menu className="h-5 w-5" />
             </SidebarTrigger>
           </header>
 
@@ -243,12 +255,12 @@ export default function HassaniApp() {
             <ScrollArea ref={scrollRef} className="flex-1">
               <div className="max-w-3xl mx-auto px-5 py-8 space-y-8">
                 {(!currentConversation || currentConversation.messages.length === 0) ? (
-                  <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-10 animate-fade-in-up">
-                    <div className="h-24 w-24 bg-card rounded-3xl flex items-center justify-center shadow-2xl overflow-hidden border border-primary/10 relative">
+                  <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-8 animate-fade-in-up">
+                    <div className="h-20 w-20 bg-card rounded-2xl flex items-center justify-center shadow-2xl overflow-hidden border border-primary/10 relative">
                       <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" onError={(e) => { e.currentTarget.src = "https://picsum.photos/seed/hassani/128/128"; }} />
                     </div>
-                    <div className="space-y-4">
-                      <h2 className="text-4xl font-black text-center text-foreground">
+                    <div className="space-y-3">
+                      <h2 className="text-3xl font-black text-center text-foreground dark:text-foreground">
                         {lang === 'ar' ? `أهلاً ${userName}` : `Hello ${userName}`}
                       </h2>
                       <p className="text-muted-foreground font-bold text-lg min-h-[1.5em] flex items-center justify-center">
@@ -256,24 +268,19 @@ export default function HassaniApp() {
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl px-2" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-                      {[
-                        { text: lang === 'ar' ? "حل مشكلة برمجية" : "Solve Code Problem", icon: <Code2 className="h-4 w-4" />, color: "text-emerald-500" },
-                        { text: lang === 'ar' ? "توليد فكرة إبداعية" : "Generate Idea", icon: <Lightbulb className="h-4 w-4" />, color: "text-amber-500" },
-                        { text: lang === 'ar' ? "إنشاء مخططات" : "Create Diagrams", icon: <Layout className="h-4 w-4" />, color: "text-indigo-500" },
-                        { text: lang === 'ar' ? "تخطيط قواعد بيانات" : "DB Planning", icon: <Rocket className="h-4 w-4" />, color: "text-rose-500" },
-                      ].map((item) => (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl px-2" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+                      {quickActions.map((item) => (
                         <Button 
                           key={item.text} 
                           variant="outline" 
                           dir={lang === 'ar' ? 'rtl' : 'ltr'}
-                          className="h-16 rounded-2xl border-primary/10 hover:bg-primary/5 flex items-center gap-4 px-5 shadow-sm group overflow-hidden" 
-                          onClick={() => handleSendMessage(item.text)}
+                          className="h-14 rounded-2xl border-primary/10 hover:bg-primary/5 flex items-center gap-3 px-4 shadow-sm group overflow-hidden" 
+                          onClick={() => handleSendMessage(item.text, item.type as MessageType)}
                         >
-                          <div className={`h-10 w-10 rounded-xl bg-current/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform ${item.color}`}>
+                          <div className={`h-8 w-8 rounded-lg bg-current/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform ${item.color}`}>
                             {item.icon}
                           </div>
-                          <span className="font-bold text-foreground text-sm truncate">{item.text}</span>
+                          <span className="font-bold text-foreground dark:text-foreground text-sm truncate">{item.text}</span>
                         </Button>
                       ))}
                     </div>
