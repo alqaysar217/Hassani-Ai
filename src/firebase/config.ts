@@ -1,8 +1,7 @@
-
 'use client';
 
 /**
- * إعدادات Firebase الحقيقية لمشروع حساني الذكي
+ * إعدادات Firebase الحقيقية لمشروع حساني الذكي (hassani-ai)
  */
 export const firebaseConfig = {
   apiKey: "AIzaSyDdPHIC7kn2ehXRdeXGC0Dm7cs0MaIsGM4",

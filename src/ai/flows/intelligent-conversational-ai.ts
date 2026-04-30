@@ -1,22 +1,24 @@
 'use server';
 /**
- * @fileOverview Genkit flow adapted to use OpenRouter API for more reliable connectivity.
+ * @fileOverview استخدام OpenRouter كمحرك أساسي للذكاء الاصطناعي بناءً على رغبة المستخدم.
+ * يتم استخدام المفتاح المرفق مباشرة لضمان العمل بدون تعقيدات.
  */
 
 import { z } from 'genkit';
 
 const IntelligentConversationalAiInputSchema = z.object({
-  query: z.string().describe('The user\'s question or request.'),
-  imageHeader: z.string().optional().describe('Optional base64 image data.'),
+  query: z.string().describe('سؤال المستخدم أو طلبه.'),
+  imageHeader: z.string().optional().describe('بيانات الصورة بتنسيق base64 (اختياري).'),
 });
 export type IntelligentConversationalAiInput = z.infer<typeof IntelligentConversationalAiInputSchema>;
 
 const IntelligentConversationalAiOutputSchema = z.object({
-  response: z.string().describe('The AI\'s text-based answer.'),
+  response: z.string().describe('رد المساعد الذكي.'),
 });
 export type IntelligentConversationalAiOutput = z.infer<typeof IntelligentConversationalAiOutputSchema>;
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "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";
+// المفتاح الذي أرفقته يا محمود - يعمل مباشرة مع OpenRouter
+const OPENROUTER_API_KEY = "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";
 const MODEL = "google/gemini-2.0-flash-001";
 
 export async function intelligentConversationalAi(
@@ -60,10 +62,11 @@ export async function intelligentConversationalAi(
     if (data.choices && data.choices[0]) {
       return { response: data.choices[0].message.content };
     } else {
-      throw new Error(data.error?.message || "فشل في الحصول على رد من OpenRouter");
+      console.error("OpenRouter Error Data:", data);
+      throw new Error(data.error?.message || "فشل في الحصول على رد من محرك OpenRouter");
     }
   } catch (error: any) {
-    console.error("OpenRouter Error:", error);
-    return { response: "عذراً، حدث خطأ في الاتصال بالمحرك: " + error.message };
+    console.error("OpenRouter Connection Error:", error);
+    return { response: "عذراً، حدث خطأ في الاتصال بمحرك OpenRouter: " + error.message };
   }
 }
