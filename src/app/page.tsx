@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -12,7 +13,7 @@ import {
   SidebarInset, 
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Menu, LogIn, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { Menu, LogIn, ShieldCheck, AlertTriangle, Sparkles } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
 import { Message, MessageType } from '@/lib/types';
@@ -60,13 +61,13 @@ export default function HassaniApp() {
         description: "مرحباً بك في عالم حساني الذكي!"
       });
     } catch (error: any) {
-      console.error("Login Error Details:", error);
+      if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user') {
+        return;
+      }
       
       let errorMsg = "حدث خطأ غير متوقع.";
       if (error.code === 'auth/operation-not-allowed') {
         errorMsg = "يجب تفعيل 'Google' في إعدادات Firebase Console -> Authentication.";
-      } else if (error.code === 'auth/popup-closed-by-user') {
-        errorMsg = "تم إغلاق النافذة قبل إتمام الدخول.";
       } else if (error.code === 'auth/unauthorized-domain') {
         errorMsg = "هذا النطاق غير مصرح له بتسجيل الدخول في إعدادات Firebase.";
       }
@@ -79,12 +80,66 @@ export default function HassaniApp() {
     }
   };
 
+  const handleSendMessage = async (text: string, mode?: MessageType, file?: File | null) => {
+    let activeId = currentId;
+    if (!activeId) {
+      activeId = createNewConversation();
+      if (!activeId) return;
+    }
+
+    const userMsg: Message = {
+      id: crypto.randomUUID(),
+      role: 'user',
+      content: text,
+      type: file ? 'image' : 'text',
+      timestamp: Date.now(),
+      metadata: file ? { mediaUrl: URL.createObjectURL(file) } : undefined
+    };
+
+    addMessage(activeId, userMsg);
+    setIsLoading(true);
+
+    try {
+      let imageBase64 = undefined;
+      if (file) {
+        imageBase64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
+      }
+
+      const { response } = await intelligentConversationalAi({
+        query: text,
+        imageHeader: imageBase64
+      });
+
+      const aiMsg: Message = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: response,
+        type: 'text',
+        timestamp: Date.now()
+      };
+
+      addMessage(activeId, aiMsg);
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: "خطأ في الرد",
+        description: error.message || "فشل حساني في الرد حالياً."
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (userLoading) {
     return (
       <div className="h-svh w-full flex flex-col items-center justify-center bg-background space-y-6">
         <div className="flex flex-col items-center gap-2">
           <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <h2 className="text-xl font-bold text-secondary">جاري التحقق من الهوية...</h2>
+          <h2 className="text-xl font-bold text-secondary">جاري التحقق...</h2>
         </div>
       </div>
     );
@@ -108,17 +163,17 @@ export default function HassaniApp() {
               ابدأ الآن مع Google
             </Button>
             
-            <div className="p-5 bg-amber-50 rounded-2xl border border-amber-200 text-right">
-              <div className="flex items-center gap-2 mb-2 text-amber-800 font-bold">
-                <AlertTriangle className="h-5 w-5" />
-                <span>خطوات تفعيل الدخول:</span>
+            <div className="p-5 bg-primary/5 rounded-2xl border border-primary/10 text-right">
+              <div className="flex items-center gap-2 mb-2 text-primary font-bold">
+                <Sparkles className="h-5 w-5" />
+                <span>مميزات حساني:</span>
               </div>
-              <ol className="text-sm text-amber-800 list-decimal list-inside space-y-1">
-                <li>اذهب إلى <a href="https://console.firebase.google.com" target="_blank" className="underline font-bold">Firebase Console</a></li>
-                <li>اختر <b>Authentication</b> ثم <b>Sign-in method</b></li>
-                <li>اضغط <b>Add new provider</b> واختر <b>Google</b></li>
-                <li>قم بتفعيله (Enable) وحفظ الإعدادات.</li>
-              </ol>
+              <ul className="text-sm text-secondary/70 list-disc list-inside space-y-1 font-medium">
+                <li>تحليل الصور المتقدم عبر Gemini 2.0</li>
+                <li>إجابات ذكية وسريعة بفضل OpenRouter</li>
+                <li>حفظ تلقائي لكافة محادثاتك</li>
+                <li>واجهة عربية فاخرة وسهلة الاستخدام</li>
+              </ul>
             </div>
           </div>
         </div>
@@ -143,10 +198,10 @@ export default function HassaniApp() {
           <header className="h-16 flex items-center justify-between px-5 glass-morphism sticky top-0 z-30 shrink-0 border-b border-primary/5">
             <div className="flex items-center gap-3">
               <div className="flex flex-col">
-                <h1 className="text-lg font-extrabold text-secondary">حساني (OpenRouter Mode)</h1>
+                <h1 className="text-lg font-extrabold text-secondary">حساني الذكي</h1>
                 <div className="flex items-center gap-1">
                   <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase">المحرك نشط</span>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase">OpenRouter Active</span>
                 </div>
               </div>
             </div>
@@ -165,9 +220,9 @@ export default function HassaniApp() {
                        <ShieldCheck className="h-16 w-16 text-primary" />
                     </div>
                     <div className="space-y-2">
-                      <h2 className="text-3xl font-extrabold text-secondary">جاهز لخدمتك يا {user.displayName?.split(' ')[0]}</h2>
+                      <h2 className="text-3xl font-extrabold text-secondary">أهلاً بك يا {user.displayName?.split(' ')[0]}</h2>
                       <p className="text-muted-foreground max-w-sm mx-auto font-medium">
-                        أنا أعمل الآن باستخدام محرك Gemini 2.0 عبر OpenRouter لضمان أفضل استجابة.
+                        أنا جاهز لمساعدتك الآن. يمكنك سؤالي عن أي شيء أو إرسال صورة لتحليلها.
                       </p>
                     </div>
                   </div>
