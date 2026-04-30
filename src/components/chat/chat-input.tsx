@@ -7,7 +7,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { 
   Send, 
   Paperclip, 
-  Sparkles, 
   ImageIcon, 
   Code, 
   Music, 
@@ -83,7 +82,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     <div className="p-4 bg-white/80 backdrop-blur-2xl border-t border-primary/10 safe-bottom sticky bottom-0 z-30 shadow-[0_-8px_30px_-10px_rgba(197,160,89,0.1)]">
       <div className="max-w-3xl mx-auto space-y-3">
         {attachedFile && (
-          <div className="flex items-center gap-2 bg-primary/5 p-2 pr-4 rounded-2xl border border-primary/10 animate-fade-in w-fit">
+          <div className="flex items-center gap-2 bg-primary/5 p-2 pr-4 rounded-[10px] border border-primary/10 animate-fade-in w-fit">
             <Paperclip className="h-4 w-4 text-primary" />
             <span className="text-xs font-bold text-secondary truncate max-w-[150px]">{attachedFile.name}</span>
             <Button 
@@ -98,7 +97,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         )}
 
         {selectedMode !== 'text' && (
-          <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full w-fit animate-slide-in-right">
+          <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-[10px] w-fit animate-slide-in-right">
             <span className={cn("shrink-0", currentModeInfo.color)}>{currentModeInfo.icon}</span>
             <span className="text-[11px] font-bold text-primary">نمط: {currentModeInfo.label}</span>
             <button onClick={() => setSelectedMode('text')} className="hover:text-destructive">
@@ -107,7 +106,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           </div>
         )}
 
-        <div className="bg-muted/40 rounded-[28px] border border-primary/5 p-2 transition-all duration-300 focus-within:ring-2 focus-within:ring-primary/10 focus-within:bg-white focus-within:border-primary/20">
+        <div className="bg-muted/40 rounded-[10px] border border-primary/5 p-2 transition-all duration-300 focus-within:ring-2 focus-within:ring-primary/10 focus-within:bg-white focus-within:border-primary/20">
           <div className="px-2">
             <Textarea
               ref={textareaRef}
@@ -127,20 +126,20 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-10 w-10 rounded-full text-primary hover:bg-primary/5 shrink-0"
+                    className="h-10 w-10 rounded-[10px] text-primary hover:bg-primary/5 shrink-0"
                   >
                     <Plus className="h-6 w-6" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 rounded-3xl p-2 shadow-2xl border-primary/10 bg-white" dir="rtl">
+                <DropdownMenuContent align="end" className="w-56 rounded-[10px] p-2 shadow-2xl border-primary/10 bg-white" dir="rtl">
                   <div className="px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-b border-primary/5 mb-1 text-right">القدرات الذكية</div>
                   {modes.map((m) => (
                     <DropdownMenuItem 
                       key={m.id}
                       onClick={() => setSelectedMode(m.id)}
-                      className="rounded-2xl gap-3 py-3 cursor-pointer group focus:bg-primary/5 flex items-center justify-start text-right"
+                      className="rounded-[10px] gap-3 py-3 cursor-pointer group focus:bg-primary/5 flex items-center justify-start text-right"
                     >
-                      <div className={cn("p-2 rounded-xl transition-colors bg-muted group-focus:bg-white group-focus:shadow-sm shrink-0", m.color)}>
+                      <div className={cn("p-2 rounded-[10px] transition-colors bg-muted group-focus:bg-white group-focus:shadow-sm shrink-0", m.color)}>
                         {m.icon}
                       </div>
                       <span className="font-bold text-secondary flex-1">{m.label}</span>
@@ -158,7 +157,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-10 w-10 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/5 shrink-0"
+                className="h-10 w-10 rounded-[10px] text-muted-foreground hover:text-primary hover:bg-primary/5 shrink-0"
                 onClick={() => fileInputRef.current?.click()}
               >
                 <Paperclip className="h-5 w-5" />
@@ -170,7 +169,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                 <Button 
                   onClick={handleSend}
                   disabled={disabled}
-                  className="h-11 w-11 rounded-full luxury-gradient shadow-lg shadow-primary/20 shrink-0 transition-transform active:scale-90"
+                  className="h-11 w-11 rounded-[10px] luxury-gradient shadow-lg shadow-primary/20 shrink-0 transition-transform active:scale-90"
                 >
                   <Send className="h-5 w-5 fill-white rotate-180" />
                 </Button>
@@ -179,7 +178,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                   variant="ghost" 
                   size="icon" 
                   className={cn(
-                    "h-11 w-11 rounded-full transition-all duration-300 shrink-0",
+                    "h-11 w-11 rounded-[10px] transition-all duration-300 shrink-0",
                     isRecording ? "bg-red-500 text-white shadow-lg animate-pulse" : "text-muted-foreground hover:text-primary hover:bg-primary/5"
                   )}
                   onClick={() => setIsRecording(!isRecording)}

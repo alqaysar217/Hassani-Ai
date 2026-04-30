@@ -70,7 +70,7 @@ export function ChatSidebar({
         </div>
         <Button 
           onClick={handleNew}
-          className="w-full justify-start gap-3 luxury-gradient text-white rounded-2xl h-12 shadow-lg shadow-primary/20 font-bold"
+          className="w-full justify-start gap-3 luxury-gradient text-white rounded-[10px] h-12 shadow-lg shadow-primary/20 font-bold"
         >
           <Plus className="h-5 w-5" />
           محادثة جديدة
@@ -90,7 +90,7 @@ export function ChatSidebar({
                 <div
                   key={c.id}
                   className={cn(
-                    "group relative flex items-center rounded-2xl px-4 py-3 text-sm transition-all cursor-pointer",
+                    "group relative flex items-center rounded-[10px] px-4 py-3 text-sm transition-all cursor-pointer",
                     currentId === c.id 
                       ? "bg-primary/10 text-primary font-bold shadow-sm" 
                       : "hover:bg-muted text-muted-foreground hover:text-secondary"
@@ -107,8 +107,8 @@ export function ChatSidebar({
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start" className="w-48 rounded-2xl p-2 shadow-xl border-primary/5">
-                        <DropdownMenuItem className="rounded-xl gap-2 font-bold" onClick={(e) => {
+                      <DropdownMenuContent align="start" className="w-48 rounded-[10px] p-2 shadow-xl border-primary/5">
+                        <DropdownMenuItem className="rounded-[10px] gap-2 font-bold" onClick={(e) => {
                           e.stopPropagation();
                           const newTitle = prompt('إعادة تسمية المحادثة:', c.title);
                           if (newTitle) onRename(c.id, newTitle);
@@ -117,7 +117,7 @@ export function ChatSidebar({
                           تعديل الاسم
                         </DropdownMenuItem>
                         <DropdownMenuItem 
-                          className="rounded-xl text-destructive gap-2 font-bold focus:text-destructive"
+                          className="rounded-[10px] text-destructive gap-2 font-bold focus:text-destructive"
                           onClick={(e) => {
                             e.stopPropagation();
                             if(confirm('هل أنت متأكد من حذف هذه المحادثة؟')) onDelete(c.id);
@@ -139,7 +139,7 @@ export function ChatSidebar({
       <SidebarFooter className="p-5 border-t border-primary/5 bg-sidebar/50">
         <Button 
           variant="ghost" 
-          className="w-full justify-start gap-3 rounded-2xl text-secondary font-bold hover:bg-primary/5 h-12"
+          className="w-full justify-start gap-3 rounded-[10px] text-secondary font-bold hover:bg-primary/5 h-12"
           onClick={() => {
             onOpenSettings();
             setOpenMobile(false);

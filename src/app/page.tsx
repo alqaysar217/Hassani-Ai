@@ -152,7 +152,6 @@ export default function HassaniApp() {
     }
   };
 
-  // شاشة التحميل الأولية
   if (userLoading) {
     return (
       <div className="h-svh w-full flex flex-col items-center justify-center bg-background space-y-6 animate-fade-in">
@@ -169,7 +168,6 @@ export default function HassaniApp() {
     );
   }
 
-  // شاشة تسجيل الدخول
   if (!user) {
     return (
       <div className="h-svh w-full flex flex-col items-center justify-center bg-background px-6">
@@ -186,7 +184,7 @@ export default function HassaniApp() {
           
           <Button 
             onClick={handleLogin}
-            className="w-full h-16 rounded-[28px] luxury-gradient text-white font-bold text-xl shadow-2xl shadow-primary/20 flex items-center justify-center gap-4 group transition-all active:scale-95"
+            className="w-full h-16 rounded-[10px] luxury-gradient text-white font-bold text-xl shadow-2xl shadow-primary/20 flex items-center justify-center gap-4 group transition-all active:scale-95"
           >
             <LogIn className="h-6 w-6 group-hover:translate-x-[-4px] transition-transform" />
             ابدأ الآن مع Google
@@ -214,7 +212,6 @@ export default function HassaniApp() {
         />
         
         <SidebarInset className="flex flex-col h-full w-full relative overflow-hidden">
-          {/* Mobile Luxury Header */}
           <header className="h-16 flex items-center justify-between px-5 glass-morphism sticky top-0 z-30 shrink-0 border-b border-primary/5">
             <div className="flex items-center gap-3">
               <div className="relative h-10 w-10">
@@ -265,7 +262,7 @@ export default function HassaniApp() {
                     <div className="h-9 w-9 relative flex items-center justify-center">
                       <Image src="/logo-hassani.png" alt="Thinking" fill className="object-contain opacity-50 animate-pulse" />
                     </div>
-                    <div className="bg-white px-5 py-3 rounded-2xl rounded-tr-sm border border-primary/10 flex items-center gap-2 shadow-sm">
+                    <div className="bg-white px-5 py-3 rounded-[10px] rounded-tr-sm border border-primary/10 flex items-center gap-2 shadow-sm">
                       <span className="flex gap-1.5">
                         <span className="w-2 h-2 bg-primary/50 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
                         <span className="w-2 h-2 bg-primary/50 rounded-full animate-bounce [animation-delay:-0.15s]"></span>

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React from 'react';
@@ -26,7 +27,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] rounded-[32px] overflow-hidden bg-background border-none shadow-2xl">
+      <DialogContent className="sm:max-w-[425px] rounded-[10px] overflow-hidden bg-background border-none shadow-2xl">
         <DialogHeader className="text-right">
           <DialogTitle className="text-2xl font-extrabold text-secondary">الإعدادات</DialogTitle>
           <DialogDescription className="text-muted-foreground font-medium">
@@ -35,9 +36,9 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
         </DialogHeader>
         
         <div className="grid gap-6 py-6">
-          <div className="flex items-center justify-between p-4 bg-muted/30 rounded-2xl border border-primary/5">
+          <div className="flex items-center justify-between p-4 bg-muted/30 rounded-[10px] border border-primary/5">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-2xl luxury-gradient text-white shadow-md">
+              <div className="p-3 rounded-[10px] luxury-gradient text-white shadow-md">
                 <Sun className="h-6 w-6" />
               </div>
               <div className="space-y-0.5">
@@ -54,10 +55,10 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               <Label className="font-bold text-secondary">اللغة</Label>
             </div>
             <Select defaultValue="ar">
-              <SelectTrigger className="rounded-2xl h-12 border-primary/10">
+              <SelectTrigger className="rounded-[10px] h-12 border-primary/10">
                 <SelectValue placeholder="اختر اللغة" />
               </SelectTrigger>
-              <SelectContent className="rounded-2xl">
+              <SelectContent className="rounded-[10px]">
                 <SelectItem value="ar">العربية</SelectItem>
                 <SelectItem value="en">English</SelectItem>
               </SelectContent>
@@ -73,7 +74,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               <Input 
                 type="password"
                 placeholder="sk-..."
-                className="rounded-2xl h-12 pr-12 border-primary/10 bg-white"
+                className="rounded-[10px] h-12 pr-12 border-primary/10 bg-white"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
               />
@@ -84,7 +85,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
             </p>
           </div>
 
-          <div className="flex items-start gap-4 p-4 rounded-2xl bg-primary/5 border border-primary/10">
+          <div className="flex items-start gap-4 p-4 rounded-[10px] bg-primary/5 border border-primary/10">
             <Shield className="h-6 w-6 text-primary shrink-0" />
             <div className="space-y-1">
               <p className="text-sm font-extrabold text-secondary">ملاحظة الخصوصية</p>
@@ -96,8 +97,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
         </div>
 
         <DialogFooter className="flex-row gap-3 sm:justify-center">
-          <Button className="flex-1 luxury-gradient hover:opacity-90 rounded-2xl h-14 font-bold text-lg shadow-lg shadow-primary/20" onClick={() => onOpenChange(false)}>حفظ التغييرات</Button>
-          <Button variant="ghost" className="rounded-2xl h-14 font-bold px-8" onClick={() => onOpenChange(false)}>إلغاء</Button>
+          <Button className="flex-1 luxury-gradient hover:opacity-90 rounded-[10px] h-14 font-bold text-lg shadow-lg shadow-primary/20" onClick={() => onOpenChange(false)}>حفظ التغييرات</Button>
+          <Button variant="ghost" className="rounded-[10px] h-14 font-bold px-8" onClick={() => onOpenChange(false)}>إلغاء</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
