@@ -9,8 +9,7 @@ import {
   Trash2, 
   MoreVertical, 
   Settings,
-  Pencil,
-  Sparkles
+  Pencil
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -20,17 +19,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
   useSidebar
 } from "@/components/ui/sidebar";
+import Image from 'next/image';
 
 interface ChatSidebarProps {
   conversations: Conversation[];
@@ -55,7 +51,7 @@ export function ChatSidebar({
 
   const handleSelect = (id: string) => {
     onSelect(id);
-    setOpenMobile(false); // إغلاق القائمة بعد الاختيار في الجوال
+    setOpenMobile(false);
   };
 
   const handleNew = () => {
@@ -67,8 +63,8 @@ export function ChatSidebar({
     <Sidebar side="right" className="border-l border-primary/10">
       <SidebarHeader className="p-5 pb-2">
         <div className="flex items-center gap-3 mb-6 px-1">
-          <div className="h-8 w-8 rounded-lg luxury-gradient flex items-center justify-center text-white shadow-md">
-            <Sparkles className="h-4 w-4 fill-white" />
+          <div className="relative h-8 w-8">
+            <Image src="/logo-hassani.png" alt="Logo" fill className="object-contain" />
           </div>
           <span className="font-extrabold text-secondary text-lg">حساني الذكي</span>
         </div>
