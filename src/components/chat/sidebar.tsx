@@ -10,7 +10,9 @@ import {
   MoreVertical, 
   Settings,
   Pencil,
-  Brain
+  Brain,
+  LogOut,
+  User as UserIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -27,6 +29,9 @@ import {
   SidebarHeader,
   useSidebar
 } from "@/components/ui/sidebar";
+import { User } from 'firebase/auth';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 
 interface ChatSidebarProps {
   conversations: Conversation[];
@@ -36,6 +41,8 @@ interface ChatSidebarProps {
   onDelete: (id: string) => void;
   onRename: (id: string, title: string) => void;
   onOpenSettings: () => void;
+  user: User;
+  onLogout: () => void;
 }
 
 export function ChatSidebar({ 
@@ -45,7 +52,9 @@ export function ChatSidebar({
   onNew, 
   onDelete, 
   onRename,
-  onOpenSettings
+  onOpenSettings,
+  user,
+  onLogout
 }: ChatSidebarProps) {
   const { setOpenMobile } = useSidebar();
 
@@ -136,18 +145,44 @@ export function ChatSidebar({
         </div>
       </SidebarContent>
 
-      <SidebarFooter className="p-6 border-t border-primary/5 bg-sidebar/30">
+      <SidebarFooter className="p-4 border-t border-primary/5 bg-sidebar/30 space-y-4">
         <Button 
           variant="ghost" 
-          className="w-full justify-start gap-4 rounded-2xl text-secondary font-black hover:bg-primary/5 h-14 px-6"
+          className="w-full justify-start gap-4 rounded-2xl text-secondary font-black hover:bg-primary/5 h-12 px-4 transition-all"
           onClick={() => {
             onOpenSettings();
             setOpenMobile(false);
           }}
         >
-          <Settings className="h-6 w-6 text-primary" />
-          الإعدادات
+          <Settings className="h-5 w-5 text-primary" />
+          <span>الإعدادات</span>
         </Button>
+
+        <Separator className="bg-primary/5" />
+
+        <div className="flex items-center gap-3 p-2 bg-white/40 rounded-2xl border border-primary/5">
+          <Avatar className="h-10 w-10 border border-primary/10">
+            <AvatarImage src={user.photoURL || undefined} />
+            <AvatarFallback className="bg-primary/10 text-primary font-bold">
+              {user.displayName?.charAt(0) || <UserIcon className="h-4 w-4" />}
+            </AvatarFallback>
+          </Avatar>
+          
+          <div className="flex-1 min-w-0 overflow-hidden text-right">
+            <p className="text-sm font-bold text-secondary truncate">{user.displayName || "مستخدم حساني"}</p>
+            <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
+          </div>
+
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/5 shrink-0"
+            onClick={onLogout}
+            title="تسجيل الخروج"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </div>
       </SidebarFooter>
     </Sidebar>
   );

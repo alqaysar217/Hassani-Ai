@@ -13,7 +13,7 @@ import {
   SidebarInset, 
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { LogOut, Sparkles, Brain, Lightbulb, Code2, Rocket, MoreVertical, Layout, Music } from 'lucide-react';
+import { Sparkles, Brain, Lightbulb, Code2, Rocket, MoreVertical, Layout, Music } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
 import { Message, MessageType } from '@/lib/types';
@@ -152,7 +152,7 @@ export default function HassaniApp() {
               />
             </div>
             <h1 className="text-7xl font-black text-secondary tracking-tighter">حساني</h1>
-            <p className="text-muted-foreground font-medium text-lg leading-relaxed">رفيقك الذكي الذي يفهكم ويبتكر معكم في كل خطوة</p>
+            <p className="text-muted-foreground font-medium text-lg leading-relaxed">رفيقك الذكي الذي يفهمكم ويبتكر معكم في كل خطوة</p>
           </div>
           <Button 
             onClick={handleLogin}
@@ -176,6 +176,8 @@ export default function HassaniApp() {
           onDelete={deleteConversation}
           onRename={renameConversation}
           onOpenSettings={() => setIsSettingsOpen(true)}
+          user={user}
+          onLogout={handleLogout}
         />
         
         <SidebarInset className="flex flex-col h-full w-full relative overflow-hidden">
@@ -196,15 +198,6 @@ export default function HassaniApp() {
             </div>
 
             <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={handleLogout}
-                className="h-10 w-10 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-xl transition-colors"
-                title="تسجيل الخروج"
-              >
-                <LogOut className="h-5 w-5" />
-              </Button>
               <SidebarTrigger className="h-10 w-10 hover:bg-primary/5 rounded-xl text-primary transition-colors">
                  <MoreVertical className="h-6 w-6" />
               </SidebarTrigger>
