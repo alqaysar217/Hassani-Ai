@@ -2,15 +2,16 @@
 'use client';
 
 /**
- * إعدادات Firebase مع قيم افتراضية لمنع انهيار التطبيق (Fix for trimEnd error)
+ * إعدادات Firebase الحقيقية لمشروع حساني الذكي
  */
 export const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "",
+  apiKey: "AIzaSyDdPHIC7kn2ehXRdeXGC0Dm7cs0MaIsGM4",
+  authDomain: "hassani-ai.firebaseapp.com",
+  projectId: "hassani-ai",
+  storageBucket: "hassani-ai.firebasestorage.app",
+  messagingSenderId: "984926394297",
+  appId: "1:984926394297:web:3af6bfa6ab33f1abab8868",
+  measurementId: "G-ZJ6MZQ1MPQ"
 };
 
-export const isFirebaseConfigured = !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+export const isFirebaseConfigured = true;
