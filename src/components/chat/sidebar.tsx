@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -6,22 +5,12 @@ import { Conversation } from '@/lib/types';
 import { 
   Plus, 
   MessageSquare, 
-  Trash2, 
-  MoreVertical, 
   Settings,
-  Pencil,
   Brain,
-  LogOut,
-  User as UserIcon
+  LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -53,8 +42,6 @@ export function ChatSidebar({
   currentId, 
   onSelect, 
   onNew, 
-  onDelete, 
-  onRename,
   onOpenSettings,
   user,
   onLogout,
@@ -88,7 +75,7 @@ export function ChatSidebar({
           <div className="h-10 w-10 bg-primary rounded-2xl flex items-center justify-center text-white shadow-lg">
             <Brain className="h-6 w-6" />
           </div>
-          <span className="text-2xl font-black text-secondary tracking-tighter">{lang === 'ar' ? 'حساني' : 'Hassani'}</span>
+          <span className="text-2xl font-black text-foreground tracking-tighter">{lang === 'ar' ? 'حساني' : 'Hassani'}</span>
         </div>
         <Button onClick={onNew} className="w-full justify-center gap-3 luxury-gradient text-white rounded-2xl h-14 shadow-xl shadow-primary/20 font-black text-lg">
           <Plus className="h-6 w-6" />
@@ -98,11 +85,11 @@ export function ChatSidebar({
 
       <SidebarContent className="px-4">
         <div className="py-2">
-          <h3 className="px-4 text-[10px] font-black text-muted-foreground/50 uppercase tracking-[0.2em] mb-4">
+          <h3 className="px-4 text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em] mb-4">
             {lang === 'ar' ? 'السجل' : 'History'}
           </h3>
           {conversations.length === 0 ? (
-            <div className="text-center py-10 opacity-30 text-sm font-bold">
+            <div className="text-center py-10 opacity-30 text-sm font-bold text-muted-foreground">
               {lang === 'ar' ? 'لا توجد محادثات' : 'No conversations'}
             </div>
           ) : (
@@ -119,7 +106,7 @@ export function ChatSidebar({
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-primary/5 bg-sidebar/30 space-y-4">
-        <Button variant="ghost" className="w-full justify-start gap-4 rounded-2xl text-secondary font-black hover:bg-primary/5 h-12 px-4 transition-all" onClick={onOpenSettings}>
+        <Button variant="ghost" className="w-full justify-start gap-4 rounded-2xl text-foreground font-black hover:bg-primary/5 h-12 px-4 transition-all" onClick={onOpenSettings}>
           <Settings className="h-5 w-5 text-primary" />
           <span>{lang === 'ar' ? 'الإعدادات' : 'Settings'}</span>
         </Button>
@@ -130,7 +117,7 @@ export function ChatSidebar({
             <AvatarFallback className="bg-primary/10 text-primary font-bold">{displayName.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0 overflow-hidden">
-            <p className="text-sm font-bold text-secondary truncate">{displayName}</p>
+            <p className="text-sm font-bold text-foreground truncate">{displayName}</p>
             <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
           </div>
           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/5 shrink-0" onClick={onLogout}>

@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -13,7 +12,7 @@ import {
   SidebarInset, 
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Brain, Lightbulb, Code2, Rocket, Menu, Layout, Music } from 'lucide-react';
+import { Code2, Lightbulb, Menu, Layout, Rocket } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
 import { Message, MessageType } from '@/lib/types';
@@ -196,7 +195,7 @@ export default function HassaniApp() {
             <div className="relative h-32 w-32 shadow-2xl rounded-3xl overflow-hidden mb-4 border-2 border-primary/10">
                <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" onError={(e) => { e.currentTarget.src = "https://picsum.photos/seed/hassani/200/200"; }} />
             </div>
-            <h1 className="text-7xl font-black text-secondary tracking-tighter">{lang === 'ar' ? 'حساني' : 'Hassani'}</h1>
+            <h1 className="text-7xl font-black text-foreground tracking-tighter">{lang === 'ar' ? 'حساني' : 'Hassani'}</h1>
             <p className="text-muted-foreground font-medium text-lg leading-relaxed">
               {lang === 'ar' ? 'رفيقك الذكي الذي يفهمكم ويبتكر معكم في كل خطوة' : 'Your smart companion that understands and innovates with you.'}
             </p>
@@ -233,7 +232,7 @@ export default function HassaniApp() {
               <div className="relative h-9 w-9 overflow-hidden rounded-xl shadow-lg border border-primary/10">
                 <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" onError={(e) => { e.currentTarget.src = "https://picsum.photos/seed/hassani/40/40"; }} />
               </div>
-              <h1 className="text-xl font-black text-secondary tracking-tight">{lang === 'ar' ? 'حساني' : 'Hassani'}</h1>
+              <h1 className="text-xl font-black text-foreground tracking-tight">{lang === 'ar' ? 'حساني' : 'Hassani'}</h1>
             </div>
             <SidebarTrigger className="h-10 w-10 hover:bg-primary/5 rounded-xl text-primary transition-colors">
                <Menu className="h-6 w-6" />
@@ -249,8 +248,8 @@ export default function HassaniApp() {
                       <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" onError={(e) => { e.currentTarget.src = "https://picsum.photos/seed/hassani/128/128"; }} />
                     </div>
                     <div className="space-y-4">
-                      <h2 className="text-5xl font-black text-secondary text-center">
-                        {lang === 'ar' ? 'أهلاً' : 'Hello'} <span className="text-primary">{userName}</span>
+                      <h2 className="text-5xl font-black text-center text-foreground">
+                        {lang === 'ar' ? 'أهلاً ' : 'Hello '}<span className="text-primary">{userName}</span>
                       </h2>
                       <p className="text-muted-foreground font-bold text-xl min-h-[1.5em] flex items-center justify-center">
                         {displayText}<span className="w-1 h-6 bg-primary ml-1 animate-pulse shrink-0"></span>
@@ -266,7 +265,7 @@ export default function HassaniApp() {
                       ].map((item) => (
                         <Button key={item.text} variant="outline" className="h-16 rounded-2xl border-primary/10 hover:bg-primary/5 flex flex-row items-center gap-4 px-5 shadow-sm group" onClick={() => handleSendMessage(item.text)}>
                           <div className={`h-10 w-10 rounded-xl bg-current/10 flex items-center justify-center shrink-0 group-hover:scale-110 ${item.color}`}>{item.icon}</div>
-                          <span className="font-bold text-secondary text-sm">{item.text}</span>
+                          <span className="font-bold text-foreground text-sm">{item.text}</span>
                         </Button>
                       ))}
                     </div>

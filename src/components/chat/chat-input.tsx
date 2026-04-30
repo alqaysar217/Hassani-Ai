@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -14,7 +13,6 @@ import {
   Plus,
   Zap,
   Music,
-  Brain,
   Rocket,
   Layout
 } from 'lucide-react';
@@ -81,13 +79,13 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const currentModeInfo = modes.find(m => m.id === selectedMode) || modes[0];
 
   return (
-    <div className="p-4 bg-white/95 backdrop-blur-3xl border-t border-primary/5 safe-bottom sticky bottom-0 z-30 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.08)]">
+    <div className="p-4 bg-background/95 backdrop-blur-3xl border-t border-primary/5 safe-bottom sticky bottom-0 z-30 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.08)]">
       <div className="max-w-3xl mx-auto space-y-2">
         
         {attachedFile && (
           <div className="flex items-center gap-2 bg-primary/5 p-2 pr-4 rounded-xl border border-primary/10 animate-fade-in w-fit">
             <ImageIcon className="h-4 w-4 text-primary" />
-            <span className="text-xs font-bold text-secondary truncate max-w-[150px]">{attachedFile.name}</span>
+            <span className="text-xs font-bold text-foreground truncate max-w-[150px]">{attachedFile.name}</span>
             <Button 
               variant="ghost" 
               size="icon" 
@@ -99,7 +97,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           </div>
         )}
 
-        <div className="bg-muted/30 rounded-[24px] border border-primary/5 overflow-hidden transition-all duration-300 focus-within:ring-4 focus-within:ring-primary/5 focus-within:bg-white focus-within:border-primary/20">
+        <div className="bg-muted/30 dark:bg-muted/50 rounded-[24px] border border-primary/5 overflow-hidden transition-all duration-300 focus-within:ring-4 focus-within:ring-primary/5 focus-within:bg-card focus-within:border-primary/20">
           <div className="px-4">
             <Textarea
               ref={textareaRef}
@@ -120,7 +118,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                     <Plus className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-64 rounded-2xl p-2 border-primary/10 shadow-2xl backdrop-blur-xl bg-white/90" dir="rtl">
+                <DropdownMenuContent align="start" className="w-64 rounded-2xl p-2 border-primary/10 shadow-2xl backdrop-blur-xl bg-popover/90" dir="rtl">
                   {modes.map((mode) => (
                     <DropdownMenuItem 
                       key={mode.id} 
@@ -130,7 +128,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                       <div className={cn("p-2 rounded-lg bg-current/10 shrink-0", mode.color)}>
                         {mode.icon}
                       </div>
-                      <span className="font-bold text-secondary text-sm flex-1 text-right">{mode.label}</span>
+                      <span className="font-bold text-foreground text-sm flex-1 text-right">{mode.label}</span>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -174,7 +172,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                 <Button 
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9 rounded-2xl bg-secondary/5 text-secondary hover:bg-secondary/10 shrink-0 transition-all active:scale-90"
+                  className="h-9 w-9 rounded-2xl bg-foreground/5 text-foreground hover:bg-foreground/10 shrink-0 transition-all active:scale-90"
                   title="تحدث بالصوت"
                 >
                   <Mic className="h-5 w-5" />
