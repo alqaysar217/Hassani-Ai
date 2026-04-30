@@ -2,7 +2,7 @@
 
 /**
  * إعدادات Firebase الأساسية.
- * يجب التأكد من ضبط هذه القيم في ملف .env.local
+ * يتم سحب هذه القيم من ملف .env الخاص بالمشروع.
  */
 export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
