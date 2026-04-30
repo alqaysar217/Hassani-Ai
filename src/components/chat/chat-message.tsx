@@ -5,7 +5,7 @@ import React from 'react';
 import { Message } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Copy, Check, Layout, MoreHorizontal } from 'lucide-react';
+import { Copy, Check, Layout, MoreHorizontal, Brain, User } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 
@@ -29,49 +29,55 @@ export function ChatMessage({ message }: ChatMessageProps) {
 
   return (
     <div className={cn(
-      "flex w-full group transition-all duration-300",
+      "flex w-full group animate-fade-in-up",
       isAI ? "justify-start" : "justify-end"
     )}>
       <div className={cn(
-        "relative flex flex-col gap-2 max-w-[92%] md:max-w-[85%]",
+        "relative flex flex-col gap-3 max-w-[94%] md:max-w-[85%]",
         isAI ? "items-start" : "items-end"
       )}>
-        <div className="flex items-center gap-2 px-2">
-          <span className="text-[11px] font-extrabold text-muted-foreground/70 uppercase tracking-widest">
-            {isAI ? "حساني" : "أنت"} • {new Date(message.timestamp).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
+        <div className="flex items-center gap-3 px-1">
+          <div className={cn(
+            "h-6 w-6 rounded-lg flex items-center justify-center text-white shadow-sm",
+            isAI ? "bg-primary" : "bg-secondary"
+          )}>
+            {isAI ? <Brain className="h-3.5 w-3.5" /> : <User className="h-3.5 w-3.5" />}
+          </div>
+          <span className="text-[11px] font-black text-muted-foreground/60 uppercase tracking-widest">
+            {isAI ? "حساني" : "أنت"}
           </span>
         </div>
 
         <div className={cn(
-          "px-5 py-4 shadow-sm transition-all duration-200 active:scale-[0.99]",
-          isAI ? "chat-bubble-ai" : "chat-bubble-user"
+          "px-6 py-5 shadow-sm transition-all duration-300",
+          isAI ? "chat-bubble-ai rounded-[28px] rounded-tr-sm" : "chat-bubble-user rounded-[28px] rounded-tl-sm"
         )}>
           {message.type === 'text' && (
-            <p className="whitespace-pre-wrap leading-relaxed text-[16px]">
+            <p className="whitespace-pre-wrap leading-relaxed text-lg font-medium">
               {message.content || ""}
             </p>
           )}
 
           {message.type === 'code' && (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {message.metadata?.explanation && (
-                <p className="text-[15px] leading-relaxed mb-3">
+                <p className="text-lg leading-relaxed mb-3">
                   {message.metadata.explanation}
                 </p>
               )}
-              <div className="rounded-[10px] overflow-hidden bg-secondary border border-white/10 shadow-xl">
-                <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5">
-                  <span className="text-[10px] font-mono opacity-60 uppercase tracking-widest">Code</span>
+              <div className="rounded-2xl overflow-hidden bg-secondary border border-white/5 shadow-2xl">
+                <div className="flex items-center justify-between px-5 py-3 bg-white/5 border-b border-white/5">
+                  <span className="text-xs font-black opacity-60 uppercase tracking-widest">Code</span>
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-8 w-8 hover:bg-white/10 text-white/70 rounded-[10px]"
+                    className="h-9 w-9 hover:bg-white/10 text-white/70 rounded-xl"
                     onClick={() => copyToClipboard(message.metadata?.code || "")}
                   >
                     {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
-                <pre className="p-5 font-code text-xs md:text-sm overflow-x-auto text-amber-100 no-scrollbar dir-ltr" dir="ltr">
+                <pre className="p-6 font-code text-sm overflow-x-auto text-amber-50 no-scrollbar dir-ltr" dir="ltr">
                   <code>{message.metadata?.code || message.content || ""}</code>
                 </pre>
               </div>
@@ -80,11 +86,11 @@ export function ChatMessage({ message }: ChatMessageProps) {
 
           {message.type === 'image' && (
             <div className="space-y-4">
-               <div className="relative aspect-square w-full min-w-[280px] rounded-[10px] overflow-hidden border border-primary/10 shadow-2xl">
+               <div className="relative aspect-square w-full min-w-[280px] rounded-2xl overflow-hidden border border-primary/5 shadow-2xl">
                   {message.metadata?.mediaUrl && (
                     <Image 
                       src={message.metadata.mediaUrl} 
-                      alt="AI Generated" 
+                      alt="Hassani Vision" 
                       fill 
                       className="object-cover"
                       unoptimized
@@ -93,26 +99,13 @@ export function ChatMessage({ message }: ChatMessageProps) {
                </div>
             </div>
           )}
-
-          {message.type === 'diagram' && (
-            <div className="space-y-3">
-               <div className="flex items-center gap-2 text-primary font-bold text-sm">
-                  <Layout className="h-4 w-4" /> المخطط جاهز
-               </div>
-               <div className="rounded-[10px] overflow-hidden bg-muted/50 border border-primary/10 p-5">
-                 <pre className="font-code text-xs overflow-x-auto no-scrollbar dir-ltr text-secondary" dir="ltr">
-                   <code>{message.metadata?.diagramSyntax || ""}</code>
-                 </pre>
-               </div>
-            </div>
-          )}
         </div>
 
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2 mt-2">
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/5 text-muted-foreground" onClick={() => copyToClipboard(message.content || "")}>
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2 mt-1">
+          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-primary/5 text-muted-foreground" onClick={() => copyToClipboard(message.content || "")}>
             <Copy className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/5 text-muted-foreground">
+          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-primary/5 text-muted-foreground">
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </div>

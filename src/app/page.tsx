@@ -13,14 +13,14 @@ import {
   SidebarInset, 
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Menu, LogIn, ShieldCheck, Sparkles, Globe, AlertCircle, Copy, CheckCircle2 } from 'lucide-react';
+import { LogOut, Sparkles, Brain, Lightbulb, Code2, Rocket, MoreVertical } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
 import { Message, MessageType } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useAuth } from '@/firebase';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
+import Image from 'next/image';
 
 export default function HassaniApp() {
   const { user, loading: userLoading } = useUser();
@@ -38,7 +38,6 @@ export default function HassaniApp() {
   
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -55,39 +54,30 @@ export default function HassaniApp() {
   }, [currentConversation?.messages, isLoading]);
 
   const handleLogin = async () => {
-    setAuthError(null);
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      toast({
-        title: "تم تسجيل الدخول بنجاح",
-        description: "مرحباً بك في عالم حساني الذكي!"
-      });
+      toast({ title: "مرحباً بك في حساني" });
     } catch (error: any) {
-      console.error("Auth Error:", error);
-      if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user') {
-        return;
+      if (error.code !== 'auth/popup-closed-by-user') {
+        toast({ variant: 'destructive', title: "خطأ في تسجيل الدخول", description: error.message });
       }
-      
-      const currentDomain = window.location.hostname;
-      if (error.code === 'auth/unauthorized-domain') {
-        setAuthError(currentDomain);
-      } else {
-        toast({
-          variant: 'destructive',
-          title: "خطأ في تسجيل الدخول",
-          description: error.message || "حدث خطأ غير متوقع.",
-        });
-      }
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast({ title: "تم تسجيل الخروج" });
+    } catch (error) {
+      toast({ variant: 'destructive', title: "خطأ في تسجيل الخروج" });
     }
   };
 
   const handleSendMessage = async (text: string, type: MessageType = 'text', file: File | null = null) => {
     if (!currentId) {
       const newId = createNewConversation();
-      if (newId) {
-        processMessage(newId, text, type, file);
-      }
+      if (newId) processMessage(newId, text, type, file);
     } else {
       processMessage(currentId, text, type, file);
     }
@@ -131,11 +121,7 @@ export default function HassaniApp() {
 
       addMessage(convId, aiMsg);
     } catch (err: any) {
-      toast({
-        variant: 'destructive',
-        title: "خطأ في الرد",
-        description: "تعذر الاتصال بمحرك OpenRouter."
-      });
+      toast({ variant: 'destructive', title: "خطأ في الرد", description: "تعذر الاتصال بالمحرك." });
     } finally {
       setIsLoading(false);
     }
@@ -143,61 +129,26 @@ export default function HassaniApp() {
 
   if (userLoading) {
     return (
-      <div className="h-svh w-full flex flex-col items-center justify-center bg-background space-y-6">
-        <div className="flex flex-col items-center gap-2">
-          <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <h2 className="text-xl font-bold text-secondary">جاري التحقق...</h2>
-        </div>
+      <div className="h-svh w-full flex flex-col items-center justify-center bg-background">
+        <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="h-svh w-full flex flex-col items-center justify-center bg-background px-6" dir="rtl">
+      <div className="h-svh w-full flex flex-col items-center justify-center bg-background px-6">
         <div className="max-w-md w-full space-y-8 text-center">
-          <div className="space-y-4">
-            <h1 className="text-5xl font-black text-secondary tracking-tight">حساني الذكي</h1>
-            <p className="text-muted-foreground font-medium text-lg">مساعدك المتطور بمحرك OpenRouter</p>
+          <div className="space-y-4 animate-fade-in">
+            <h1 className="text-7xl font-black text-secondary tracking-tighter">حساني</h1>
+            <p className="text-muted-foreground font-medium text-lg">مساعدك الشخصي الذي يفهكم</p>
           </div>
-          
-          {authError && (
-            <Alert variant="destructive" className="text-right border-2 animate-fade-in">
-              <AlertCircle className="h-5 w-5" />
-              <AlertTitle className="font-bold">تنبيه: يجب إتمام الخطوة الأخيرة</AlertTitle>
-              <AlertDescription className="space-y-3 mt-2">
-                <p className="text-sm">بما أنك أضفت النطاق في Firebase، جرب الآن الضغط على "ابدأ الآن" مرة أخرى. إذا استمر الخطأ، تأكد من إضافة هذا الرابط بالضبط:</p>
-                <div className="flex items-center gap-2 bg-white/20 p-2 rounded-lg font-mono text-xs overflow-hidden">
-                  <span className="truncate flex-1">{authError}</span>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 hover:bg-white/30"
-                    onClick={() => {
-                      navigator.clipboard.writeText(authError);
-                      toast({ title: "تم نسخ الرابط" });
-                    }}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
-                <p className="text-[10px] opacity-80 leading-relaxed">
-                  اذهب إلى: Authentication {"→"} Settings {"→"} Authorized domains {"→"} Add domain
-                </p>
-              </AlertDescription>
-            </Alert>
-          )}
-
-          <div className="space-y-4">
-            <Button 
-              onClick={handleLogin}
-              className="w-full h-16 rounded-2xl luxury-gradient text-white font-bold text-xl shadow-2xl flex items-center justify-center gap-4 group transition-all active:scale-95"
-            >
-              <LogIn className="h-6 w-6" />
-              ابدأ الآن مع Google
-            </Button>
-            <p className="text-xs text-muted-foreground">بالدخول أنت توافق على شروط استخدام حساني الذكي</p>
-          </div>
+          <Button 
+            onClick={handleLogin}
+            className="w-full h-16 rounded-2xl luxury-gradient text-white font-bold text-xl shadow-2xl transition-all active:scale-95"
+          >
+            ابدأ الآن
+          </Button>
         </div>
       </div>
     );
@@ -219,43 +170,67 @@ export default function HassaniApp() {
         <SidebarInset className="flex flex-col h-full w-full relative overflow-hidden">
           <header className="h-16 flex items-center justify-between px-5 glass-morphism sticky top-0 z-30 shrink-0 border-b border-primary/5">
             <div className="flex items-center gap-3">
-              <div className="flex flex-col">
-                <h1 className="text-lg font-extrabold text-secondary">حساني الذكي</h1>
-                <div className="flex items-center gap-1">
-                  <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase">OpenRouter Active</span>
-                </div>
+              <div className="relative h-9 w-9 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg">
+                <Brain className="h-5 w-5" />
               </div>
+              <h1 className="text-xl font-black text-secondary tracking-tight">حساني</h1>
             </div>
 
-            <SidebarTrigger className="h-10 w-10 hover:bg-primary/5 rounded-xl text-primary">
-               <Menu className="h-6 w-6" />
-            </SidebarTrigger>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={handleLogout}
+                className="h-10 w-10 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-xl"
+              >
+                <LogOut className="h-5 w-5" />
+              </Button>
+              <SidebarTrigger className="h-10 w-10 hover:bg-primary/5 rounded-xl text-primary">
+                 <MoreVertical className="h-6 w-6" />
+              </SidebarTrigger>
+            </div>
           </header>
 
-          <div className="flex-1 flex flex-col relative overflow-hidden bg-[radial-gradient(circle_at_top_right,rgba(197,160,89,0.05),transparent)]">
+          <div className="flex-1 flex flex-col relative overflow-hidden bg-[radial-gradient(circle_at_top_right,rgba(197,160,89,0.03),transparent)]">
             <ScrollArea ref={scrollRef} className="flex-1">
               <div className="max-w-3xl mx-auto px-5 py-8 space-y-8">
                 {(!currentConversation || currentConversation.messages.length === 0) ? (
-                  <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
-                    <div className="p-6 bg-primary/5 rounded-full relative">
-                       <CheckCircle2 className="h-16 w-16 text-primary" />
-                       <div className="absolute -top-1 -right-1 bg-green-500 text-white p-1 rounded-full shadow-lg">
-                          <Sparkles className="h-4 w-4" />
-                       </div>
+                  <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-10 animate-fade-in-up">
+                    <div className="relative">
+                      <div className="h-28 w-28 bg-primary/10 rounded-3xl flex items-center justify-center transform rotate-3 shadow-2xl">
+                        <Rocket className="h-16 w-16 text-primary" />
+                      </div>
+                      <div className="absolute -top-3 -right-3 h-10 w-10 bg-secondary rounded-full flex items-center justify-center text-white shadow-xl">
+                        <Sparkles className="h-5 w-5" />
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <h2 className="text-3xl font-extrabold text-secondary">أهلاً بك يا {user.displayName?.split(' ')[0]}</h2>
-                      <p className="text-muted-foreground max-w-sm mx-auto font-medium">
-                        أنا جاهز لمساعدتك الآن عبر محرك OpenRouter. يمكنك سؤالي عن أي شيء أو إرسال صورة لتحليلها.
+
+                    <div className="space-y-4">
+                      <h2 className="text-5xl font-black text-secondary">أهلاً {user.displayName?.split(' ')[0]}</h2>
+                      <p className="text-muted-foreground max-w-md mx-auto font-medium text-lg leading-relaxed">
+                        أنا "حساني"، رفيقك الذكي في رحلة الإبداع وحل المشكلات. ماذا سننجز معاً اليوم؟
                       </p>
                     </div>
-                    <div className="flex flex-wrap justify-center gap-2 mt-4">
-                       {["كيف أبدأ؟", "حل لي هذه المعادلة", "حلل هذه الصورة"].map((hint) => (
-                         <Button key={hint} variant="outline" className="rounded-full text-xs font-bold border-primary/20 hover:bg-primary/5" onClick={() => handleSendMessage(hint)}>
-                           {hint}
-                         </Button>
-                       ))}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-xl">
+                      {[
+                        { text: "حل مشكلة برمجية معقدة", icon: <Code2 className="h-4 w-4" /> },
+                        { text: "توليد فكرة إبداعية لمشروع", icon: <Lightbulb className="h-4 w-4" /> },
+                        { text: "تخطيط رحلة استكشافية", icon: <Rocket className="h-4 w-4" /> },
+                        { text: "تحليل صورة أو بيانات", icon: <Brain className="h-4 w-4" /> }
+                      ].map((item) => (
+                        <Button 
+                          key={item.text} 
+                          variant="outline" 
+                          className="h-16 rounded-2xl border-primary/10 hover:bg-primary/5 hover:border-primary/30 flex items-center justify-start gap-3 px-5 transition-all"
+                          onClick={() => handleSendMessage(item.text)}
+                        >
+                          <div className="h-8 w-8 rounded-lg bg-primary/5 flex items-center justify-center text-primary shrink-0">
+                            {item.icon}
+                          </div>
+                          <span className="font-bold text-secondary text-sm">{item.text}</span>
+                        </Button>
+                      ))}
                     </div>
                   </div>
                 ) : (
@@ -266,7 +241,7 @@ export default function HassaniApp() {
                 
                 {isLoading && (
                   <div className="flex justify-start items-center gap-3">
-                    <div className="bg-white px-5 py-3 rounded-2xl rounded-tr-sm border border-primary/10 flex items-center gap-2 shadow-sm">
+                    <div className="bg-white px-6 py-4 rounded-3xl rounded-tr-sm border border-primary/10 flex items-center gap-3 shadow-sm animate-pulse">
                       <div className="flex gap-1">
                         <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce"></div>
                         <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.2s]"></div>

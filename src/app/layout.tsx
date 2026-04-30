@@ -6,8 +6,8 @@ import {FirebaseClientProvider} from '@/firebase/client-provider';
 import {FirebaseErrorListener} from '@/components/FirebaseErrorListener';
 
 export const metadata: Metadata = {
-  title: 'حساني الذكي',
-  description: 'مساعدك الشخصي المتكامل بنظام الذكاء الاصطناعي',
+  title: 'حساني',
+  description: 'مساعدك الشخصي المتطور',
 };
 
 export default function RootLayout({
