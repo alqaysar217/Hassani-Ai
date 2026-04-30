@@ -21,6 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import { cn } from '@/lib/utils';
 
 interface SettingsDialogProps {
   open: boolean;
@@ -155,25 +156,30 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     english: "English (EN)",
   };
 
+  const isRtl = lang === 'ar';
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] rounded-3xl overflow-hidden bg-background border-none shadow-2xl p-0" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+      <DialogContent 
+        className="sm:max-w-[500px] rounded-3xl overflow-hidden bg-background border-none shadow-2xl p-0" 
+        dir={isRtl ? 'rtl' : 'ltr'}
+      >
         <div className="bg-primary/5 p-8 border-b border-primary/10">
-          <DialogHeader className={lang === 'ar' ? "text-right" : "text-left"}>
+          <DialogHeader className="text-start">
             <DialogTitle className="text-3xl font-black text-secondary">{t.title}</DialogTitle>
             <DialogDescription className="text-muted-foreground font-medium">{t.desc}</DialogDescription>
           </DialogHeader>
         </div>
         
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="w-full justify-start h-14 bg-transparent border-b border-primary/5 px-8 gap-6 rounded-none">
-            <TabsTrigger value="profile" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none font-bold">{t.profile}</TabsTrigger>
-            <TabsTrigger value="appearance" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none font-bold">{t.appearance}</TabsTrigger>
-            <TabsTrigger value="language" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none font-bold">{t.language}</TabsTrigger>
+          <TabsList className="w-full justify-start h-14 bg-transparent border-b border-primary/5 px-8 gap-8 rounded-none overflow-x-auto no-scrollbar">
+            <TabsTrigger value="profile" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none font-bold px-0 pb-4 h-full">{t.profile}</TabsTrigger>
+            <TabsTrigger value="appearance" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none font-bold px-0 pb-4 h-full">{t.appearance}</TabsTrigger>
+            <TabsTrigger value="language" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none font-bold px-0 pb-4 h-full">{t.language}</TabsTrigger>
           </TabsList>
 
-          <div className="p-8 min-h-[350px]">
-            <TabsContent value="profile" className="m-0 space-y-8 animate-fade-in">
+          <div className="p-8 min-h-[380px]">
+            <TabsContent value="profile" className="m-0 space-y-8 animate-fade-in outline-none">
               <div className="flex flex-col items-center gap-6">
                 <div className="relative group">
                   <Avatar className="h-32 w-32 border-4 border-white dark:border-secondary shadow-2xl">
@@ -183,7 +189,15 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                     </AvatarFallback>
                   </Avatar>
                   <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
-                  <Button variant="secondary" size="icon" className="absolute bottom-0 right-0 h-10 w-10 rounded-full shadow-lg border-2 border-white dark:border-secondary" onClick={() => fileInputRef.current?.click()}>
+                  <Button 
+                    variant="secondary" 
+                    size="icon" 
+                    className={cn(
+                      "absolute bottom-0 h-10 w-10 rounded-full shadow-lg border-2 border-white dark:border-secondary",
+                      isRtl ? "right-0" : "left-0"
+                    )} 
+                    onClick={() => fileInputRef.current?.click()}
+                  >
                     <Upload className="h-5 w-5" />
                   </Button>
                 </div>
@@ -194,7 +208,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                   </Label>
                   <Input 
                     placeholder={lang === 'ar' ? "ادخل اسمك..." : "Enter your name..."}
-                    className="rounded-2xl h-14 px-6 border-primary/10 bg-muted/20 focus:bg-background transition-all text-lg font-bold"
+                    className="rounded-2xl h-14 px-6 border-primary/10 bg-muted/20 focus:bg-background transition-all text-lg font-bold text-start"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
@@ -202,7 +216,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               </div>
             </TabsContent>
 
-            <TabsContent value="appearance" className="m-0 space-y-6 animate-fade-in">
+            <TabsContent value="appearance" className="m-0 space-y-6 animate-fade-in outline-none">
               <Label className="font-black text-secondary text-sm flex items-center gap-2 mb-4">
                 <Palette className="h-4 w-4 text-primary" />
                 {t.themeLabel}
@@ -210,24 +224,30 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               <div className="grid grid-cols-2 gap-4">
                 <Button 
                   variant={theme === 'light' ? 'default' : 'outline'} 
-                  className={`h-24 rounded-2xl flex flex-col gap-2 transition-all ${theme === 'light' ? 'luxury-gradient text-white' : 'border-primary/10'}`}
+                  className={cn(
+                    "h-28 rounded-2xl flex flex-col gap-3 transition-all border-primary/10",
+                    theme === 'light' ? 'luxury-gradient text-white shadow-lg' : 'bg-muted/10'
+                  )}
                   onClick={() => toggleTheme('light')}
                 >
-                  <Sun className="h-6 w-6" />
-                  <span className="font-bold">{t.light}</span>
+                  <Sun className="h-7 w-7" />
+                  <span className="font-bold text-base">{t.light}</span>
                 </Button>
                 <Button 
                   variant={theme === 'dark' ? 'default' : 'outline'} 
-                  className={`h-24 rounded-2xl flex flex-col gap-2 transition-all ${theme === 'dark' ? 'luxury-gradient text-white' : 'border-primary/10'}`}
+                  className={cn(
+                    "h-28 rounded-2xl flex flex-col gap-3 transition-all border-primary/10",
+                    theme === 'dark' ? 'luxury-gradient text-white shadow-lg' : 'bg-muted/10'
+                  )}
                   onClick={() => toggleTheme('dark')}
                 >
-                  <Moon className="h-6 w-6" />
-                  <span className="font-bold">{t.dark}</span>
+                  <Moon className="h-7 w-7" />
+                  <span className="font-bold text-base">{t.dark}</span>
                 </Button>
               </div>
             </TabsContent>
 
-            <TabsContent value="language" className="m-0 space-y-6 animate-fade-in">
+            <TabsContent value="language" className="m-0 space-y-6 animate-fade-in outline-none">
               <Label className="font-black text-secondary text-sm flex items-center gap-2 mb-4">
                 <Languages className="h-4 w-4 text-primary" />
                 {t.langLabel}
@@ -235,19 +255,25 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               <div className="flex flex-col gap-3">
                 <Button 
                   variant={lang === 'ar' ? 'secondary' : 'outline'} 
-                  className={`h-16 justify-between px-6 rounded-2xl border-primary/10 ${lang === 'ar' ? 'bg-primary/10 text-primary border-primary/30' : ''}`}
+                  className={cn(
+                    "h-16 flex items-center justify-between px-6 rounded-2xl border-primary/10 transition-all",
+                    lang === 'ar' ? 'bg-primary/10 text-primary border-primary/30' : 'bg-muted/10'
+                  )}
                   onClick={() => toggleLang('ar')}
                 >
-                  <span className="font-bold">{t.arabic}</span>
-                  {lang === 'ar' && <CheckCircle2 className="h-5 w-5" />}
+                  <span className="font-bold text-lg">{t.arabic}</span>
+                  {lang === 'ar' && <CheckCircle2 className="h-6 w-6" />}
                 </Button>
                 <Button 
                   variant={lang === 'en' ? 'secondary' : 'outline'} 
-                  className={`h-16 justify-between px-6 rounded-2xl border-primary/10 ${lang === 'en' ? 'bg-primary/10 text-primary border-primary/30' : ''}`}
+                  className={cn(
+                    "h-16 flex items-center justify-between px-6 rounded-2xl border-primary/10 transition-all",
+                    lang === 'en' ? 'bg-primary/10 text-primary border-primary/30' : 'bg-muted/10'
+                  )}
                   onClick={() => toggleLang('en')}
                 >
-                  <span className="font-bold">{t.english}</span>
-                  {lang === 'en' && <CheckCircle2 className="h-5 w-5" />}
+                  <span className="font-bold text-lg">{t.english}</span>
+                  {lang === 'en' && <CheckCircle2 className="h-6 w-6" />}
                 </Button>
               </div>
             </TabsContent>
@@ -255,8 +281,12 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
         </Tabs>
 
         <div className="p-8 pt-0">
-          <Button className="w-full luxury-gradient rounded-2xl h-16 font-black text-xl shadow-xl shadow-primary/20 transition-all active:scale-95" onClick={handleUpdateProfile} disabled={isUpdating}>
-            {isUpdating ? <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : t.save}
+          <Button 
+            className="w-full luxury-gradient rounded-2xl h-16 font-black text-xl shadow-xl shadow-primary/20 transition-all active:scale-95 disabled:opacity-70" 
+            onClick={handleUpdateProfile} 
+            disabled={isUpdating}
+          >
+            {isUpdating ? <div className="h-6 w-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : t.save}
           </Button>
         </div>
       </DialogContent>
