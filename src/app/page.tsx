@@ -50,7 +50,7 @@ export default function HassaniApp() {
   const [isLoading, setIsLoading] = useState(false);
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [displayText, setDisplayText] = useState("");
-  const [profile, setProfile] = useState<{ displayName?: string } | null>(null);
+  const [profile, setProfile] = useState<{ displayName?: string, photoURL?: string } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -273,9 +273,8 @@ export default function HassaniApp() {
                     </div>
 
                     <div className="space-y-4">
-                      <h2 className="text-5xl font-black text-secondary flex items-center justify-center gap-2 flex-wrap">
-                        <span>أهلاً</span>
-                        <span className="text-primary">{userName}</span>
+                      <h2 className="text-5xl font-black text-secondary text-center">
+                        أهلاً <span className="text-primary">{userName}</span>
                       </h2>
                       <div className="h-8 flex items-center justify-center">
                         <p className="text-muted-foreground font-bold text-xl min-h-[1.5em] flex items-center">
@@ -297,13 +296,13 @@ export default function HassaniApp() {
                         <Button 
                           key={item.text} 
                           variant="outline" 
-                          className="h-16 rounded-2xl border-primary/10 hover:bg-primary/5 hover:border-primary/30 flex flex-row items-center justify-start gap-4 px-5 transition-all shadow-sm group"
+                          className="h-16 rounded-2xl border-primary/10 hover:bg-primary/5 hover:border-primary/30 flex flex-row items-center justify-start gap-4 px-5 transition-all shadow-sm group text-right"
                           onClick={() => handleSendMessage(item.text)}
                         >
                           <div className={`h-10 w-10 rounded-xl bg-current/10 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${item.color}`}>
                             {item.icon}
                           </div>
-                          <span className="font-bold text-secondary text-sm flex-1 text-right">{item.text}</span>
+                          <span className="font-bold text-secondary text-sm flex-1">{item.text}</span>
                         </Button>
                       ))}
                     </div>
