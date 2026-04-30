@@ -82,7 +82,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
 
   return (
     <div className="p-4 bg-white/95 backdrop-blur-3xl border-t border-primary/5 safe-bottom sticky bottom-0 z-30 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.08)]">
-      <div className="max-w-3xl mx-auto space-y-3">
+      <div className="max-w-3xl mx-auto space-y-2">
         
         {attachedFile && (
           <div className="flex items-center gap-2 bg-primary/5 p-2 pr-4 rounded-xl border border-primary/10 animate-fade-in w-fit">
@@ -99,7 +99,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           </div>
         )}
 
-        <div className="bg-muted/30 rounded-[24px] border border-primary/5 overflow-hidden transition-all duration-300 focus-within:ring-4 focus-within:ring-primary/5 focus-within:bg-white focus-within:border-primary/20 p-1">
+        <div className="bg-muted/30 rounded-[24px] border border-primary/5 overflow-hidden transition-all duration-300 focus-within:ring-4 focus-within:ring-primary/5 focus-within:bg-white focus-within:border-primary/20">
           <div className="px-4">
             <Textarea
               ref={textareaRef}
@@ -107,16 +107,16 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKeyDown}
               placeholder="تحدث مع حساني..."
-              className="min-h-[56px] max-h-[180px] border-0 focus-visible:ring-0 bg-transparent resize-none py-4 text-lg font-medium placeholder:text-muted-foreground/30 no-scrollbar"
+              className="min-h-[44px] max-h-[200px] border-0 focus-visible:ring-0 bg-transparent resize-none py-3 text-lg font-medium placeholder:text-muted-foreground/30 no-scrollbar"
               disabled={disabled}
             />
           </div>
 
-          <div className="flex items-center justify-between pt-1 border-t border-primary/5 mt-1 px-2 pb-1.5">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between pt-1 border-t border-primary/5 mx-2 mb-1.5 px-2">
+            <div className="flex items-center gap-1.5">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl bg-primary/5 text-primary hover:bg-primary/10 transition-all shadow-sm">
+                  <Button variant="ghost" size="icon" className="h-9 w-9 rounded-2xl bg-primary/5 text-primary hover:bg-primary/10 transition-all">
                     <Plus className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -146,7 +146,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-10 w-10 rounded-2xl text-muted-foreground hover:text-primary hover:bg-primary/5"
+                className="h-9 w-9 rounded-2xl text-muted-foreground hover:text-primary hover:bg-primary/5"
                 onClick={() => fileInputRef.current?.click()}
                 title="إرفاق صورة"
               >
@@ -166,15 +166,15 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                 <Button 
                   onClick={handleSend}
                   disabled={disabled}
-                  className="h-10 w-10 rounded-2xl luxury-gradient shadow-lg shadow-primary/20 shrink-0 transition-all active:scale-90"
+                  className="h-9 w-9 rounded-2xl luxury-gradient shadow-lg shadow-primary/20 shrink-0 transition-all active:scale-90"
                 >
-                  <Send className="h-5 w-5 fill-white rotate-180" />
+                  <Send className="h-4.5 w-4.5 fill-white rotate-180" />
                 </Button>
               ) : (
                 <Button 
                   variant="ghost"
                   size="icon"
-                  className="h-10 w-10 rounded-2xl bg-secondary/5 text-secondary hover:bg-secondary/10 shrink-0 transition-all active:scale-90"
+                  className="h-9 w-9 rounded-2xl bg-secondary/5 text-secondary hover:bg-secondary/10 shrink-0 transition-all active:scale-90"
                   title="تحدث بالصوت"
                 >
                   <Mic className="h-5 w-5" />
