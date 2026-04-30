@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -256,7 +257,7 @@ export default function HassaniApp() {
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl px-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl px-2" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
                       {[
                         { text: lang === 'ar' ? "حل مشكلة برمجية" : "Solve Code Problem", icon: <Code2 className="h-4 w-4" />, color: "text-emerald-500" },
                         { text: lang === 'ar' ? "توليد فكرة إبداعية" : "Generate Idea", icon: <Lightbulb className="h-4 w-4" />, color: "text-amber-500" },
@@ -266,13 +267,13 @@ export default function HassaniApp() {
                         <Button 
                           key={item.text} 
                           variant="outline" 
-                          className="h-16 rounded-2xl border-primary/10 hover:bg-primary/5 flex flex-row items-center gap-4 px-5 shadow-sm group" 
+                          className="h-16 rounded-2xl border-primary/10 hover:bg-primary/5 flex items-center gap-4 px-5 shadow-sm group overflow-hidden" 
                           onClick={() => handleSendMessage(item.text)}
                         >
-                          <div className={`h-10 w-10 rounded-xl bg-current/10 flex items-center justify-center shrink-0 group-hover:scale-110 ${item.color}`}>
+                          <div className={`h-10 w-10 rounded-xl bg-current/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform ${item.color}`}>
                             {item.icon}
                           </div>
-                          <span className="font-bold text-foreground text-sm">{item.text}</span>
+                          <span className="font-bold text-foreground text-sm truncate">{item.text}</span>
                         </Button>
                       ))}
                     </div>
