@@ -120,7 +120,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                     <Plus className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-60 rounded-2xl p-2 border-primary/10 shadow-2xl backdrop-blur-xl bg-white/90">
+                <DropdownMenuContent align="start" className="w-64 rounded-2xl p-2 border-primary/10 shadow-2xl backdrop-blur-xl bg-white/90" dir="rtl">
                   {modes.map((mode) => (
                     <DropdownMenuItem 
                       key={mode.id} 
