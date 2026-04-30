@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -60,12 +61,16 @@ export default function HassaniApp() {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      // تجاهل الأخطاء الناتجة عن إلغاء المستخدم للنافذة المنبثقة
+      if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user') {
+        return;
+      }
+      
       toast({
         variant: 'destructive',
         title: "خطأ في تسجيل الدخول",
-        description: "تعذر الاتصال بخدمات Google."
+        description: "تعذر الاتصال بخدمات Google. يرجى المحاولة مرة أخرى."
       });
     }
   };
@@ -142,7 +147,6 @@ export default function HassaniApp() {
 
       addMessage(activeId, aiMsg);
     } catch (error: any) {
-      console.error(error);
       toast({
         variant: 'destructive',
         title: "خطأ في المساعد",
@@ -157,7 +161,7 @@ export default function HassaniApp() {
     return (
       <div className="h-svh w-full flex flex-col items-center justify-center bg-background space-y-6">
         <div className="relative h-24 w-24 rounded-[10px] overflow-hidden">
-          <Image src="/logo-hassani.png" alt="Logo" fill className="object-contain animate-pulse" />
+          <Image src="https://picsum.photos/seed/hassani-logo/200/200" alt="Logo" fill className="object-contain animate-pulse" />
         </div>
         <div className="flex flex-col items-center gap-2">
           <h2 className="text-xl font-bold text-secondary">جاري التحميل...</h2>
@@ -174,8 +178,8 @@ export default function HassaniApp() {
       <div className="h-svh w-full flex flex-col items-center justify-center bg-background px-6">
         <div className="max-w-md w-full space-y-12 text-center">
           <div className="space-y-6">
-            <div className="relative h-32 w-32 mx-auto rounded-[10px] overflow-hidden">
-              <Image src="/logo-hassani.png" alt="Logo" fill className="object-contain" />
+            <div className="relative h-32 w-32 mx-auto rounded-[10px] overflow-hidden shadow-2xl">
+              <Image src="https://picsum.photos/seed/hassani-main/400/400" alt="Logo" fill className="object-contain" />
             </div>
             <div className="space-y-2">
               <h1 className="text-4xl font-black text-secondary tracking-tight">مرحباً بك في حساني</h1>
@@ -216,7 +220,7 @@ export default function HassaniApp() {
           <header className="h-16 flex items-center justify-between px-5 glass-morphism sticky top-0 z-30 shrink-0 border-b border-primary/5">
             <div className="flex items-center gap-3">
               <div className="relative h-10 w-10 rounded-[10px] overflow-hidden">
-                <Image src="/logo-hassani.png" alt="Hassani Logo" fill className="object-contain" />
+                <Image src="https://picsum.photos/seed/hassani-small/100/100" alt="Hassani Logo" fill className="object-contain" />
               </div>
               <div className="flex flex-col">
                 <h1 className="text-lg font-extrabold tracking-tight text-secondary">حساني الذكي</h1>
@@ -239,7 +243,7 @@ export default function HassaniApp() {
                   <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6 space-y-8">
                     <div className="relative">
                       <div className="relative h-32 w-32 mx-auto drop-shadow-2xl rounded-[10px] overflow-hidden">
-                        <Image src="/logo-hassani.png" alt="Hassani AI" fill className="object-contain" />
+                        <Image src="https://picsum.photos/seed/hassani-welcome/400/400" alt="Hassani AI" fill className="object-contain" />
                       </div>
                       <div className="absolute -bottom-2 -right-2 h-10 w-10 rounded-full bg-white border-4 border-background flex items-center justify-center shadow-xl">
                         <div className="h-4 w-4 rounded-full bg-green-500 animate-pulse" />
@@ -261,7 +265,7 @@ export default function HassaniApp() {
                 {isLoading && (
                   <div className="flex justify-start items-center gap-3">
                     <div className="h-9 w-9 relative flex items-center justify-center rounded-[10px] overflow-hidden">
-                      <Image src="/logo-hassani.png" alt="Thinking" fill className="object-contain opacity-50 animate-pulse" />
+                      <Image src="https://picsum.photos/seed/thinking/100/100" alt="Thinking" fill className="object-contain opacity-50 animate-pulse" />
                     </div>
                     <div className="bg-white px-5 py-3 rounded-[10px] rounded-tr-sm border border-primary/10 flex items-center gap-2 shadow-sm">
                       <span className="flex gap-1.5">
