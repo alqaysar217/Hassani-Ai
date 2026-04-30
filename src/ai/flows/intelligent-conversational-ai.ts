@@ -39,7 +39,7 @@ export async function intelligentConversationalAi(
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Authorization': `Bearer ${OPENROUTER_API_KEY.trim()}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://hassani-ai.web.app',
         'X-Title': 'Hassani AI'
@@ -55,10 +55,11 @@ export async function intelligentConversationalAi(
     if (data.choices && data.choices[0]) {
       return { response: data.choices[0].message.content };
     } else if (data.error) {
-      if (data.error.message.includes("User not found") || data.error.message.includes("API key")) {
-        return { response: "خطأ في الاتصال: يبدو أن هناك مشكلة في مفتاح OpenRouter أو الرصيد. يرجى مراجعة حسابك." };
+      const errorMsg = data.error.message || "";
+      if (errorMsg.includes("User not found") || errorMsg.includes("API key")) {
+        return { response: "خطأ في المفتاح: يبدو أن مفتاح OpenRouter غير مفعل أو يحتاج لرصيد. يرجى التأكد من شحن حسابك في OpenRouter." };
       }
-      throw new Error(data.error.message);
+      throw new Error(errorMsg);
     } else {
       throw new Error("فشل الاتصال بمحرك OpenRouter");
     }
