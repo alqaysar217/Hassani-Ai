@@ -58,14 +58,14 @@ export function ChatMessage({ message }: ChatMessageProps) {
           !isAI && "flex-row-reverse"
         )}>
           <div className={cn(
-            "h-7 w-7 rounded-lg flex items-center justify-center overflow-hidden shadow-sm border border-primary/10 bg-card",
+            "h-7 w-7 rounded-full flex items-center justify-center overflow-hidden shadow-sm border border-primary/10 bg-card",
           )}>
             {isAI ? (
               <div className="relative h-full w-full">
-                <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover p-0.5" />
+                <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" />
               </div>
             ) : (
-              <Avatar className="h-full w-full rounded-lg">
+              <Avatar className="h-full w-full rounded-full">
                 <AvatarImage src={userPhoto} className="object-cover" />
                 <AvatarFallback className="bg-secondary text-[10px] text-white font-bold">{userInitial}</AvatarFallback>
               </Avatar>
