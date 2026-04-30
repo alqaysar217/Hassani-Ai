@@ -1,12 +1,15 @@
 "use client"
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Message } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Copy, Check, Layout, MoreHorizontal, Brain, User, Database, GitBranch, Users } from 'lucide-react';
+import { Copy, Check, Layout, MoreHorizontal } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
+import { useUser, useFirestore } from '@/firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface ChatMessageProps {
   message: Message;
@@ -14,7 +17,21 @@ interface ChatMessageProps {
 
 export function ChatMessage({ message }: ChatMessageProps) {
   const { toast } = useToast();
+  const { user } = useUser();
+  const db = useFirestore();
   const [copied, setCopied] = React.useState(false);
+  const [userProfile, setUserProfile] = useState<{ photoURL?: string, displayName?: string } | null>(null);
+
+  const isAI = message.role === 'assistant';
+
+  useEffect(() => {
+    if (!isAI && user) {
+      const unsubscribe = onSnapshot(doc(db, 'users', user.uid), (doc) => {
+        if (doc.exists()) setUserProfile(doc.data());
+      });
+      return () => unsubscribe();
+    }
+  }, [isAI, user, db]);
 
   const copyToClipboard = (text: string) => {
     if (!text) return;
@@ -24,7 +41,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const isAI = message.role === 'assistant';
+  const userPhoto = userProfile?.photoURL || user?.photoURL || undefined;
+  const userInitial = userProfile?.displayName?.charAt(0) || user?.displayName?.charAt(0) || "م";
 
   return (
     <div className={cn(
@@ -35,14 +53,25 @@ export function ChatMessage({ message }: ChatMessageProps) {
         "relative flex flex-col gap-3 max-w-[94%] md:max-w-[85%]",
         isAI ? "items-start" : "items-end"
       )}>
-        <div className="flex items-center gap-3 px-1">
+        <div className={cn(
+          "flex items-center gap-2 px-1",
+          !isAI && "flex-row-reverse"
+        )}>
           <div className={cn(
-            "h-6 w-6 rounded-lg flex items-center justify-center text-white shadow-sm",
-            isAI ? "bg-primary" : "bg-secondary"
+            "h-7 w-7 rounded-lg flex items-center justify-center overflow-hidden shadow-sm border border-primary/10 bg-card",
           )}>
-            {isAI ? <Brain className="h-3.5 w-3.5" /> : <User className="h-3.5 w-3.5" />}
+            {isAI ? (
+              <div className="relative h-full w-full">
+                <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover p-0.5" />
+              </div>
+            ) : (
+              <Avatar className="h-full w-full rounded-lg">
+                <AvatarImage src={userPhoto} className="object-cover" />
+                <AvatarFallback className="bg-secondary text-[10px] text-white font-bold">{userInitial}</AvatarFallback>
+              </Avatar>
+            )}
           </div>
-          <span className="text-[11px] font-black text-muted-foreground/60 uppercase tracking-widest">
+          <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">
             {isAI ? "حساني" : "أنت"}
           </span>
         </div>
