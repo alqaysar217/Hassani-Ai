@@ -22,6 +22,14 @@ import { useUser, useAuth } from '@/firebase';
 import { signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import Image from 'next/image';
 
+const MARKETING_PHRASES = [
+  "يلا نبدأ الإبداع.. أنا جاهز لمساعدتك",
+  "لنبتكر شيئاً مذهلاً اليوم",
+  "دعنا نحول أفكارك إلى واقع ملموس",
+  "حساني شريكك الذكي في كل خطوة",
+  "هل أنت مستعد لتحدي برمجـي جديد؟"
+];
+
 export default function HassaniApp() {
   const { user, loading: userLoading } = useUser();
   const auth = useAuth();
@@ -38,8 +46,17 @@ export default function HassaniApp() {
   
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [phraseIndex, setPhraseIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  // تأثير تبديل العبارات التسويقية
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPhraseIndex((prev) => (prev + 1) % MARKETING_PHRASES.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -221,16 +238,18 @@ export default function HassaniApp() {
                           }}
                         />
                       </div>
-                      <div className="absolute -top-3 -right-3 h-10 w-10 bg-secondary rounded-full flex items-center justify-center text-white shadow-xl">
-                        <Sparkles className="h-5 w-5" />
-                      </div>
                     </div>
 
                     <div className="space-y-4">
-                      <h2 className="text-5xl font-black text-secondary">أهلاً {user.displayName?.split(' ')[0]}</h2>
-                      <p className="text-muted-foreground max-w-md mx-auto font-medium text-lg leading-relaxed">
-                        أنا "حساني"، رفيقك في رحلة الإبداع وحل المشكلات المعقدة. ماذا سننجز معاً اليوم؟
-                      </p>
+                      <h2 className="text-5xl font-black text-secondary flex items-center justify-center gap-2 flex-wrap">
+                        <span>أهلاً</span>
+                        <span className="text-primary">{user.displayName?.split(' ')[0]}</span>
+                      </h2>
+                      <div className="h-8 overflow-hidden">
+                        <p className="text-muted-foreground font-bold text-xl transition-all duration-500 animate-fade-in" key={phraseIndex}>
+                          {MARKETING_PHRASES[phraseIndex]}
+                        </p>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl px-2">
