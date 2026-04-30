@@ -13,7 +13,7 @@ import {
   SidebarInset, 
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Menu, LogIn, ShieldCheck, AlertTriangle, Sparkles } from 'lucide-react';
+import { Menu, LogIn, ShieldCheck, Sparkles, Globe } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
 import { Message, MessageType } from '@/lib/types';
@@ -66,71 +66,20 @@ export default function HassaniApp() {
       }
       
       let errorMsg = "حدث خطأ غير متوقع.";
-      if (error.code === 'auth/operation-not-allowed') {
-        errorMsg = "يجب تفعيل 'Google' في إعدادات Firebase Console -> Authentication.";
-      } else if (error.code === 'auth/unauthorized-domain') {
-        errorMsg = "هذا النطاق غير مصرح له بتسجيل الدخول في إعدادات Firebase.";
+      const currentDomain = window.location.hostname;
+
+      if (error.code === 'auth/unauthorized-domain') {
+        errorMsg = `هذا النطاق (${currentDomain}) غير مصرح له. يرجى إضافته في إعدادات Firebase -> Authentication -> Settings -> Authorized domains.`;
+      } else if (error.code === 'auth/operation-not-allowed') {
+        errorMsg = "يجب تفعيل 'Google' في إعدادات Firebase Console.";
       }
 
       toast({
         variant: 'destructive',
         title: "خطأ في تسجيل الدخول",
-        description: errorMsg
+        description: errorMsg,
+        duration: 10000,
       });
-    }
-  };
-
-  const handleSendMessage = async (text: string, mode?: MessageType, file?: File | null) => {
-    let activeId = currentId;
-    if (!activeId) {
-      activeId = createNewConversation();
-      if (!activeId) return;
-    }
-
-    const userMsg: Message = {
-      id: crypto.randomUUID(),
-      role: 'user',
-      content: text,
-      type: file ? 'image' : 'text',
-      timestamp: Date.now(),
-      metadata: file ? { mediaUrl: URL.createObjectURL(file) } : undefined
-    };
-
-    addMessage(activeId, userMsg);
-    setIsLoading(true);
-
-    try {
-      let imageBase64 = undefined;
-      if (file) {
-        imageBase64 = await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(file);
-        });
-      }
-
-      const { response } = await intelligentConversationalAi({
-        query: text,
-        imageHeader: imageBase64
-      });
-
-      const aiMsg: Message = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: response,
-        type: 'text',
-        timestamp: Date.now()
-      };
-
-      addMessage(activeId, aiMsg);
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: "خطأ في الرد",
-        description: error.message || "فشل حساني في الرد حالياً."
-      });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -165,15 +114,12 @@ export default function HassaniApp() {
             
             <div className="p-5 bg-primary/5 rounded-2xl border border-primary/10 text-right">
               <div className="flex items-center gap-2 mb-2 text-primary font-bold">
-                <Sparkles className="h-5 w-5" />
-                <span>مميزات حساني:</span>
+                <Globe className="h-5 w-5" />
+                <span>حل مشكلة النطاق:</span>
               </div>
-              <ul className="text-sm text-secondary/70 list-disc list-inside space-y-1 font-medium">
-                <li>تحليل الصور المتقدم عبر Gemini 2.0</li>
-                <li>إجابات ذكية وسريعة بفضل OpenRouter</li>
-                <li>حفظ تلقائي لكافة محادثاتك</li>
-                <li>واجهة عربية فاخرة وسهلة الاستخدام</li>
-              </ul>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                إذا ظهر لك خطأ "النطاق غير مصرح له"، انسخ الرابط الذي سيظهر في التنبيه الأحمر وضعه في قائمة "Authorized domains" في إعدادات Authentication بـ Firebase.
+              </p>
             </div>
           </div>
         </div>
@@ -222,7 +168,7 @@ export default function HassaniApp() {
                     <div className="space-y-2">
                       <h2 className="text-3xl font-extrabold text-secondary">أهلاً بك يا {user.displayName?.split(' ')[0]}</h2>
                       <p className="text-muted-foreground max-w-sm mx-auto font-medium">
-                        أنا جاهز لمساعدتك الآن. يمكنك سؤالي عن أي شيء أو إرسال صورة لتحليلها.
+                        أنا جاهز لمساعدتك الآن عبر محرك OpenRouter. يمكنك سؤالي عن أي شيء.
                       </p>
                     </div>
                   </div>
