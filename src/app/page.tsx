@@ -13,7 +13,7 @@ import {
   SidebarInset, 
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Menu, LogIn, ShieldCheck, Sparkles, Globe, AlertCircle, Copy } from 'lucide-react';
+import { Menu, LogIn, ShieldCheck, Sparkles, Globe, AlertCircle, Copy, CheckCircle2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
 import { Message, MessageType } from '@/lib/types';
@@ -162,11 +162,11 @@ export default function HassaniApp() {
           </div>
           
           {authError && (
-            <Alert variant="destructive" className="text-right border-2 animate-bounce">
+            <Alert variant="destructive" className="text-right border-2 animate-fade-in">
               <AlertCircle className="h-5 w-5" />
-              <AlertTitle className="font-bold">خطأ: النطاق غير مصرح له</AlertTitle>
+              <AlertTitle className="font-bold">تنبيه: يجب إتمام الخطوة الأخيرة</AlertTitle>
               <AlertDescription className="space-y-3 mt-2">
-                <p className="text-sm">يجب إضافة هذا الرابط في إعدادات Firebase:</p>
+                <p className="text-sm">بما أنك أضفت النطاق في Firebase، جرب الآن الضغط على "ابدأ الآن" مرة أخرى. إذا استمر الخطأ، تأكد من إضافة هذا الرابط بالضبط:</p>
                 <div className="flex items-center gap-2 bg-white/20 p-2 rounded-lg font-mono text-xs overflow-hidden">
                   <span className="truncate flex-1">{authError}</span>
                   <Button 
@@ -196,6 +196,7 @@ export default function HassaniApp() {
               <LogIn className="h-6 w-6" />
               ابدأ الآن مع Google
             </Button>
+            <p className="text-xs text-muted-foreground">بالدخول أنت توافق على شروط استخدام حساني الذكي</p>
           </div>
         </div>
       </div>
@@ -237,14 +238,24 @@ export default function HassaniApp() {
               <div className="max-w-3xl mx-auto px-5 py-8 space-y-8">
                 {(!currentConversation || currentConversation.messages.length === 0) ? (
                   <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
-                    <div className="p-6 bg-primary/5 rounded-full">
-                       <ShieldCheck className="h-16 w-16 text-primary" />
+                    <div className="p-6 bg-primary/5 rounded-full relative">
+                       <CheckCircle2 className="h-16 w-16 text-primary" />
+                       <div className="absolute -top-1 -right-1 bg-green-500 text-white p-1 rounded-full shadow-lg">
+                          <Sparkles className="h-4 w-4" />
+                       </div>
                     </div>
                     <div className="space-y-2">
                       <h2 className="text-3xl font-extrabold text-secondary">أهلاً بك يا {user.displayName?.split(' ')[0]}</h2>
                       <p className="text-muted-foreground max-w-sm mx-auto font-medium">
-                        أنا جاهز لمساعدتك الآن عبر محرك OpenRouter. يمكنك سؤالي عن أي شيء.
+                        أنا جاهز لمساعدتك الآن عبر محرك OpenRouter. يمكنك سؤالي عن أي شيء أو إرسال صورة لتحليلها.
                       </p>
+                    </div>
+                    <div className="flex flex-wrap justify-center gap-2 mt-4">
+                       {["كيف أبدأ؟", "حل لي هذه المعادلة", "حلل هذه الصورة"].map((hint) => (
+                         <Button key={hint} variant="outline" className="rounded-full text-xs font-bold border-primary/20 hover:bg-primary/5" onClick={() => handleSendMessage(hint)}>
+                           {hint}
+                         </Button>
+                       ))}
                     </div>
                   </div>
                 ) : (
