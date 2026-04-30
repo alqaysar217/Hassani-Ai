@@ -1,71 +1,123 @@
+
 "use client"
 
-import { useState, useEffect } from 'react';
-import { Conversation, Message, MessageType } from '@/lib/types';
-
-const STORAGE_KEY = 'hassani_chat_history';
+import { useState, useEffect, useMemo } from 'react';
+import { Conversation, Message } from '@/lib/types';
+import { 
+  collection, 
+  query, 
+  where, 
+  orderBy, 
+  onSnapshot, 
+  doc, 
+  setDoc, 
+  addDoc, 
+  deleteDoc, 
+  updateDoc,
+  serverTimestamp 
+} from 'firebase/firestore';
+import { useFirestore, useUser } from '@/firebase';
 
 export function useChat() {
+  const db = useFirestore();
+  const { user } = useUser();
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [currentId, setCurrentId] = useState<string | null>(null);
 
+  // جلب المحادثات الخاصة بالمستخدم
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setConversations(parsed);
-      } catch (e) {
-        console.error('Failed to parse chat history', e);
-      }
-    }
-  }, []);
+    if (!db || !user) return;
 
+    const q = query(
+      collection(db, 'conversations'),
+      where('userId', '==', user.uid),
+      orderBy('updatedAt', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const convs = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Conversation[];
+      setConversations(convs);
+    });
+
+    return () => unsubscribe();
+  }, [db, user]);
+
+  // جلب الرسائل للمحادثة الحالية
   useEffect(() => {
-    if (conversations.length > 0) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
+    if (!db || !currentId) {
+      setMessages([]);
+      return;
     }
-  }, [conversations]);
 
-  const currentConversation = conversations.find(c => c.id === currentId) || null;
+    const q = query(
+      collection(db, 'conversations', currentId, 'messages'),
+      orderBy('timestamp', 'asc')
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const msgs = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Message[];
+      setMessages(msgs);
+    });
+
+    return () => unsubscribe();
+  }, [db, currentId]);
+
+  const currentConversation = useMemo(() => {
+    const conv = conversations.find(c => c.id === currentId);
+    if (!conv) return null;
+    return { ...conv, messages };
+  }, [conversations, currentId, messages]);
 
   const createNewConversation = () => {
+    if (!db || !user) return null;
+    
     const id = crypto.randomUUID();
-    const newConv: Conversation = {
-      id,
-      title: 'New Chat',
-      updatedAt: Date.now(),
-      messages: [],
-    };
-    setConversations([newConv, ...conversations]);
+    setDoc(doc(db, 'conversations', id), {
+      title: 'محادثة جديدة',
+      userId: user.uid,
+      updatedAt: Date.now()
+    });
+    
     setCurrentId(id);
     return id;
   };
 
   const addMessage = (conversationId: string, message: Message) => {
-    setConversations(prev => {
-      const updated = prev.map(c => {
-        if (c.id === conversationId) {
-          const newMessages = [...c.messages, message];
-          let newTitle = c.title;
-          if (c.messages.length === 0 && message.role === 'user') {
-            newTitle = message.content.slice(0, 30) + (message.content.length > 30 ? '...' : '');
-          }
-          return { ...c, messages: newMessages, title: newTitle, updatedAt: Date.now() };
-        }
-        return c;
+    if (!db) return;
+
+    // إضافة الرسالة للمجموعة الفرعية
+    addDoc(collection(db, 'conversations', conversationId, 'messages'), message);
+
+    // تحديث عنوان المحادثة وتاريخها إذا كانت أول رسالة
+    if (messages.length === 0 && message.role === 'user') {
+      const newTitle = message.content.slice(0, 30) + (message.content.length > 30 ? '...' : '');
+      updateDoc(doc(db, 'conversations', conversationId), {
+        title: newTitle,
+        updatedAt: Date.now()
       });
-      return updated.sort((a, b) => b.updatedAt - a.updatedAt);
-    });
+    } else {
+      updateDoc(doc(db, 'conversations', conversationId), {
+        updatedAt: Date.now()
+      });
+    }
   };
 
   const deleteConversation = (id: string) => {
-    setConversations(prev => prev.filter(c => c.id !== id));
+    if (!db) return;
+    deleteDoc(doc(db, 'conversations', id));
     if (currentId === id) setCurrentId(null);
   };
 
   const renameConversation = (id: string, title: string) => {
-    setConversations(prev => prev.map(c => c.id === id ? { ...c, title } : c));
+    if (!db) return;
+    updateDoc(doc(db, 'conversations', id), { title });
   };
 
   return {

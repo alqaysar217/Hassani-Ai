@@ -1,0 +1,51 @@
+
+{
+  "entities": {
+    "Conversation": {
+      "title": "محادثة",
+      "description": "تمثل جلسة محادثة بين المستخدم وحساني",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "عنوان المحادثة" },
+        "userId": { "type": "string", "description": "معرف المستخدم صاحب المحادثة" },
+        "updatedAt": { "type": "number", "description": "طابع زمني لآخر تحديث" }
+      },
+      "required": ["title", "userId", "updatedAt"]
+    },
+    "Message": {
+      "title": "رسالة",
+      "description": "تمثل رسالة مفردة داخل المحادثة",
+      "type": "object",
+      "properties": {
+        "role": { "type": "string", "enum": ["user", "assistant"] },
+        "content": { "type": "string" },
+        "type": { "type": "string", "enum": ["text", "image", "code", "diagram", "music", "planning"] },
+        "timestamp": { "type": "number" },
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "code": { "type": "string" },
+            "explanation": { "type": "string" },
+            "mediaUrl": { "type": "string" },
+            "diagramSyntax": { "type": "string" },
+            "diagramExplanation": { "type": "string" }
+          }
+        }
+      },
+      "required": ["role", "content", "type", "timestamp"]
+    }
+  },
+  "auth": {
+    "providers": ["google.com"]
+  },
+  "firestore": {
+    "/conversations/{conversationId}": {
+      "schema": "Conversation",
+      "description": "مجموعة المحادثات الرئيسية"
+    },
+    "/conversations/{conversationId}/messages/{messageId}": {
+      "schema": "Message",
+      "description": "الرسائل التابعة لمحادثة معينة"
+    }
+  }
+}
