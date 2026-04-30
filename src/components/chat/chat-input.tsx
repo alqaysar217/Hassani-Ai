@@ -75,18 +75,19 @@ export function ChatInput({ onSend, disabled, lang = 'ar' }: ChatInputProps) {
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+      // Adjust the minimum height calculation for mobile
+      textareaRef.current.style.height = `${Math.max(textareaRef.current.scrollHeight, 24)}px`;
     }
   }, [input]);
 
   const currentModeInfo = modes.find(m => m.id === selectedMode) || modes[0];
 
   return (
-    <div className="p-4 bg-background/95 backdrop-blur-3xl border-t border-primary/5 safe-bottom sticky bottom-0 z-30 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.08)]" dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className="p-3 bg-background/95 backdrop-blur-3xl border-t border-primary/5 safe-bottom sticky bottom-0 z-30 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.08)]" dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-3xl mx-auto space-y-2">
         
         {attachedFile && (
-          <div className="flex items-center gap-2 bg-primary/5 p-2 pr-4 rounded-xl border border-primary/10 animate-fade-in w-fit">
+          <div className="flex items-center gap-2 bg-primary/5 p-2 pr-4 rounded-xl border border-primary/10 animate-fade-in w-fit mb-1">
             <ImageIcon className="h-4 w-4 text-primary" />
             <span className="text-xs font-bold text-foreground truncate max-w-[150px]">{attachedFile.name}</span>
             <Button 
@@ -100,35 +101,36 @@ export function ChatInput({ onSend, disabled, lang = 'ar' }: ChatInputProps) {
           </div>
         )}
 
-        <div className="bg-muted/30 dark:bg-muted/50 rounded-[24px] border border-primary/5 overflow-hidden transition-all duration-300 focus-within:ring-4 focus-within:ring-primary/5 focus-within:bg-background focus-within:border-primary/20">
-          <div className="px-4 py-1">
+        <div className="bg-muted/30 dark:bg-muted/50 rounded-[20px] border border-primary/5 overflow-hidden transition-all duration-300 focus-within:ring-4 focus-within:ring-primary/5 focus-within:bg-background focus-within:border-primary/20 p-0.5">
+          <div className="px-3 pt-1">
             <Textarea
               ref={textareaRef}
+              rows={1}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKeyDown}
               placeholder={isRtl ? "تحدث مع حساني..." : "Chat with Hassani..."}
-              className="min-h-[24px] max-h-[200px] border-0 focus-visible:ring-0 bg-transparent resize-none py-1.5 text-base font-medium placeholder:text-muted-foreground/30 no-scrollbar text-start"
+              className="min-h-[24px] max-h-[180px] border-0 focus-visible:ring-0 bg-transparent resize-none p-1 text-base font-medium placeholder:text-muted-foreground/30 no-scrollbar text-start leading-tight"
               disabled={disabled}
             />
           </div>
 
-          <div className="flex items-center justify-between pt-1 border-t border-primary/5 mx-2 mb-1.5 px-2">
-            <div className="flex items-center gap-1.5">
+          <div className="flex items-center justify-between border-t border-primary/5 mx-2 mt-0.5 mb-1 pt-1 px-1">
+            <div className="flex items-center gap-1">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-9 w-9 rounded-2xl bg-primary/5 text-primary hover:bg-primary/10 transition-all">
-                    <Plus className="h-5 w-5" />
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl bg-primary/5 text-primary hover:bg-primary/10 transition-all">
+                    <Plus className="h-4.5 w-4.5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-64 rounded-2xl p-2 border-primary/10 shadow-2xl backdrop-blur-xl bg-popover/90" dir={isRtl ? 'rtl' : 'ltr'}>
+                <DropdownMenuContent align="start" className="w-60 rounded-2xl p-1.5 border-primary/10 shadow-2xl backdrop-blur-xl bg-popover/90" dir={isRtl ? 'rtl' : 'ltr'}>
                   {modes.map((mode) => (
                     <DropdownMenuItem 
                       key={mode.id} 
-                      className="rounded-xl flex flex-row items-center gap-3 py-3 cursor-pointer focus:bg-primary/5"
+                      className="rounded-xl flex flex-row items-center gap-3 py-2.5 cursor-pointer focus:bg-primary/5"
                       onClick={() => setSelectedMode(mode.id)}
                     >
-                      <div className={cn("p-2 rounded-lg bg-current/10 shrink-0", mode.color)}>
+                      <div className={cn("p-1.5 rounded-lg bg-current/10 shrink-0", mode.color)}>
                         {mode.icon}
                       </div>
                       <span className="font-bold text-foreground text-sm flex-1 text-start">{mode.label}</span>
@@ -147,17 +149,17 @@ export function ChatInput({ onSend, disabled, lang = 'ar' }: ChatInputProps) {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-9 w-9 rounded-2xl text-muted-foreground hover:text-primary hover:bg-primary/5"
+                className="h-8 w-8 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/5"
                 onClick={() => fileInputRef.current?.click()}
                 title={isRtl ? "إرفاق صورة" : "Attach Image"}
               >
-                <Paperclip className="h-5 w-5" />
+                <Paperclip className="h-4.5 w-4.5" />
               </Button>
 
               {selectedMode !== 'text' && (
-                <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full animate-slide-in-right">
-                  <span className={cn("shrink-0", currentModeInfo.color)}>{currentModeInfo.icon}</span>
-                  <span className="text-[10px] font-black text-primary uppercase">{currentModeInfo.label}</span>
+                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-primary/10 rounded-full animate-slide-in-right">
+                  <span className={cn("shrink-0 scale-75", currentModeInfo.color)}>{currentModeInfo.icon}</span>
+                  <span className="text-[9px] font-black text-primary uppercase whitespace-nowrap">{currentModeInfo.label}</span>
                 </div>
               )}
             </div>
@@ -168,20 +170,20 @@ export function ChatInput({ onSend, disabled, lang = 'ar' }: ChatInputProps) {
                   onClick={handleSend}
                   disabled={disabled}
                   className={cn(
-                    "h-9 w-9 rounded-2xl luxury-gradient shadow-lg shadow-primary/20 shrink-0 transition-all active:scale-90",
+                    "h-8 w-8 rounded-xl luxury-gradient shadow-lg shadow-primary/20 shrink-0 transition-all active:scale-90",
                     isRtl && "rotate-180"
                   )}
                 >
-                  <Send className="h-4.5 w-4.5 fill-white" />
+                  <Send className="h-4 w-4 fill-white" />
                 </Button>
               ) : (
                 <Button 
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9 rounded-2xl bg-foreground/5 text-foreground hover:bg-foreground/10 shrink-0 transition-all active:scale-90"
+                  className="h-8 w-8 rounded-xl bg-foreground/5 text-foreground hover:bg-foreground/10 shrink-0 transition-all active:scale-90"
                   title={isRtl ? "تحدث بالصوت" : "Voice Chat"}
                 >
-                  <Mic className="h-5 w-5" />
+                  <Mic className="h-4.5 w-4.5" />
                 </Button>
               )}
             </div>
