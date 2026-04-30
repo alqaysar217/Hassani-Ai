@@ -13,7 +13,7 @@ import {
   SidebarInset, 
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { LogOut, Sparkles, Brain, Lightbulb, Code2, Rocket, MoreVertical } from 'lucide-react';
+import { LogOut, Sparkles, Brain, Lightbulb, Code2, Rocket, MoreVertical, Layout, Music } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
 import { Message, MessageType } from '@/lib/types';
@@ -140,20 +140,19 @@ export default function HassaniApp() {
       <div className="h-svh w-full flex flex-col items-center justify-center bg-background px-6">
         <div className="max-w-md w-full space-y-10 text-center">
           <div className="space-y-6 animate-fade-in flex flex-col items-center">
-            <div className="relative h-32 w-32 shadow-2xl rounded-3xl overflow-hidden mb-4">
+            <div className="relative h-32 w-32 shadow-2xl rounded-3xl overflow-hidden mb-4 border-2 border-primary/10">
                <Image 
                 src="/logo-hassani.png" 
                 alt="حساني" 
                 fill 
                 className="object-cover"
                 onError={(e) => {
-                  // Fallback if logo not found
                   e.currentTarget.src = "https://picsum.photos/seed/hassani/200/200";
                 }}
               />
             </div>
             <h1 className="text-7xl font-black text-secondary tracking-tighter">حساني</h1>
-            <p className="text-muted-foreground font-medium text-lg">رفيقك الذكي الذي يفهكم ويبتكر معكم</p>
+            <p className="text-muted-foreground font-medium text-lg leading-relaxed">رفيقك الذكي الذي يفهكم ويبتكر معكم في كل خطوة</p>
           </div>
           <Button 
             onClick={handleLogin}
@@ -201,24 +200,24 @@ export default function HassaniApp() {
                 variant="ghost" 
                 size="icon" 
                 onClick={handleLogout}
-                className="h-10 w-10 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-xl"
+                className="h-10 w-10 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-xl transition-colors"
                 title="تسجيل الخروج"
               >
                 <LogOut className="h-5 w-5" />
               </Button>
-              <SidebarTrigger className="h-10 w-10 hover:bg-primary/5 rounded-xl text-primary">
+              <SidebarTrigger className="h-10 w-10 hover:bg-primary/5 rounded-xl text-primary transition-colors">
                  <MoreVertical className="h-6 w-6" />
               </SidebarTrigger>
             </div>
           </header>
 
-          <div className="flex-1 flex flex-col relative overflow-hidden bg-[radial-gradient(circle_at_top_right,rgba(197,160,89,0.03),transparent)]">
+          <div className="flex-1 flex flex-col relative overflow-hidden bg-[radial-gradient(circle_at_top_right,rgba(197,160,89,0.04),transparent)]">
             <ScrollArea ref={scrollRef} className="flex-1">
               <div className="max-w-3xl mx-auto px-5 py-8 space-y-8">
                 {(!currentConversation || currentConversation.messages.length === 0) ? (
                   <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-10 animate-fade-in-up">
                     <div className="relative group">
-                      <div className="h-32 w-32 bg-white rounded-3xl flex items-center justify-center transform group-hover:rotate-6 transition-transform shadow-2xl overflow-hidden border border-primary/5">
+                      <div className="h-32 w-32 bg-white rounded-3xl flex items-center justify-center transform group-hover:rotate-6 transition-transform shadow-2xl overflow-hidden border border-primary/10">
                         <Image 
                           src="/logo-hassani.png" 
                           alt="حساني" 
@@ -241,23 +240,25 @@ export default function HassaniApp() {
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-xl px-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl px-2">
                       {[
-                        { text: "حل مشكلة برمجية معقدة", icon: <Code2 className="h-4 w-4" /> },
-                        { text: "توليد فكرة إبداعية لمشروع", icon: <Lightbulb className="h-4 w-4" /> },
-                        { text: "تخطيط رحلة استكشافية", icon: <Rocket className="h-4 w-4" /> },
-                        { text: "تحليل صورة أو بيانات", icon: <Brain className="h-4 w-4" /> }
+                        { text: "حل مشكلة برمجية معقدة", icon: <Code2 className="h-4 w-4" />, color: "text-emerald-500" },
+                        { text: "توليد فكرة إبداعية لمشروع", icon: <Lightbulb className="h-4 w-4" />, color: "text-amber-500" },
+                        { text: "إنشاء مخططات احترافية", icon: <Layout className="h-4 w-4" />, color: "text-indigo-500" },
+                        { text: "تخطيط قواعد البيانات", icon: <Rocket className="h-4 w-4" />, color: "text-rose-500" },
+                        { text: "ألحان وصوتيات ذكية", icon: <Music className="h-4 w-4" />, color: "text-purple-500" },
+                        { text: "تحليل صورة أو بيانات", icon: <Brain className="h-4 w-4" />, color: "text-blue-500" }
                       ].map((item) => (
                         <Button 
                           key={item.text} 
                           variant="outline" 
-                          className="h-16 rounded-2xl border-primary/10 hover:bg-primary/5 hover:border-primary/30 flex items-center justify-start gap-3 px-5 transition-all shadow-sm"
+                          className="h-16 rounded-2xl border-primary/10 hover:bg-primary/5 hover:border-primary/30 flex items-center justify-start gap-4 px-5 transition-all shadow-sm group"
                           onClick={() => handleSendMessage(item.text)}
                         >
-                          <div className="h-8 w-8 rounded-lg bg-primary/5 flex items-center justify-center text-primary shrink-0">
+                          <div className={`h-10 w-10 rounded-xl bg-current/10 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${item.color}`}>
                             {item.icon}
                           </div>
-                          <span className="font-bold text-secondary text-sm">{item.text}</span>
+                          <span className="font-bold text-secondary text-sm flex-1 text-right">{item.text}</span>
                         </Button>
                       ))}
                     </div>
