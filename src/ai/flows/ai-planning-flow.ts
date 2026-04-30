@@ -1,9 +1,8 @@
+
 'use server';
 /**
  * @fileOverview خبير استراتيجي يستخدم OpenRouter.
  */
-
-import { z } from 'genkit';
 
 const OPENROUTER_API_KEY = "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";
 const MODEL = "google/gemini-2.0-flash-001";
@@ -15,6 +14,8 @@ export async function aiPlanning(input: { request: string }) {
       headers: {
         'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://hassani-ai.web.app',
+        'X-Title': 'Hassani AI'
       },
       body: JSON.stringify({
         model: MODEL,
@@ -32,8 +33,11 @@ export async function aiPlanning(input: { request: string }) {
     });
 
     const data = await response.json();
-    return JSON.parse(data.choices[0].message.content);
-  } catch (error) {
-    throw new Error("فشل في توليد الخطة عبر OpenRouter");
+    if (data.choices && data.choices[0]) {
+      return JSON.parse(data.choices[0].message.content);
+    }
+    throw new Error(data.error?.message || "فشل في توليد الخطة");
+  } catch (error: any) {
+    throw new Error("خطأ OpenRouter: " + error.message);
   }
 }

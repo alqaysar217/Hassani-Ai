@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview يكتشف هذا التدفق نية المستخدم باستخدام OpenRouter.
@@ -24,6 +25,8 @@ export async function automaticIntentRouting(
       headers: {
         'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://hassani-ai.web.app',
+        'X-Title': 'Hassani AI'
       },
       body: JSON.stringify({
         model: MODEL,
@@ -37,7 +40,7 @@ export async function automaticIntentRouting(
             - 'image': طلبات توليد صور.
             - 'music': طلبات موسيقى.
             - 'programming': مساعدة برمجية.
-            - 'diagram': مخططات (ERD, DFD, Use Case).
+            - 'diagram': مخططات.
             - 'planning': تخطيط واستراتيجية.`
           },
           { role: 'user', content: input.query }
@@ -47,10 +50,11 @@ export async function automaticIntentRouting(
     });
 
     const data = await response.json();
-    const result = JSON.parse(data.choices[0].message.content);
-    return result;
+    if (data.choices && data.choices[0]) {
+      return JSON.parse(data.choices[0].message.content);
+    }
+    return { intent: 'question' };
   } catch (error) {
-    console.error("Intent Routing Error:", error);
     return { intent: 'question' };
   }
 }
