@@ -47,16 +47,34 @@ export default function HassaniApp() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [phraseIndex, setPhraseIndex] = useState(0);
+  const [displayText, setDisplayText] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  // تأثير تبديل العبارات التسويقية
+  // تأثير الكتابة الحية (Typewriter Effect)
   useEffect(() => {
-    const interval = setInterval(() => {
-      setPhraseIndex((prev) => (prev + 1) % MARKETING_PHRASES.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
+    let currentText = "";
+    let i = 0;
+    const fullText = MARKETING_PHRASES[phraseIndex];
+    
+    setDisplayText(""); // إعادة ضبط النص عند تبديل العبارة
+
+    const typingInterval = setInterval(() => {
+      if (i < fullText.length) {
+        currentText += fullText.charAt(i);
+        setDisplayText(currentText);
+        i++;
+      } else {
+        clearInterval(typingInterval);
+        // الانتظار قليلاً بعد انتهاء الكتابة قبل الانتقال للعبارة التالية
+        setTimeout(() => {
+          setPhraseIndex((prev) => (prev + 1) % MARKETING_PHRASES.length);
+        }, 3000);
+      }
+    }, 60); // سرعة الكتابة
+
+    return () => clearInterval(typingInterval);
+  }, [phraseIndex]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -245,9 +263,10 @@ export default function HassaniApp() {
                         <span>أهلاً</span>
                         <span className="text-primary">{user.displayName?.split(' ')[0]}</span>
                       </h2>
-                      <div className="h-8 overflow-hidden">
-                        <p className="text-muted-foreground font-bold text-xl transition-all duration-500 animate-fade-in" key={phraseIndex}>
-                          {MARKETING_PHRASES[phraseIndex]}
+                      <div className="h-8 flex items-center justify-center">
+                        <p className="text-muted-foreground font-bold text-xl min-h-[1.5em] flex items-center">
+                          {displayText}
+                          <span className="w-1 h-6 bg-primary ml-1 animate-pulse shrink-0"></span>
                         </p>
                       </div>
                     </div>
