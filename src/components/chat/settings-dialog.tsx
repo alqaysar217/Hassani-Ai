@@ -38,17 +38,22 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (user && open) {
-        // نحاول أولاً القراءة من Firestore
+      if (!user || !open) return;
+      
+      // نبدأ بالقيم الافتراضية من Auth لضمان عدم بقاء الحقول فارغة
+      setName(user.displayName || '');
+      setPhotoUrl(user.photoURL || '');
+
+      try {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists()) {
           const data = userDoc.data();
-          setName(data.displayName || user.displayName || '');
-          setPhotoUrl(data.photoURL || user.photoURL || '');
-        } else {
-          setName(user.displayName || '');
-          setPhotoUrl(user.photoURL || '');
+          if (data.displayName) setName(data.displayName);
+          if (data.photoURL) setPhotoUrl(data.photoURL);
         }
+      } catch (error: any) {
+        // في حالة وجود خطأ "Offline"، نكتفي بالبيانات المحملة من Auth ولا نعرض خطأ مزعجاً للمستخدم
+        console.warn("Firestore fetch failed, using local profile:", error.message);
       }
     };
     fetchProfile();
@@ -57,7 +62,6 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // نرفع الحد لـ 1 ميجابايت لأن Firestore يسمح بذلك
       if (file.size > 1024 * 1024) { 
         toast({
           variant: "destructive",
@@ -81,7 +85,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     
     setIsUpdating(true);
     try {
-      // 1. تحديث Firestore (هو المرجع الأساسي الآن لتجاوز حد الطول)
+      // تحديث Firestore
       const userRef = doc(db, 'users', user.uid);
       await setDoc(userRef, {
         displayName: name,
@@ -89,18 +93,17 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
         updatedAt: Date.now()
       }, { merge: true });
 
-      // 2. تحديث الاسم في Auth (لأنه قصير ولا يسبب مشاكل)
+      // تحديث الاسم في Auth
       await updateProfile(auth.currentUser, {
         displayName: name
       });
 
       toast({
         title: "تم تحديث البيانات",
-        description: "تم حفظ التغييرات بنجاح في قاعدة البيانات.",
+        description: "تم حفظ التغييرات بنجاح.",
       });
       onOpenChange(false);
-      // نقوم بعمل تحديث للصفحة لضمان ظهور البيانات الجديدة
-      window.location.reload();
+      // لا نحتاج لعمل reload للصفحة لأننا نستخدم Snapshots في المكونات الأخرى
     } catch (error: any) {
       toast({
         variant: "destructive",
