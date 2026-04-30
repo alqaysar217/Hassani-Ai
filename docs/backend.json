@@ -1,6 +1,16 @@
 
 {
   "entities": {
+    "UserProfile": {
+      "title": "ملف المستخدم",
+      "description": "بيانات المستخدم الشخصية المخزنة في قاعدة البيانات",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string", "description": "رابط الصورة أو كود Base64" },
+        "updatedAt": { "type": "number" }
+      }
+    },
     "Conversation": {
       "title": "محادثة",
       "description": "تمثل جلسة محادثة بين المستخدم وحساني",
@@ -8,7 +18,7 @@
       "properties": {
         "title": { "type": "string", "description": "عنوان المحادثة" },
         "userId": { "type": "string", "description": "معرف المستخدم صاحب المحادثة" },
-        "updatedAt": { "type": "number", "description": "طابع زمني لآخر تحديث" }
+        "updatedAt": { "type": "number" }
       },
       "required": ["title", "userId", "updatedAt"]
     },
@@ -39,6 +49,10 @@
     "providers": ["google.com"]
   },
   "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "ملفات تعريف المستخدمين"
+    },
     "/conversations/{conversationId}": {
       "schema": "Conversation",
       "description": "مجموعة المحادثات الرئيسية"

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -17,8 +18,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
 import { Message, MessageType } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { useUser, useAuth } from '@/firebase';
+import { useUser, useAuth, useFirestore } from '@/firebase';
 import { signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { doc, onSnapshot } from 'firebase/firestore';
 import Image from 'next/image';
 
 const MARKETING_PHRASES = [
@@ -31,6 +33,7 @@ const MARKETING_PHRASES = [
 
 export default function HassaniApp() {
   const { user, loading: userLoading } = useUser();
+  const db = useFirestore();
   const auth = useAuth();
   const { 
     conversations, 
@@ -47,8 +50,20 @@ export default function HassaniApp() {
   const [isLoading, setIsLoading] = useState(false);
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [displayText, setDisplayText] = useState("");
+  const [profile, setProfile] = useState<{ displayName?: string } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (user) {
+      const unsubscribe = onSnapshot(doc(db, 'users', user.uid), (doc) => {
+        if (doc.exists()) {
+          setProfile(doc.data());
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, [user, db]);
 
   useEffect(() => {
     let currentText = "";
@@ -197,6 +212,8 @@ export default function HassaniApp() {
     );
   }
 
+  const userName = profile?.displayName || user.displayName?.split(' ')[0] || "مستخدم";
+
   return (
     <SidebarProvider defaultOpen={false}>
       <div className="flex w-full h-svh bg-background overflow-hidden relative" dir="rtl">
@@ -258,7 +275,7 @@ export default function HassaniApp() {
                     <div className="space-y-4">
                       <h2 className="text-5xl font-black text-secondary flex items-center justify-center gap-2 flex-wrap">
                         <span>أهلاً</span>
-                        <span className="text-primary">{user.displayName?.split(' ')[0]}</span>
+                        <span className="text-primary">{userName}</span>
                       </h2>
                       <div className="h-8 flex items-center justify-center">
                         <p className="text-muted-foreground font-bold text-xl min-h-[1.5em] flex items-center">

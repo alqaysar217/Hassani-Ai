@@ -1,7 +1,7 @@
 
 "use client"
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Conversation } from '@/lib/types';
 import { 
   Plus, 
@@ -32,6 +32,8 @@ import {
 import { User } from 'firebase/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { useFirestore } from '@/firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
 
 interface ChatSidebarProps {
   conversations: Conversation[];
@@ -57,6 +59,20 @@ export function ChatSidebar({
   onLogout
 }: ChatSidebarProps) {
   const { setOpenMobile } = useSidebar();
+  const db = useFirestore();
+  const [profile, setProfile] = useState<{ displayName?: string, photoURL?: string } | null>(null);
+
+  // مراقبة بيانات المستخدم في Firestore
+  useEffect(() => {
+    if (user) {
+      const unsubscribe = onSnapshot(doc(db, 'users', user.uid), (doc) => {
+        if (doc.exists()) {
+          setProfile(doc.data());
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, [user, db]);
 
   const handleSelect = (id: string) => {
     onSelect(id);
@@ -67,6 +83,9 @@ export function ChatSidebar({
     onNew();
     setOpenMobile(false);
   };
+
+  const displayName = profile?.displayName || user.displayName || "مستخدم حساني";
+  const photoURL = profile?.photoURL || user.photoURL || undefined;
 
   return (
     <Sidebar side="right" className="border-l border-primary/5">
@@ -162,14 +181,14 @@ export function ChatSidebar({
 
         <div className="flex items-center gap-3 p-2 bg-white/40 rounded-2xl border border-primary/5">
           <Avatar className="h-10 w-10 border border-primary/10">
-            <AvatarImage src={user.photoURL || undefined} />
+            <AvatarImage src={photoURL} />
             <AvatarFallback className="bg-primary/10 text-primary font-bold">
-              {user.displayName?.charAt(0) || <UserIcon className="h-4 w-4" />}
+              {displayName.charAt(0) || <UserIcon className="h-4 w-4" />}
             </AvatarFallback>
           </Avatar>
           
           <div className="flex-1 min-w-0 overflow-hidden text-right">
-            <p className="text-sm font-bold text-secondary truncate">{user.displayName || "مستخدم حساني"}</p>
+            <p className="text-sm font-bold text-secondary truncate">{displayName}</p>
             <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
           </div>
 

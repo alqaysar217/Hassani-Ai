@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -13,8 +14,9 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { User, Image as ImageIcon, CheckCircle2, Upload, X } from 'lucide-react';
-import { useAuth, useUser } from '@/firebase';
+import { useAuth, useUser, useFirestore } from '@/firebase';
 import { updateProfile } from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
@@ -25,6 +27,7 @@ interface SettingsDialogProps {
 
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const { user } = useUser();
+  const db = useFirestore();
   const auth = useAuth();
   const { toast } = useToast();
   
@@ -34,16 +37,28 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (user) {
-      setName(user.displayName || '');
-      setPhotoUrl(user.photoURL || '');
-    }
-  }, [user, open]);
+    const fetchProfile = async () => {
+      if (user && open) {
+        // نحاول أولاً القراءة من Firestore
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          setName(data.displayName || user.displayName || '');
+          setPhotoUrl(data.photoURL || user.photoURL || '');
+        } else {
+          setName(user.displayName || '');
+          setPhotoUrl(user.photoURL || '');
+        }
+      }
+    };
+    fetchProfile();
+  }, [user, open, db]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 1024 * 1024) { // تحدد الحجم بـ 1 ميجا لضمان سرعة التخزين كنص
+      // نرفع الحد لـ 1 ميجابايت لأن Firestore يسمح بذلك
+      if (file.size > 1024 * 1024) { 
         toast({
           variant: "destructive",
           title: "الصورة كبيرة جداً",
@@ -62,19 +77,30 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   };
 
   const handleUpdateProfile = async () => {
-    if (!auth.currentUser) return;
+    if (!auth.currentUser || !user) return;
     
     setIsUpdating(true);
     try {
-      await updateProfile(auth.currentUser, {
+      // 1. تحديث Firestore (هو المرجع الأساسي الآن لتجاوز حد الطول)
+      const userRef = doc(db, 'users', user.uid);
+      await setDoc(userRef, {
         displayName: name,
-        photoURL: photoUrl
+        photoURL: photoUrl,
+        updatedAt: Date.now()
+      }, { merge: true });
+
+      // 2. تحديث الاسم في Auth (لأنه قصير ولا يسبب مشاكل)
+      await updateProfile(auth.currentUser, {
+        displayName: name
       });
+
       toast({
         title: "تم تحديث البيانات",
-        description: "تم حفظ التغييرات على ملفك الشخصي بنجاح.",
+        description: "تم حفظ التغييرات بنجاح في قاعدة البيانات.",
       });
       onOpenChange(false);
+      // نقوم بعمل تحديث للصفحة لضمان ظهور البيانات الجديدة
+      window.location.reload();
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -151,22 +177,6 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
-            </div>
-
-            <div className="space-y-3">
-              <Label className="font-black text-secondary text-sm flex items-center gap-2">
-                <ImageIcon className="h-4 w-4 text-primary" />
-                رابط الصورة (اختياري)
-              </Label>
-              <Input 
-                placeholder="أو ضع رابط صورة هنا..."
-                className="rounded-2xl h-12 px-6 border-primary/10 bg-muted/20 focus:bg-white transition-all text-sm font-medium"
-                value={photoUrl.startsWith('data:') ? '' : photoUrl}
-                onChange={(e) => setPhotoUrl(e.target.value)}
-              />
-              <p className="text-[10px] text-muted-foreground font-bold leading-relaxed px-2">
-                يمكنك رفع صورة مباشرة أو وضع رابط صورة من الإنترنت.
-              </p>
             </div>
           </div>
         </div>
