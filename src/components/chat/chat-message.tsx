@@ -18,6 +18,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const [copied, setCopied] = React.useState(false);
 
   const copyToClipboard = (text: string) => {
+    if (!text) return;
     navigator.clipboard.writeText(text);
     setCopied(true);
     toast({ title: "تم النسخ" });
@@ -47,7 +48,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
         )}>
           {message.type === 'text' && (
             <p className="whitespace-pre-wrap leading-relaxed text-[16px]">
-              {message.content}
+              {message.content || ""}
             </p>
           )}
 
@@ -71,7 +72,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
                   </Button>
                 </div>
                 <pre className="p-5 font-code text-xs md:text-sm overflow-x-auto text-amber-100 no-scrollbar dir-ltr" dir="ltr">
-                  <code>{message.metadata?.code || message.content}</code>
+                  <code>{message.metadata?.code || message.content || ""}</code>
                 </pre>
               </div>
             </div>
@@ -80,13 +81,15 @@ export function ChatMessage({ message }: ChatMessageProps) {
           {message.type === 'image' && (
             <div className="space-y-4">
                <div className="relative aspect-square w-full min-w-[280px] rounded-[10px] overflow-hidden border border-primary/10 shadow-2xl">
-                  <Image 
-                    src={message.metadata?.mediaUrl || message.content} 
-                    alt="AI Generated" 
-                    fill 
-                    className="object-cover"
-                    unoptimized
-                  />
+                  {message.metadata?.mediaUrl && (
+                    <Image 
+                      src={message.metadata.mediaUrl} 
+                      alt="AI Generated" 
+                      fill 
+                      className="object-cover"
+                      unoptimized
+                    />
+                  )}
                </div>
             </div>
           )}
@@ -98,7 +101,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
                </div>
                <div className="rounded-[10px] overflow-hidden bg-muted/50 border border-primary/10 p-5">
                  <pre className="font-code text-xs overflow-x-auto no-scrollbar dir-ltr text-secondary" dir="ltr">
-                   <code>{message.metadata?.diagramSyntax}</code>
+                   <code>{message.metadata?.diagramSyntax || ""}</code>
                  </pre>
                </div>
             </div>
@@ -106,7 +109,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
         </div>
 
         <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2 mt-2">
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/5 text-muted-foreground" onClick={() => copyToClipboard(message.content)}>
+          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/5 text-muted-foreground" onClick={() => copyToClipboard(message.content || "")}>
             <Copy className="h-4 w-4" />
           </Button>
           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/5 text-muted-foreground">

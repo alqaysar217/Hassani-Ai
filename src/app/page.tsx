@@ -13,7 +13,7 @@ import {
   SidebarInset, 
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Menu, LogIn } from 'lucide-react';
+import { Menu, LogIn, AlertCircle } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { automaticIntentRouting } from '@/ai/flows/automatic-intent-routing';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
@@ -24,6 +24,7 @@ import { Message, MessageType } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useAuth } from '@/firebase';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { isFirebaseConfigured } from '@/firebase/config';
 import Image from 'next/image';
 
 export default function HassaniApp() {
@@ -58,19 +59,25 @@ export default function HassaniApp() {
   }, [currentConversation?.messages, isLoading]);
 
   const handleLogin = async () => {
+    if (!isFirebaseConfigured) {
+      toast({
+        variant: 'destructive',
+        title: "إعدادات ناقصة",
+        description: "يرجى إضافة مفاتيح Firebase في ملف .env أولاً."
+      });
+      return;
+    }
+
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
     } catch (error: any) {
-      // تجاهل الأخطاء الناتجة عن إلغاء المستخدم للنافذة المنبثقة
-      if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user') {
-        return;
-      }
+      if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user') return;
       
       toast({
         variant: 'destructive',
         title: "خطأ في تسجيل الدخول",
-        description: "تعذر الاتصال بخدمات Google. يرجى المحاولة مرة أخرى."
+        description: error.message || "تعذر الاتصال بخدمات Google."
       });
     }
   };
@@ -100,7 +107,7 @@ export default function HassaniApp() {
       let intent: string = selectedMode || 'text';
       if (!selectedMode || selectedMode === 'text') {
         const res = await automaticIntentRouting({ query: text });
-        intent = res.intent;
+        intent = res.intent || 'text';
       }
       
       let aiResponse = "";
@@ -116,7 +123,7 @@ export default function HassaniApp() {
           break;
         case 'programming':
           const codeRes = await aiCodeAssistance({ codeRequest: text });
-          aiResponse = codeRes.explanation;
+          aiResponse = codeRes.explanation || "إليك الكود المطلوب:";
           msgType = 'code';
           metadata = { code: codeRes.code, explanation: codeRes.explanation };
           break;
@@ -131,7 +138,7 @@ export default function HassaniApp() {
           break;
         default:
           const chatRes = await intelligentConversationalAi({ query: text });
-          aiResponse = chatRes.response;
+          aiResponse = chatRes.response || "عذراً، لم أستطع فهم الطلب.";
           msgType = 'text';
           break;
       }
@@ -150,12 +157,25 @@ export default function HassaniApp() {
       toast({
         variant: 'destructive',
         title: "خطأ في المساعد",
-        description: error.message || "يرجى التحقق من الاتصال والمحاولة مرة أخرى."
+        description: "تأكد من إعداد مفتاح GEMINI_API_KEY في ملف .env"
       });
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (!isFirebaseConfigured) {
+    return (
+      <div className="h-svh w-full flex flex-col items-center justify-center bg-background px-6 text-center">
+        <AlertCircle className="h-16 w-16 text-destructive mb-6" />
+        <h1 className="text-2xl font-bold mb-2">إعدادات Firebase غير مكتملة</h1>
+        <p className="text-muted-foreground max-w-md mb-8">
+          يجب عليك إضافة مفاتيح مشروعك في ملف <code className="bg-muted p-1 rounded">.env</code> لكي يعمل التطبيق.
+        </p>
+        <Button onClick={() => window.location.reload()} className="luxury-gradient text-white font-bold">تحديث الصفحة</Button>
+      </div>
+    );
+  }
 
   if (userLoading) {
     return (
@@ -196,7 +216,7 @@ export default function HassaniApp() {
           </Button>
           
           <p className="text-xs text-muted-foreground opacity-60">
-            بتسجيل دخولك، أنت توافق على شروط الاستخدام وسياسة الخصوصية
+            يرجى التأكد من تفعيل Google Auth في لوحة تحكم Firebase
           </p>
         </div>
       </div>
