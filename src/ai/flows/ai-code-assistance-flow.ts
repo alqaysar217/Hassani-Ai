@@ -1,33 +1,38 @@
 'use server';
 /**
- * @fileOverview An AI assistant for programming help.
+ * @fileOverview مساعد برمج مخصص يستخدم OpenRouter.
  */
 
-import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-const AICodeAssistanceInputSchema = z.object({
-  codeRequest: z.string().describe('The programming question or request.'),
-});
-export type AICodeAssistanceInput = z.infer<typeof AICodeAssistanceInputSchema>;
+const OPENROUTER_API_KEY = "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";
+const MODEL = "google/gemini-2.0-flash-001";
 
-const AICodeAssistanceOutputSchema = z.object({
-  code: z.string().describe('The generated code in a markdown block.'),
-  explanation: z.string().describe('Explanation of the code.'),
-});
-export type AICodeAssistanceOutput = z.infer<typeof AICodeAssistanceOutputSchema>;
+export async function aiCodeAssistance(input: { codeRequest: string }) {
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [
+          {
+            role: 'system',
+            content: `أنت حساني، خبير برمجيات. قدم الكود والشرح بصيغة JSON:
+            { "code": "markdown_code", "explanation": "شرح باللغة العربية" }`
+          },
+          { role: 'user', content: input.codeRequest }
+        ],
+        response_format: { type: 'json_object' }
+      })
+    });
 
-const aiCodeAssistancePrompt = ai.definePrompt({
-  name: 'aiCodeAssistancePrompt',
-  input: { schema: AICodeAssistanceInputSchema },
-  output: { schema: AICodeAssistanceOutputSchema },
-  prompt: `You are an expert programming assistant named Hassani. Provide code and a clear explanation.
-
-User's request: {{{codeRequest}}}`,
-});
-
-export async function aiCodeAssistance(input: AICodeAssistanceInput): Promise<AICodeAssistanceOutput> {
-  const { output } = await aiCodeAssistancePrompt(input);
-  if (!output) throw new Error('Failed to generate code assistance');
-  return output;
+    const data = await response.json();
+    return JSON.parse(data.choices[0].message.content);
+  } catch (error) {
+    throw new Error("فشل في توليد المساعدة البرمجية عبر OpenRouter");
+  }
 }

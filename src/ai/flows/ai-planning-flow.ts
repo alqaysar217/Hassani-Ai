@@ -1,35 +1,39 @@
 'use server';
 /**
- * @fileOverview تدفق الذكاء الاصطناعي للمساعدة في التخطيط والاستراتيجيات.
+ * @fileOverview خبير استراتيجي يستخدم OpenRouter.
  */
 
-import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-const AIPlanningInputSchema = z.object({
-  request: z.string().describe('الطلب أو المشروع المراد التخطيط له.'),
-});
-export type AIPlanningInput = z.infer<typeof AIPlanningInputSchema>;
+const OPENROUTER_API_KEY = "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";
+const MODEL = "google/gemini-2.0-flash-001";
 
-const AIPlanningOutputSchema = z.object({
-  plan: z.string().describe('الخطة المقترحة بتنسيق markdown.'),
-  steps: z.array(z.string()).optional().describe('الخطوات الرئيسية.'),
-});
-export type AIPlanningOutput = z.infer<typeof AIPlanningOutputSchema>;
+export async function aiPlanning(input: { request: string }) {
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [
+          {
+            role: 'system',
+            content: `أنت حساني، خبير استراتيجي. أنشئ خطة مفصلة للطلب التالي.
+            أرجع النتيجة بصيغة JSON:
+            { "plan": "النص الكامل للخطة بصيغة markdown", "steps": ["خطوة 1", "خطوة 2"] }`
+          },
+          { role: 'user', content: input.request }
+        ],
+        response_format: { type: 'json_object' }
+      })
+    });
 
-const aiPlanningPrompt = ai.definePrompt({
-  name: 'aiPlanningPrompt',
-  input: { schema: AIPlanningInputSchema },
-  output: { schema: AIPlanningOutputSchema },
-  prompt: `أنت خبير استراتيجي ومخطط مشاريع محترف اسمك حساني.
-قم بإنشاء خطة عمل مفصلة ومنظمة للطلب التالي:
-{{{request}}}
-
-يجب أن تكون الخطة عملية، واضحة، وباللغة العربية.`,
-});
-
-export async function aiPlanning(input: AIPlanningInput): Promise<AIPlanningOutput> {
-  const { output } = await aiPlanningPrompt(input);
-  if (!output) throw new Error('فشل في توليد الخطة');
-  return output;
+    const data = await response.json();
+    return JSON.parse(data.choices[0].message.content);
+  } catch (error) {
+    throw new Error("فشل في توليد الخطة عبر OpenRouter");
+  }
 }

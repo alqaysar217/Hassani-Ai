@@ -1,42 +1,56 @@
 'use server';
 /**
- * @fileOverview This flow automatically detects the user's intent based on their query.
+ * @fileOverview يكتشف هذا التدفق نية المستخدم باستخدام OpenRouter.
  */
 
-import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-const AutomaticIntentRoutingInputSchema = z.object({
-  query: z.string().describe('The user\'s query.'),
-});
-export type AutomaticIntentRoutingInput = z.infer<typeof AutomaticIntentRoutingInputSchema>;
+const OPENROUTER_API_KEY = "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";
+const MODEL = "google/gemini-2.0-flash-001";
 
 const AutomaticIntentRoutingOutputSchema = z.object({
   intent: z
     .enum(['question', 'image', 'music', 'programming', 'diagram', 'planning'])
-    .describe('The detected intent of the user\'s query.'),
+    .describe('النية المكتشفة من طلب المستخدم.'),
 });
 export type AutomaticIntentRoutingOutput = z.infer<typeof AutomaticIntentRoutingOutputSchema>;
 
-const automaticIntentRoutingPrompt = ai.definePrompt({
-  name: 'automaticIntentRoutingPrompt',
-  input: { schema: AutomaticIntentRoutingInputSchema },
-  output: { schema: AutomaticIntentRoutingOutputSchema },
-  prompt: `You are an AI intent detection system. Classify the user's query into one of these categories:
-- 'question': General questions or seeking information.
-- 'image': Requests to generate or visualize images.
-- 'music': Requests to create or generate music or melodies.
-- 'programming': Help with code, debugging, or programming concepts.
-- 'diagram': Requests for structured diagrams (ERD, DFD, Use Case).
-- 'planning': Assistance with planning, strategy, or decision-making.
-
-User Query: {{{query}}}`,
-});
-
 export async function automaticIntentRouting(
-  input: AutomaticIntentRoutingInput,
+  input: { query: string },
 ): Promise<AutomaticIntentRoutingOutput> {
-  const { output } = await automaticIntentRoutingPrompt(input);
-  if (!output) throw new Error('Failed to detect intent');
-  return output;
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [
+          {
+            role: 'system',
+            content: `صنف طلب المستخدم إلى واحد من هذه التصنيفات حصراً وارجع النتيجة بصيغة JSON:
+            { "intent": "التصنيف" }
+            التصنيفات:
+            - 'question': أسئلة عامة.
+            - 'image': طلبات توليد صور.
+            - 'music': طلبات موسيقى.
+            - 'programming': مساعدة برمجية.
+            - 'diagram': مخططات (ERD, DFD, Use Case).
+            - 'planning': تخطيط واستراتيجية.`
+          },
+          { role: 'user', content: input.query }
+        ],
+        response_format: { type: 'json_object' }
+      })
+    });
+
+    const data = await response.json();
+    const result = JSON.parse(data.choices[0].message.content);
+    return result;
+  } catch (error) {
+    console.error("Intent Routing Error:", error);
+    return { intent: 'question' };
+  }
 }
