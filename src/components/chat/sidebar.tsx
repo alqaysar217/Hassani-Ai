@@ -6,7 +6,6 @@ import {
   Plus, 
   MessageSquare, 
   Settings,
-  Brain,
   LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -23,6 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { useFirestore } from '@/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
+import Image from 'next/image';
 
 interface ChatSidebarProps {
   conversations: Conversation[];
@@ -72,8 +72,14 @@ export function ChatSidebar({
     <Sidebar side={lang === 'ar' ? 'right' : 'left'} className="border-primary/5">
       <SidebarHeader className="p-6">
         <div className="flex items-center gap-4 mb-8">
-          <div className="h-10 w-10 bg-primary rounded-2xl flex items-center justify-center text-white shadow-lg">
-            <Brain className="h-6 w-6" />
+          <div className="relative h-10 w-10 overflow-hidden rounded-2xl shadow-lg border border-primary/10">
+            <Image 
+              src="/logo-hassani.png" 
+              alt="Hassani" 
+              fill 
+              className="object-cover" 
+              onError={(e) => { e.currentTarget.src = "https://picsum.photos/seed/hassani/40/40"; }} 
+            />
           </div>
           <span className="text-2xl font-black text-foreground tracking-tighter">{lang === 'ar' ? 'حساني' : 'Hassani'}</span>
         </div>
