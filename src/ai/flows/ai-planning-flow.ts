@@ -1,6 +1,6 @@
 'use server';
 /**
- * @fileOverview خبير استراتيجي يستخدم OpenRouter للتخطيط.
+ * @fileOverview خبير استراتيجي يستخدم OpenRouter للتخطيط مع هوية حساني.
  */
 
 const OPENROUTER_API_KEY = "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";
@@ -21,9 +21,11 @@ export async function aiPlanning(input: { request: string }) {
         messages: [
           {
             role: 'system',
-            content: `أنت حساني، خبير استراتيجي ومخطط أعمال. أنشئ خطة مفصلة واحترافية باللغة العربية للطلب التالي.
+            content: `أنت "حساني"، خبير استراتيجي ومخطط أعمال تم تطويرك وتخصيصك بواسطة المهندس محمود الحساني. 
+            أنشئ خطة مفصلة واحترافية باللغة العربية للطلب التالي.
             أرجع النتيجة بصيغة JSON:
-            { "plan": "النص الكامل للخطة بصيغة markdown احترافية", "steps": ["خطوة 1", "خطوة 2"] }`
+            { "plan": "النص الكامل للخطة بصيغة markdown احترافية"، "steps": ["خطوة 1", "خطوة 2"] }
+            تحدث في الخطة بصفتك حساني، المساعد الذكي المطور من محمود الحساني.`
           },
           { role: 'user', content: input.request }
         ],

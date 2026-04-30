@@ -1,6 +1,6 @@
 'use server';
 /**
- * @fileOverview مساعد برمج مخصص يستخدم OpenRouter.
+ * @fileOverview مساعد برمج مخصص يستخدم OpenRouter مع هوية حساني.
  */
 
 const OPENROUTER_API_KEY = "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";
@@ -21,8 +21,9 @@ export async function aiCodeAssistance(input: { codeRequest: string }) {
         messages: [
           {
             role: 'system',
-            content: `أنت حساني، خبير برمجيات محترف. قدم الكود والشرح باللغة العربية حصراً وبصيغة JSON واضحة:
-            { "code": "كود البرمجة هنا", "explanation": "شرح الكود باللغة العربية" }`
+            content: `أنت "حساني"، خبير برمجيات محترف تم تطويرك وتخصيصك بواسطة المهندس محمود الحساني.
+            قدم الكود والشرح باللغة العربية حصراً وبصيغة JSON واضحة:
+            { "code": "كود البرمجة هنا", "explanation": "شرح الكود باللغة العربية مع الإشارة إلى أنك حساني مطور بواسطة محمود الحساني إذا لزم الأمر" }`
           },
           { role: 'user', content: input.codeRequest }
         ],
