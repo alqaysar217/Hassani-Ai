@@ -71,6 +71,8 @@ export default function HassaniApp() {
   };
 
   const handleSendMessage = async (text: string, selectedMode?: MessageType) => {
+    if (!text.trim()) return;
+
     let activeId = currentId;
     if (!activeId) {
       activeId = createNewConversation();
@@ -90,13 +92,13 @@ export default function HassaniApp() {
     setIsLoading(true);
 
     try {
-      let intent: any = selectedMode;
+      let intent: string = selectedMode || 'text';
       if (!selectedMode || selectedMode === 'text') {
         const res = await automaticIntentRouting({ query: text });
         intent = res.intent;
       }
       
-      let aiResponse;
+      let aiResponse = "";
       let msgType: MessageType = 'text';
       let metadata = {};
 
@@ -139,12 +141,12 @@ export default function HassaniApp() {
       };
 
       addMessage(activeId, aiMsg);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       toast({
         variant: 'destructive',
         title: "خطأ في المساعد",
-        description: "يرجى التحقق من الاتصال والمحاولة مرة أخرى."
+        description: error.message || "يرجى التحقق من الاتصال والمحاولة مرة أخرى."
       });
     } finally {
       setIsLoading(false);
@@ -153,7 +155,7 @@ export default function HassaniApp() {
 
   if (userLoading) {
     return (
-      <div className="h-svh w-full flex flex-col items-center justify-center bg-background space-y-6 animate-fade-in">
+      <div className="h-svh w-full flex flex-col items-center justify-center bg-background space-y-6">
         <div className="relative h-24 w-24 rounded-[10px] overflow-hidden">
           <Image src="/logo-hassani.png" alt="Logo" fill className="object-contain animate-pulse" />
         </div>
@@ -170,7 +172,7 @@ export default function HassaniApp() {
   if (!user) {
     return (
       <div className="h-svh w-full flex flex-col items-center justify-center bg-background px-6">
-        <div className="max-w-md w-full space-y-12 text-center animate-fade-in-up">
+        <div className="max-w-md w-full space-y-12 text-center">
           <div className="space-y-6">
             <div className="relative h-32 w-32 mx-auto rounded-[10px] overflow-hidden">
               <Image src="/logo-hassani.png" alt="Logo" fill className="object-contain" />
@@ -234,7 +236,7 @@ export default function HassaniApp() {
             <ScrollArea ref={scrollRef} className="flex-1">
               <div className="max-w-3xl mx-auto px-5 py-8 space-y-8">
                 {(!currentConversation || currentConversation.messages.length === 0) ? (
-                  <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6 space-y-8 animate-fade-in-up">
+                  <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6 space-y-8">
                     <div className="relative">
                       <div className="relative h-32 w-32 mx-auto drop-shadow-2xl rounded-[10px] overflow-hidden">
                         <Image src="/logo-hassani.png" alt="Hassani AI" fill className="object-contain" />
@@ -257,7 +259,7 @@ export default function HassaniApp() {
                 )}
                 
                 {isLoading && (
-                  <div className="flex justify-start items-center gap-3 animate-fade-in">
+                  <div className="flex justify-start items-center gap-3">
                     <div className="h-9 w-9 relative flex items-center justify-center rounded-[10px] overflow-hidden">
                       <Image src="/logo-hassani.png" alt="Thinking" fill className="object-contain opacity-50 animate-pulse" />
                     </div>
