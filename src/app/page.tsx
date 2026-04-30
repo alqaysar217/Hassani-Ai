@@ -226,7 +226,7 @@ export default function HassaniApp() {
           lang={lang}
         />
         
-        <SidebarInset className="flex flex-col h-full w-full relative overflow-hidden">
+        <SidebarInset className="flex flex-col h-full w-full relative overflow-hidden" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
           <header className="h-16 flex items-center justify-between px-5 glass-morphism sticky top-0 z-30 shrink-0">
             <div className="flex items-center gap-3">
               <div className="relative h-9 w-9 overflow-hidden rounded-xl shadow-lg border border-primary/10">
@@ -249,7 +249,7 @@ export default function HassaniApp() {
                     </div>
                     <div className="space-y-4">
                       <h2 className="text-5xl font-black text-center text-foreground">
-                        {lang === 'ar' ? 'أهلاً ' : 'Hello '}<span className="text-primary">{userName}</span>
+                        {lang === 'ar' ? `أهلاً ${userName}` : `Hello ${userName}`}
                       </h2>
                       <p className="text-muted-foreground font-bold text-xl min-h-[1.5em] flex items-center justify-center">
                         {displayText}<span className="w-1 h-6 bg-primary ml-1 animate-pulse shrink-0"></span>
@@ -263,8 +263,15 @@ export default function HassaniApp() {
                         { text: lang === 'ar' ? "إنشاء مخططات" : "Create Diagrams", icon: <Layout className="h-4 w-4" />, color: "text-indigo-500" },
                         { text: lang === 'ar' ? "تخطيط قواعد بيانات" : "DB Planning", icon: <Rocket className="h-4 w-4" />, color: "text-rose-500" },
                       ].map((item) => (
-                        <Button key={item.text} variant="outline" className="h-16 rounded-2xl border-primary/10 hover:bg-primary/5 flex flex-row items-center gap-4 px-5 shadow-sm group" onClick={() => handleSendMessage(item.text)}>
-                          <div className={`h-10 w-10 rounded-xl bg-current/10 flex items-center justify-center shrink-0 group-hover:scale-110 ${item.color}`}>{item.icon}</div>
+                        <Button 
+                          key={item.text} 
+                          variant="outline" 
+                          className="h-16 rounded-2xl border-primary/10 hover:bg-primary/5 flex flex-row items-center gap-4 px-5 shadow-sm group" 
+                          onClick={() => handleSendMessage(item.text)}
+                        >
+                          <div className={`h-10 w-10 rounded-xl bg-current/10 flex items-center justify-center shrink-0 group-hover:scale-110 ${item.color}`}>
+                            {item.icon}
+                          </div>
                           <span className="font-bold text-foreground text-sm">{item.text}</span>
                         </Button>
                       ))}
@@ -286,7 +293,7 @@ export default function HassaniApp() {
                 )}
               </div>
             </ScrollArea>
-            <ChatInput onSend={handleSendMessage} disabled={isLoading} />
+            <ChatInput onSend={handleSendMessage} disabled={isLoading} lang={lang} />
           </div>
         </SidebarInset>
         <SettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />

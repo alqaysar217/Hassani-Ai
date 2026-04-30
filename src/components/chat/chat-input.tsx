@@ -28,23 +28,26 @@ import {
 interface ChatInputProps {
   onSend: (message: string, mode?: MessageType, file?: File | null) => void;
   disabled?: boolean;
+  lang?: 'ar' | 'en';
 }
 
-const modes = [
-  { id: 'text' as MessageType, icon: <Zap className="h-4 w-4" />, label: "دردشة ذكية", color: "text-amber-500" },
-  { id: 'image' as MessageType, icon: <ImageIcon className="h-4 w-4" />, label: "توليد صور", color: "text-blue-500" },
-  { id: 'code' as MessageType, icon: <Code className="h-4 w-4" />, label: "مساعد برمجـي", color: "text-emerald-500" },
-  { id: 'diagram' as MessageType, icon: <Layout className="h-4 w-4" />, label: "إنشاء مخططات", color: "text-indigo-500" },
-  { id: 'planning' as MessageType, icon: <Rocket className="h-4 w-4" />, label: "تخطيط قواعد البيانات", color: "text-rose-500" },
-  { id: 'music' as MessageType, icon: <Music className="h-4 w-4" />, label: "ألحان وصوت", color: "text-purple-500" },
-];
-
-export function ChatInput({ onSend, disabled }: ChatInputProps) {
+export function ChatInput({ onSend, disabled, lang = 'ar' }: ChatInputProps) {
   const [input, setInput] = useState('');
   const [selectedMode, setSelectedMode] = useState<MessageType>('text');
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const isRtl = lang === 'ar';
+
+  const modes = [
+    { id: 'text' as MessageType, icon: <Zap className="h-4 w-4" />, label: isRtl ? "دردشة ذكية" : "Smart Chat", color: "text-amber-500" },
+    { id: 'image' as MessageType, icon: <ImageIcon className="h-4 w-4" />, label: isRtl ? "توليد صور" : "Image Generation", color: "text-blue-500" },
+    { id: 'code' as MessageType, icon: <Code className="h-4 w-4" />, label: isRtl ? "مساعد برمجـي" : "Coding Assistant", color: "text-emerald-500" },
+    { id: 'diagram' as MessageType, icon: <Layout className="h-4 w-4" />, label: isRtl ? "إنشاء مخططات" : "Create Diagrams", color: "text-indigo-500" },
+    { id: 'planning' as MessageType, icon: <Rocket className="h-4 w-4" />, label: isRtl ? "تخطيط قواعد البيانات" : "DB Planning", color: "text-rose-500" },
+    { id: 'music' as MessageType, icon: <Music className="h-4 w-4" />, label: isRtl ? "ألحان وصوت" : "Music & Audio", color: "text-purple-500" },
+  ];
 
   const handleSend = () => {
     if ((input.trim() || attachedFile) && !disabled) {
@@ -79,7 +82,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const currentModeInfo = modes.find(m => m.id === selectedMode) || modes[0];
 
   return (
-    <div className="p-4 bg-background/95 backdrop-blur-3xl border-t border-primary/5 safe-bottom sticky bottom-0 z-30 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.08)]">
+    <div className="p-4 bg-background/95 backdrop-blur-3xl border-t border-primary/5 safe-bottom sticky bottom-0 z-30 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.08)]" dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-3xl mx-auto space-y-2">
         
         {attachedFile && (
@@ -97,15 +100,15 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           </div>
         )}
 
-        <div className="bg-muted/30 dark:bg-muted/50 rounded-[24px] border border-primary/5 overflow-hidden transition-all duration-300 focus-within:ring-4 focus-within:ring-primary/5 focus-within:bg-card focus-within:border-primary/20">
-          <div className="px-4">
+        <div className="bg-muted/30 dark:bg-muted/50 rounded-[24px] border border-primary/5 overflow-hidden transition-all duration-300 focus-within:ring-4 focus-within:ring-primary/5 focus-within:bg-background focus-within:border-primary/20">
+          <div className="px-4 py-1">
             <Textarea
               ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKeyDown}
-              placeholder="تحدث مع حساني..."
-              className="min-h-[38px] max-h-[200px] border-0 focus-visible:ring-0 bg-transparent resize-none py-2 text-base font-medium placeholder:text-muted-foreground/30 no-scrollbar"
+              placeholder={isRtl ? "تحدث مع حساني..." : "Chat with Hassani..."}
+              className="min-h-[38px] max-h-[200px] border-0 focus-visible:ring-0 bg-transparent resize-none py-2 text-base font-medium placeholder:text-muted-foreground/30 no-scrollbar text-start"
               disabled={disabled}
             />
           </div>
@@ -118,7 +121,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                     <Plus className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-64 rounded-2xl p-2 border-primary/10 shadow-2xl backdrop-blur-xl bg-popover/90" dir="rtl">
+                <DropdownMenuContent align="start" className="w-64 rounded-2xl p-2 border-primary/10 shadow-2xl backdrop-blur-xl bg-popover/90" dir={isRtl ? 'rtl' : 'ltr'}>
                   {modes.map((mode) => (
                     <DropdownMenuItem 
                       key={mode.id} 
@@ -128,7 +131,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                       <div className={cn("p-2 rounded-lg bg-current/10 shrink-0", mode.color)}>
                         {mode.icon}
                       </div>
-                      <span className="font-bold text-foreground text-sm flex-1 text-right">{mode.label}</span>
+                      <span className="font-bold text-foreground text-sm flex-1 text-start">{mode.label}</span>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -146,7 +149,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                 size="icon" 
                 className="h-9 w-9 rounded-2xl text-muted-foreground hover:text-primary hover:bg-primary/5"
                 onClick={() => fileInputRef.current?.click()}
-                title="إرفاق صورة"
+                title={isRtl ? "إرفاق صورة" : "Attach Image"}
               >
                 <Paperclip className="h-5 w-5" />
               </Button>
@@ -164,16 +167,19 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                 <Button 
                   onClick={handleSend}
                   disabled={disabled}
-                  className="h-9 w-9 rounded-2xl luxury-gradient shadow-lg shadow-primary/20 shrink-0 transition-all active:scale-90"
+                  className={cn(
+                    "h-9 w-9 rounded-2xl luxury-gradient shadow-lg shadow-primary/20 shrink-0 transition-all active:scale-90",
+                    isRtl && "rotate-180"
+                  )}
                 >
-                  <Send className="h-4.5 w-4.5 fill-white rotate-180" />
+                  <Send className="h-4.5 w-4.5 fill-white" />
                 </Button>
               ) : (
                 <Button 
                   variant="ghost"
                   size="icon"
                   className="h-9 w-9 rounded-2xl bg-foreground/5 text-foreground hover:bg-foreground/10 shrink-0 transition-all active:scale-90"
-                  title="تحدث بالصوت"
+                  title={isRtl ? "تحدث بالصوت" : "Voice Chat"}
                 >
                   <Mic className="h-5 w-5" />
                 </Button>
