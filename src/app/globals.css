@@ -34,6 +34,36 @@
     --sidebar-border: 38 20% 88%;
     --sidebar-ring: 38 45% 48%;
   }
+
+  .dark {
+    --background: 210 20% 8%;
+    --foreground: 40 30% 98%;
+    --card: 210 20% 10%;
+    --card-foreground: 40 30% 98%;
+    --popover: 210 20% 10%;
+    --popover-foreground: 40 30% 98%;
+    --primary: 38 45% 55%; /* Slightly lighter gold for contrast */
+    --primary-foreground: 210 20% 10%;
+    --secondary: 210 20% 15%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 210 20% 14%;
+    --muted-foreground: 210 10% 65%;
+    --accent: 38 45% 15%;
+    --accent-foreground: 38 45% 85%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 210 20% 16%;
+    --input: 210 20% 16%;
+    --ring: 38 45% 55%;
+    --sidebar-background: 210 20% 6%;
+    --sidebar-foreground: 210 10% 85%;
+    --sidebar-primary: 38 45% 55%;
+    --sidebar-primary-foreground: 210 20% 10%;
+    --sidebar-accent: 210 20% 12%;
+    --sidebar-accent-foreground: 38 45% 85%;
+    --sidebar-border: 210 20% 14%;
+    --sidebar-ring: 38 45% 55%;
+  }
 }
 
 @layer base {
@@ -59,11 +89,11 @@
 }
 
 .chat-bubble-ai {
-  @apply bg-white text-foreground rounded-[10px] rounded-tr-sm border border-primary/10 shadow-sm;
+  @apply bg-card text-foreground rounded-[10px] rounded-tr-sm border border-primary/10 shadow-sm;
 }
 
 .glass-morphism {
-  @apply bg-white/70 backdrop-blur-2xl border-b border-primary/10;
+  @apply bg-background/70 backdrop-blur-2xl border-b border-primary/10;
 }
 
 .no-scrollbar::-webkit-scrollbar {

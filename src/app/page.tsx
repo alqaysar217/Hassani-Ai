@@ -23,14 +23,6 @@ import { signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import Image from 'next/image';
 
-const MARKETING_PHRASES = [
-  "يلا نبدأ الإبداع.. أنا جاهز لمساعدتك",
-  "لنبتكر شيئاً مذهلاً اليوم",
-  "دعنا نحول أفكارك إلى واقع ملموس",
-  "حساني شريكك الذكي في كل خطوة",
-  "هل أنت مستعد لتحدي برمجـي جديد؟"
-];
-
 export default function HassaniApp() {
   const { user, loading: userLoading } = useUser();
   const db = useFirestore();
@@ -51,15 +43,38 @@ export default function HassaniApp() {
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [displayText, setDisplayText] = useState("");
   const [profile, setProfile] = useState<{ displayName?: string, photoURL?: string } | null>(null);
+  const [lang, setLang] = useState<'ar' | 'en'>('ar');
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
+    // تحميل التفضيلات
+    const savedTheme = localStorage.getItem('theme');
+    const savedLang = localStorage.getItem('lang') as 'ar' | 'en' || 'ar';
+    setLang(savedLang);
+    if (savedTheme === 'dark') document.documentElement.classList.add('dark');
+    document.documentElement.dir = savedLang === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = savedLang;
+  }, []);
+
+  const MARKETING_PHRASES = lang === 'ar' ? [
+    "يلا نبدأ الإبداع.. أنا جاهز لمساعدتك",
+    "لنبتكر شيئاً مذهلاً اليوم",
+    "دعنا نحول أفكارك إلى واقع ملموس",
+    "حساني شريكك الذكي في كل خطوة",
+    "هل أنت مستعد لتحدي برمجـي جديد؟"
+  ] : [
+    "Let's start creating.. I'm ready to help",
+    "Let's innovate something amazing today",
+    "Let's turn your ideas into reality",
+    "Hassani, your smart partner in every step",
+    "Ready for a new coding challenge?"
+  ];
+
+  useEffect(() => {
     if (user) {
       const unsubscribe = onSnapshot(doc(db, 'users', user.uid), (doc) => {
-        if (doc.exists()) {
-          setProfile(doc.data());
-        }
+        if (doc.exists()) setProfile(doc.data());
       });
       return () => unsubscribe();
     }
@@ -69,9 +84,7 @@ export default function HassaniApp() {
     let currentText = "";
     let i = 0;
     const fullText = MARKETING_PHRASES[phraseIndex];
-    
     setDisplayText("");
-
     const typingInterval = setInterval(() => {
       if (i < fullText.length) {
         currentText += fullText.charAt(i);
@@ -84,18 +97,14 @@ export default function HassaniApp() {
         }, 3000);
       }
     }, 60);
-
     return () => clearInterval(typingInterval);
-  }, [phraseIndex]);
+  }, [phraseIndex, lang]);
 
   useEffect(() => {
     if (scrollRef.current) {
       const viewport = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
       if (viewport) {
-        viewport.scrollTo({
-          top: viewport.scrollHeight,
-          behavior: 'smooth'
-        });
+        viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
       }
     }
   }, [currentConversation?.messages, isLoading]);
@@ -104,10 +113,9 @@ export default function HassaniApp() {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      toast({ title: "مرحباً بك في حساني" });
     } catch (error: any) {
       if (error.code !== 'auth/popup-closed-by-user') {
-        toast({ variant: 'destructive', title: "خطأ في تسجيل الدخول", description: error.message });
+        toast({ variant: 'destructive', title: "Error", description: error.message });
       }
     }
   };
@@ -115,9 +123,8 @@ export default function HassaniApp() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      toast({ title: "تم تسجيل الخروج" });
     } catch (error) {
-      toast({ variant: 'destructive', title: "خطأ في تسجيل الخروج" });
+      toast({ variant: 'destructive', title: "Logout Error" });
     }
   };
 
@@ -168,7 +175,7 @@ export default function HassaniApp() {
 
       addMessage(convId, aiMsg);
     } catch (err: any) {
-      toast({ variant: 'destructive', title: "خطأ في الرد", description: "تعذر الاتصال بالمحرك." });
+      toast({ variant: 'destructive', title: "Error", description: "Connection failed." });
     } finally {
       setIsLoading(false);
     }
@@ -188,35 +195,26 @@ export default function HassaniApp() {
         <div className="max-w-md w-full space-y-10 text-center">
           <div className="space-y-6 animate-fade-in flex flex-col items-center">
             <div className="relative h-32 w-32 shadow-2xl rounded-3xl overflow-hidden mb-4 border-2 border-primary/10">
-               <Image 
-                src="/logo-hassani.png" 
-                alt="حساني" 
-                fill 
-                className="object-cover"
-                onError={(e) => {
-                  e.currentTarget.src = "https://picsum.photos/seed/hassani/200/200";
-                }}
-              />
+               <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" onError={(e) => { e.currentTarget.src = "https://picsum.photos/seed/hassani/200/200"; }} />
             </div>
-            <h1 className="text-7xl font-black text-secondary tracking-tighter">حساني</h1>
-            <p className="text-muted-foreground font-medium text-lg leading-relaxed">رفيقك الذكي الذي يفهمكم ويبتكر معكم في كل خطوة</p>
+            <h1 className="text-7xl font-black text-secondary tracking-tighter">{lang === 'ar' ? 'حساني' : 'Hassani'}</h1>
+            <p className="text-muted-foreground font-medium text-lg leading-relaxed">
+              {lang === 'ar' ? 'رفيقك الذكي الذي يفهمكم ويبتكر معكم في كل خطوة' : 'Your smart companion that understands and innovates with you.'}
+            </p>
           </div>
-          <Button 
-            onClick={handleLogin}
-            className="w-full h-16 rounded-2xl luxury-gradient text-white font-bold text-xl shadow-2xl transition-all active:scale-95"
-          >
-            ابدأ رحلتك الآن
+          <Button onClick={handleLogin} className="w-full h-16 rounded-2xl luxury-gradient text-white font-bold text-xl shadow-2xl transition-all active:scale-95">
+            {lang === 'ar' ? 'ابدأ رحلتك الآن' : 'Start Your Journey'}
           </Button>
         </div>
       </div>
     );
   }
 
-  const userName = profile?.displayName || user.displayName?.split(' ')[0] || "مستخدم";
+  const userName = profile?.displayName || user.displayName?.split(' ')[0] || (lang === 'ar' ? "مستخدم" : "User");
 
   return (
     <SidebarProvider defaultOpen={false}>
-      <div className="flex w-full h-svh bg-background overflow-hidden relative" dir="rtl">
+      <div className="flex w-full h-svh bg-background overflow-hidden relative" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
         <ChatSidebar 
           conversations={conversations}
           currentId={currentId}
@@ -227,30 +225,20 @@ export default function HassaniApp() {
           onOpenSettings={() => setIsSettingsOpen(true)}
           user={user}
           onLogout={handleLogout}
+          lang={lang}
         />
         
         <SidebarInset className="flex flex-col h-full w-full relative overflow-hidden">
-          <header className="h-16 flex items-center justify-between px-5 glass-morphism sticky top-0 z-30 shrink-0 border-b border-primary/5">
+          <header className="h-16 flex items-center justify-between px-5 glass-morphism sticky top-0 z-30 shrink-0">
             <div className="flex items-center gap-3">
               <div className="relative h-9 w-9 overflow-hidden rounded-xl shadow-lg border border-primary/10">
-                <Image 
-                  src="/logo-hassani.png" 
-                  alt="حساني" 
-                  fill 
-                  className="object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = "https://picsum.photos/seed/hassani/40/40";
-                  }}
-                />
+                <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" onError={(e) => { e.currentTarget.src = "https://picsum.photos/seed/hassani/40/40"; }} />
               </div>
-              <h1 className="text-xl font-black text-secondary tracking-tight">حساني</h1>
+              <h1 className="text-xl font-black text-secondary tracking-tight">{lang === 'ar' ? 'حساني' : 'Hassani'}</h1>
             </div>
-
-            <div className="flex items-center gap-2">
-              <SidebarTrigger className="h-10 w-10 hover:bg-primary/5 rounded-xl text-primary transition-colors">
-                 <Menu className="h-6 w-6" />
-              </SidebarTrigger>
-            </div>
+            <SidebarTrigger className="h-10 w-10 hover:bg-primary/5 rounded-xl text-primary transition-colors">
+               <Menu className="h-6 w-6" />
+            </SidebarTrigger>
           </header>
 
           <div className="flex-1 flex flex-col relative overflow-hidden bg-[radial-gradient(circle_at_top_right,rgba(197,160,89,0.04),transparent)]">
@@ -258,84 +246,52 @@ export default function HassaniApp() {
               <div className="max-w-3xl mx-auto px-5 py-8 space-y-8">
                 {(!currentConversation || currentConversation.messages.length === 0) ? (
                   <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-10 animate-fade-in-up">
-                    <div className="relative group">
-                      <div className="h-32 w-32 bg-white rounded-3xl flex items-center justify-center transform group-hover:rotate-6 transition-transform shadow-2xl overflow-hidden border border-primary/10">
-                        <Image 
-                          src="/logo-hassani.png" 
-                          alt="حساني" 
-                          fill 
-                          className="object-cover"
-                          onError={(e) => {
-                            e.currentTarget.src = "https://picsum.photos/seed/hassani/128/128";
-                          }}
-                        />
-                      </div>
+                    <div className="h-32 w-32 bg-card rounded-3xl flex items-center justify-center shadow-2xl overflow-hidden border border-primary/10">
+                      <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" onError={(e) => { e.currentTarget.src = "https://picsum.photos/seed/hassani/128/128"; }} />
                     </div>
-
                     <div className="space-y-4">
                       <h2 className="text-5xl font-black text-secondary text-center">
-                        أهلاً <span className="text-primary">{userName}</span>
+                        {lang === 'ar' ? 'أهلاً' : 'Hello'} <span className="text-primary">{userName}</span>
                       </h2>
-                      <div className="h-8 flex items-center justify-center">
-                        <p className="text-muted-foreground font-bold text-xl min-h-[1.5em] flex items-center">
-                          {displayText}
-                          <span className="w-1 h-6 bg-primary ml-1 animate-pulse shrink-0"></span>
-                        </p>
-                      </div>
+                      <p className="text-muted-foreground font-bold text-xl min-h-[1.5em] flex items-center justify-center">
+                        {displayText}<span className="w-1 h-6 bg-primary ml-1 animate-pulse shrink-0"></span>
+                      </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl px-2">
                       {[
-                        { text: "حل مشكلة برمجية معقدة", icon: <Code2 className="h-4 w-4" />, color: "text-emerald-500" },
-                        { text: "توليد فكرة إبداعية لمشروع", icon: <Lightbulb className="h-4 w-4" />, color: "text-amber-500" },
-                        { text: "إنشاء مخططات احترافية", icon: <Layout className="h-4 w-4" />, color: "text-indigo-500" },
-                        { text: "تخطيط قواعد البيانات", icon: <Rocket className="h-4 w-4" />, color: "text-rose-500" },
-                        { text: "ألحان وصوتيات ذكية", icon: <Music className="h-4 w-4" />, color: "text-purple-500" },
-                        { text: "تحليل صورة أو بيانات", icon: <Brain className="h-4 w-4" />, color: "text-blue-500" }
+                        { text: lang === 'ar' ? "حل مشكلة برمجية" : "Solve Code Problem", icon: <Code2 className="h-4 w-4" />, color: "text-emerald-500" },
+                        { text: lang === 'ar' ? "توليد فكرة إبداعية" : "Generate Idea", icon: <Lightbulb className="h-4 w-4" />, color: "text-amber-500" },
+                        { text: lang === 'ar' ? "إنشاء مخططات" : "Create Diagrams", icon: <Layout className="h-4 w-4" />, color: "text-indigo-500" },
+                        { text: lang === 'ar' ? "تخطيط قواعد بيانات" : "DB Planning", icon: <Rocket className="h-4 w-4" />, color: "text-rose-500" },
                       ].map((item) => (
-                        <Button 
-                          key={item.text} 
-                          variant="outline" 
-                          className="h-16 rounded-2xl border-primary/10 hover:bg-primary/5 hover:border-primary/30 flex flex-row items-center justify-start gap-4 px-5 transition-all shadow-sm group text-right"
-                          onClick={() => handleSendMessage(item.text)}
-                        >
-                          <div className={`h-10 w-10 rounded-xl bg-current/10 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${item.color}`}>
-                            {item.icon}
-                          </div>
-                          <span className="font-bold text-secondary text-sm flex-1">{item.text}</span>
+                        <Button key={item.text} variant="outline" className="h-16 rounded-2xl border-primary/10 hover:bg-primary/5 flex flex-row items-center gap-4 px-5 shadow-sm group" onClick={() => handleSendMessage(item.text)}>
+                          <div className={`h-10 w-10 rounded-xl bg-current/10 flex items-center justify-center shrink-0 group-hover:scale-110 ${item.color}`}>{item.icon}</div>
+                          <span className="font-bold text-secondary text-sm">{item.text}</span>
                         </Button>
                       ))}
                     </div>
                   </div>
                 ) : (
-                  currentConversation.messages.map((msg) => (
-                    <ChatMessage key={msg.id} message={msg} />
-                  ))
+                  currentConversation.messages.map((msg) => <ChatMessage key={msg.id} message={msg} lang={lang} />)
                 )}
-                
                 {isLoading && (
                   <div className="flex justify-start items-center gap-3">
-                    <div className="bg-white px-6 py-4 rounded-3xl rounded-tr-sm border border-primary/10 flex items-center gap-3 shadow-sm animate-pulse">
+                    <div className="bg-card px-6 py-4 rounded-3xl rounded-tr-sm border border-primary/10 flex items-center gap-3 shadow-sm animate-pulse">
                       <div className="flex gap-1">
                         <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce"></div>
                         <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                        <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.4s]"></div>
                       </div>
-                      <span className="text-xs text-muted-foreground font-bold italic">حساني يفكر...</span>
+                      <span className="text-xs text-muted-foreground font-bold italic">{lang === 'ar' ? 'حساني يفكر...' : 'Hassani thinking...'}</span>
                     </div>
                   </div>
                 )}
               </div>
             </ScrollArea>
-
-            <ChatInput onSend={handleSendMessage} disabled={isLoading} />
+            <ChatInput onSend={handleSendMessage} disabled={isLoading} lang={lang} />
           </div>
         </SidebarInset>
-
-        <SettingsDialog 
-          open={isSettingsOpen} 
-          onOpenChange={setIsSettingsOpen} 
-        />
+        <SettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
       </div>
     </SidebarProvider>
   );
