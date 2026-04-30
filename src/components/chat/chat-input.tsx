@@ -108,7 +108,7 @@ export function ChatInput({ onSend, disabled, lang = 'ar' }: ChatInputProps) {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKeyDown}
               placeholder={isRtl ? "تحدث مع حساني..." : "Chat with Hassani..."}
-              className="min-h-[38px] max-h-[200px] border-0 focus-visible:ring-0 bg-transparent resize-none py-2 text-base font-medium placeholder:text-muted-foreground/30 no-scrollbar text-start"
+              className="min-h-[24px] max-h-[200px] border-0 focus-visible:ring-0 bg-transparent resize-none py-1.5 text-base font-medium placeholder:text-muted-foreground/30 no-scrollbar text-start"
               disabled={disabled}
             />
           </div>
