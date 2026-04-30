@@ -63,7 +63,7 @@ export function ChatSidebar({
     <Sidebar side="right" className="border-l border-primary/10">
       <SidebarHeader className="p-5 pb-2">
         <div className="flex items-center gap-3 mb-6 px-1">
-          <div className="relative h-8 w-8">
+          <div className="relative h-8 w-8 rounded-[10px] overflow-hidden">
             <Image src="/logo-hassani.png" alt="Logo" fill className="object-contain" />
           </div>
           <span className="font-extrabold text-secondary text-lg">حساني الذكي</span>
@@ -103,7 +103,7 @@ export function ChatSidebar({
                   <div className="absolute left-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full hover:bg-background">
+                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-[10px] hover:bg-background">
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>

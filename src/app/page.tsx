@@ -155,7 +155,7 @@ export default function HassaniApp() {
   if (userLoading) {
     return (
       <div className="h-svh w-full flex flex-col items-center justify-center bg-background space-y-6 animate-fade-in">
-        <div className="relative h-24 w-24">
+        <div className="relative h-24 w-24 rounded-[10px] overflow-hidden">
           <Image src="/logo-hassani.png" alt="Logo" fill className="object-contain animate-pulse" />
         </div>
         <div className="flex flex-col items-center gap-2">
@@ -173,7 +173,7 @@ export default function HassaniApp() {
       <div className="h-svh w-full flex flex-col items-center justify-center bg-background px-6">
         <div className="max-w-md w-full space-y-12 text-center animate-fade-in-up">
           <div className="space-y-6">
-            <div className="relative h-32 w-32 mx-auto">
+            <div className="relative h-32 w-32 mx-auto rounded-[10px] overflow-hidden">
               <Image src="/logo-hassani.png" alt="Logo" fill className="object-contain" />
             </div>
             <div className="space-y-2">
@@ -214,7 +214,7 @@ export default function HassaniApp() {
         <SidebarInset className="flex flex-col h-full w-full relative overflow-hidden">
           <header className="h-16 flex items-center justify-between px-5 glass-morphism sticky top-0 z-30 shrink-0 border-b border-primary/5">
             <div className="flex items-center gap-3">
-              <div className="relative h-10 w-10">
+              <div className="relative h-10 w-10 rounded-[10px] overflow-hidden">
                 <Image src="/logo-hassani.png" alt="Hassani Logo" fill className="object-contain" />
               </div>
               <div className="flex flex-col">
@@ -226,7 +226,7 @@ export default function HassaniApp() {
               </div>
             </div>
 
-            <SidebarTrigger className="h-10 w-10 hover:bg-primary/5 rounded-full text-primary transition-transform active:scale-90">
+            <SidebarTrigger className="h-10 w-10 hover:bg-primary/5 rounded-[10px] text-primary transition-transform active:scale-90">
                <Menu className="h-6 w-6" />
             </SidebarTrigger>
           </header>
@@ -237,7 +237,7 @@ export default function HassaniApp() {
                 {(!currentConversation || currentConversation.messages.length === 0) ? (
                   <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6 space-y-8 animate-fade-in-up">
                     <div className="relative">
-                      <div className="relative h-32 w-32 mx-auto drop-shadow-2xl">
+                      <div className="relative h-32 w-32 mx-auto drop-shadow-2xl rounded-[10px] overflow-hidden">
                         <Image src="/logo-hassani.png" alt="Hassani AI" fill className="object-contain" />
                       </div>
                       <div className="absolute -bottom-2 -right-2 h-10 w-10 rounded-full bg-white border-4 border-background flex items-center justify-center shadow-xl">
@@ -259,7 +259,7 @@ export default function HassaniApp() {
                 
                 {isLoading && (
                   <div className="flex justify-start items-center gap-3 animate-fade-in">
-                    <div className="h-9 w-9 relative flex items-center justify-center">
+                    <div className="h-9 w-9 relative flex items-center justify-center rounded-[10px] overflow-hidden">
                       <Image src="/logo-hassani.png" alt="Thinking" fill className="object-contain opacity-50 animate-pulse" />
                     </div>
                     <div className="bg-white px-5 py-3 rounded-[10px] rounded-tr-sm border border-primary/10 flex items-center gap-2 shadow-sm">

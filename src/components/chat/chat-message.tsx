@@ -64,7 +64,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-8 w-8 hover:bg-white/10 text-white/70"
+                    className="h-8 w-8 hover:bg-white/10 text-white/70 rounded-[10px]"
                     onClick={() => copyToClipboard(message.metadata?.code || "")}
                   >
                     {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
