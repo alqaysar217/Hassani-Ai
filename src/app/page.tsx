@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -13,7 +12,7 @@ import {
   SidebarInset, 
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Brain, Lightbulb, Code2, Rocket, MoreVertical, Layout, Music } from 'lucide-react';
+import { Sparkles, Brain, Lightbulb, Code2, Rocket, Menu, Layout, Music } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
 import { Message, MessageType } from '@/lib/types';
@@ -51,13 +50,12 @@ export default function HassaniApp() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  // تأثير الكتابة الحية (Typewriter Effect)
   useEffect(() => {
     let currentText = "";
     let i = 0;
     const fullText = MARKETING_PHRASES[phraseIndex];
     
-    setDisplayText(""); // إعادة ضبط النص عند تبديل العبارة
+    setDisplayText("");
 
     const typingInterval = setInterval(() => {
       if (i < fullText.length) {
@@ -66,12 +64,11 @@ export default function HassaniApp() {
         i++;
       } else {
         clearInterval(typingInterval);
-        // الانتظار قليلاً بعد انتهاء الكتابة قبل الانتقال للعبارة التالية
         setTimeout(() => {
           setPhraseIndex((prev) => (prev + 1) % MARKETING_PHRASES.length);
         }, 3000);
       }
-    }, 60); // سرعة الكتابة
+    }, 60);
 
     return () => clearInterval(typingInterval);
   }, [phraseIndex]);
@@ -234,7 +231,7 @@ export default function HassaniApp() {
 
             <div className="flex items-center gap-2">
               <SidebarTrigger className="h-10 w-10 hover:bg-primary/5 rounded-xl text-primary transition-colors">
-                 <MoreVertical className="h-6 w-6" />
+                 <Menu className="h-6 w-6" />
               </SidebarTrigger>
             </div>
           </header>
