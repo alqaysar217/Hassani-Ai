@@ -15,7 +15,8 @@ import {
   Zap,
   Music,
   Brain,
-  Rocket
+  Rocket,
+  Layout
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MessageType } from '@/lib/types';
@@ -35,8 +36,9 @@ const modes = [
   { id: 'text' as MessageType, icon: <Zap className="h-4 w-4" />, label: "دردشة ذكية", color: "text-amber-500" },
   { id: 'image' as MessageType, icon: <ImageIcon className="h-4 w-4" />, label: "توليد صور", color: "text-blue-500" },
   { id: 'code' as MessageType, icon: <Code className="h-4 w-4" />, label: "مساعد برمجـي", color: "text-emerald-500" },
+  { id: 'diagram' as MessageType, icon: <Layout className="h-4 w-4" />, label: "إنشاء مخططات", color: "text-indigo-500" },
+  { id: 'planning' as MessageType, icon: <Rocket className="h-4 w-4" />, label: "تخطيط قواعد البيانات", color: "text-rose-500" },
   { id: 'music' as MessageType, icon: <Music className="h-4 w-4" />, label: "ألحان وصوت", color: "text-purple-500" },
-  { id: 'planning' as MessageType, icon: <Rocket className="h-4 w-4" />, label: "تخطيط مخصص", color: "text-rose-500" },
 ];
 
 export function ChatInput({ onSend, disabled }: ChatInputProps) {
@@ -98,7 +100,6 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         )}
 
         <div className="bg-muted/30 rounded-[24px] border border-primary/5 overflow-hidden transition-all duration-300 focus-within:ring-4 focus-within:ring-primary/5 focus-within:bg-white focus-within:border-primary/20 p-1">
-          {/* Row 1: Input Area */}
           <div className="px-4">
             <Textarea
               ref={textareaRef}
@@ -111,7 +112,6 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
             />
           </div>
 
-          {/* Row 2: Tools Bar */}
           <div className="flex items-center justify-between pt-1 border-t border-primary/5 mt-1 px-2 pb-1.5">
             <div className="flex items-center gap-2">
               <DropdownMenu>
@@ -120,17 +120,17 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                     <Plus className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 border-primary/10 shadow-2xl backdrop-blur-xl bg-white/90">
+                <DropdownMenuContent align="start" className="w-60 rounded-2xl p-2 border-primary/10 shadow-2xl backdrop-blur-xl bg-white/90">
                   {modes.map((mode) => (
                     <DropdownMenuItem 
                       key={mode.id} 
-                      className="rounded-xl gap-3 py-3 cursor-pointer focus:bg-primary/5"
+                      className="rounded-xl flex flex-row items-center gap-3 py-3 cursor-pointer focus:bg-primary/5"
                       onClick={() => setSelectedMode(mode.id)}
                     >
                       <div className={cn("p-2 rounded-lg bg-current/10 shrink-0", mode.color)}>
                         {mode.icon}
                       </div>
-                      <span className="font-bold text-secondary text-sm">{mode.label}</span>
+                      <span className="font-bold text-secondary text-sm flex-1 text-right">{mode.label}</span>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
