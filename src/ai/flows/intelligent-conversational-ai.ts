@@ -39,7 +39,7 @@ export async function intelligentConversationalAi(
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY.trim()}`,
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://hassani-ai.web.app',
         'X-Title': 'Hassani AI'
