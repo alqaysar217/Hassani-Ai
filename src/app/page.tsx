@@ -48,7 +48,6 @@ export default function HassaniApp() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // تحميل التفضيلات
     const savedTheme = localStorage.getItem('theme');
     const savedLang = localStorage.getItem('lang') as 'ar' | 'en' || 'ar';
     setLang(savedLang);
@@ -246,7 +245,7 @@ export default function HassaniApp() {
               <div className="max-w-3xl mx-auto px-5 py-8 space-y-8">
                 {(!currentConversation || currentConversation.messages.length === 0) ? (
                   <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-10 animate-fade-in-up">
-                    <div className="h-32 w-32 bg-card rounded-3xl flex items-center justify-center shadow-2xl overflow-hidden border border-primary/10">
+                    <div className="h-32 w-32 bg-card rounded-3xl flex items-center justify-center shadow-2xl overflow-hidden border border-primary/10 relative">
                       <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" onError={(e) => { e.currentTarget.src = "https://picsum.photos/seed/hassani/128/128"; }} />
                     </div>
                     <div className="space-y-4">
@@ -273,7 +272,7 @@ export default function HassaniApp() {
                     </div>
                   </div>
                 ) : (
-                  currentConversation.messages.map((msg) => <ChatMessage key={msg.id} message={msg} lang={lang} />)
+                  currentConversation.messages.map((msg) => <ChatMessage key={msg.id} message={msg} />)
                 )}
                 {isLoading && (
                   <div className="flex justify-start items-center gap-3">
@@ -288,7 +287,7 @@ export default function HassaniApp() {
                 )}
               </div>
             </ScrollArea>
-            <ChatInput onSend={handleSendMessage} disabled={isLoading} lang={lang} />
+            <ChatInput onSend={handleSendMessage} disabled={isLoading} />
           </div>
         </SidebarInset>
         <SettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />

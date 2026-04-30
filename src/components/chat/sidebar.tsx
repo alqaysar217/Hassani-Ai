@@ -126,7 +126,7 @@ export function ChatSidebar({
         <Separator className="bg-primary/5" />
         <div className="flex items-center gap-3 p-2 bg-background/40 rounded-2xl border border-primary/5">
           <Avatar className="h-10 w-10 border border-primary/10">
-            <AvatarImage src={photoURL} />
+            <AvatarImage src={photoURL} className="object-cover" />
             <AvatarFallback className="bg-primary/10 text-primary font-bold">{displayName.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0 overflow-hidden">

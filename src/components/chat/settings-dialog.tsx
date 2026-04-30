@@ -41,7 +41,6 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // تحميل التفضيلات من localStorage
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' || 'light';
     const savedLang = localStorage.getItem('lang') as 'ar' | 'en' || 'ar';
     setTheme(savedTheme);
@@ -82,7 +81,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     localStorage.setItem('lang', newLang);
     document.documentElement.dir = newLang === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = newLang;
-    window.location.reload(); // إعادة تحميل بسيطة لتطبيق الترجمات
+    window.location.reload();
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
