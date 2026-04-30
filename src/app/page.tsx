@@ -12,7 +12,19 @@ import {
   SidebarInset, 
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Code2, Lightbulb, Menu, Layout, Rocket, Brain, ImageIcon, Music } from 'lucide-react';
+import { 
+  Code2, 
+  Lightbulb, 
+  Menu, 
+  Layout, 
+  Rocket, 
+  Brain, 
+  ImageIcon, 
+  Music,
+  Users,
+  Database,
+  GitBranch
+} from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
 import { Message, MessageType } from '@/lib/types';
@@ -210,16 +222,17 @@ export default function HassaniApp() {
 
   const userName = profile?.displayName || user.displayName?.split(' ')[0] || (lang === 'ar' ? "مستخدم" : "User");
 
-  // القائمة المرتبة حسب طلب المستخدم
+  // القائمة المرتبة حسب طلب المستخدم الجديد
   const quickActions = [
     { text: lang === 'ar' ? "حل مشكلة برمجية" : "Solve Code Problem", icon: <Code2 className="h-4 w-4" />, color: "text-emerald-500", type: 'code' },
     { text: lang === 'ar' ? "تخطيط قواعد البيانات" : "DB Planning", icon: <Rocket className="h-4 w-4" />, color: "text-rose-500", type: 'planning' },
     { text: lang === 'ar' ? "توليد فكرة إبداعية" : "Generate Creative Idea", icon: <Lightbulb className="h-4 w-4" />, color: "text-amber-500", type: 'text' },
     { text: lang === 'ar' ? "تحليل نظام شامل" : "Comprehensive System Analysis", icon: <Brain className="h-4 w-4" />, color: "text-blue-500", type: 'planning' },
-    { text: lang === 'ar' ? "إنشاء مخطط ERD" : "Create ERD Diagram", icon: <Layout className="h-4 w-4" />, color: "text-indigo-500", type: 'diagram' },
-    { text: lang === 'ar' ? "توليد صور" : "Generate Images", icon: <ImageIcon className="h-4 w-4" />, color: "text-purple-500", type: 'image' },
-    { text: lang === 'ar' ? "توليد موسيقى" : "Generate Music", icon: <Music className="h-4 w-4" />, color: "text-pink-500", type: 'music' },
-    { text: lang === 'ar' ? "إنشاء مخطط DFD" : "Create DFD Diagram", icon: <Layout className="h-4 w-4" />, color: "text-cyan-500", type: 'diagram' },
+    { text: lang === 'ar' ? "إنشاء مخطط Use Case" : "Create UseCase Diagram", icon: <Users className="h-4 w-4" />, color: "text-indigo-500", type: 'diagram' },
+    { text: lang === 'ar' ? "إنشاء مخطط ERD" : "Create ERD Diagram", icon: <Database className="h-4 w-4" />, color: "text-purple-500", type: 'diagram' },
+    { text: lang === 'ar' ? "إنشاء مخطط DFD" : "Create DFD Diagram", icon: <GitBranch className="h-4 w-4" />, color: "text-cyan-500", type: 'diagram' },
+    { text: lang === 'ar' ? "توليد صور" : "Generate Images", icon: <ImageIcon className="h-4 w-4" />, color: "text-pink-500", type: 'image' },
+    { text: lang === 'ar' ? "توليد موسيقى" : "Generate Music", icon: <Music className="h-4 w-4" />, color: "text-orange-500", type: 'music' },
   ];
 
   return (
