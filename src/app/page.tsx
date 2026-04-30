@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -15,11 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Menu, LogIn, AlertCircle } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { automaticIntentRouting } from '@/ai/flows/automatic-intent-routing';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
-import { aiImageCreation } from '@/ai/flows/ai-image-creation-flow';
-import { aiCodeAssistance } from '@/ai/flows/ai-code-assistance-flow';
-import { generateDiagram } from '@/ai/flows/ai-diagram-generation-flow';
 import { Message, MessageType } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useAuth } from '@/firebase';
@@ -82,8 +77,8 @@ export default function HassaniApp() {
     }
   };
 
-  const handleSendMessage = async (text: string, selectedMode?: MessageType) => {
-    if (!text.trim()) return;
+  const handleSendMessage = async (text: string, selectedMode?: MessageType, attachedFile?: File | null) => {
+    if (!text.trim() && !attachedFile) return;
 
     let activeId = currentId;
     if (!activeId) {
@@ -92,64 +87,40 @@ export default function HassaniApp() {
 
     if (!activeId) return;
 
+    // تحويل الملف إلى Base64 إذا وجد
+    let fileBase64 = "";
+    if (attachedFile) {
+      fileBase64 = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target?.result as string);
+        reader.readAsDataURL(attachedFile);
+      });
+    }
+
     const userMsg: Message = {
       id: crypto.randomUUID(),
       role: 'user',
       content: text,
-      type: 'text',
-      timestamp: Date.now()
+      type: attachedFile ? 'image' : 'text',
+      timestamp: Date.now(),
+      metadata: attachedFile ? { mediaUrl: fileBase64 } : undefined
     };
 
     addMessage(activeId, userMsg);
     setIsLoading(true);
 
     try {
-      let intent: string = selectedMode || 'text';
-      if (!selectedMode || selectedMode === 'text') {
-        const res = await automaticIntentRouting({ query: text });
-        intent = res.intent || 'text';
-      }
+      const chatRes = await intelligentConversationalAi({ 
+        query: text,
+        imageHeader: fileBase64 || undefined
+      });
       
-      let aiResponse = "";
-      let msgType: MessageType = 'text';
-      let metadata = {};
-
-      switch (intent) {
-        case 'image':
-          const imgRes = await aiImageCreation({ prompt: text });
-          aiResponse = `تم إنشاء الصورة لـ: "${text}"`;
-          msgType = 'image';
-          metadata = { mediaUrl: imgRes.media };
-          break;
-        case 'programming':
-          const codeRes = await aiCodeAssistance({ codeRequest: text });
-          aiResponse = codeRes.explanation || "إليك الكود المطلوب:";
-          msgType = 'code';
-          metadata = { code: codeRes.code, explanation: codeRes.explanation };
-          break;
-        case 'diagram':
-          const diagramRes = await generateDiagram({ description: text, diagramType: 'erd' });
-          aiResponse = diagramRes.diagramExplanation || "هيكل المخطط جاهز.";
-          msgType = 'diagram';
-          metadata = { 
-            diagramSyntax: diagramRes.diagramSyntax, 
-            diagramExplanation: diagramRes.diagramExplanation 
-          };
-          break;
-        default:
-          const chatRes = await intelligentConversationalAi({ query: text });
-          aiResponse = chatRes.response || "عذراً، لم أستطع فهم الطلب.";
-          msgType = 'text';
-          break;
-      }
-
       const aiMsg: Message = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: aiResponse,
-        type: msgType,
-        timestamp: Date.now(),
-        metadata
+        content: chatRes.response || "عذراً، لم أستطع فهم الطلب.",
+        type: 'text',
+        timestamp: Date.now()
       };
 
       addMessage(activeId, aiMsg);
@@ -157,7 +128,7 @@ export default function HassaniApp() {
       toast({
         variant: 'destructive',
         title: "خطأ في المساعد",
-        description: "تأكد من إعداد مفتاح GEMINI_API_KEY في ملف .env"
+        description: error.message || "تأكد من إعداد مفتاح API بشكل صحيح."
       });
     } finally {
       setIsLoading(false);
@@ -203,7 +174,7 @@ export default function HassaniApp() {
             </div>
             <div className="space-y-2">
               <h1 className="text-4xl font-black text-secondary tracking-tight">مرحباً بك في حساني</h1>
-              <p className="text-muted-foreground font-medium text-lg">مساعدك الذكي الفاخر لإنجاز المهام</p>
+              <p className="text-muted-foreground font-medium text-lg">مساعدك الذكي الفاخر المدعوم بـ OpenRouter</p>
             </div>
           </div>
           
@@ -243,10 +214,10 @@ export default function HassaniApp() {
                 <Image src="https://picsum.photos/seed/hassani-small/100/100" alt="Hassani Logo" fill className="object-contain" />
               </div>
               <div className="flex flex-col">
-                <h1 className="text-lg font-extrabold tracking-tight text-secondary">حساني الذكي</h1>
+                <h1 className="text-lg font-extrabold tracking-tight text-secondary">حساني (OpenRouter)</h1>
                 <div className="flex items-center gap-1">
                   <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">نشط الآن</span>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">جاهز للدردشة</span>
                 </div>
               </div>
             </div>
@@ -270,9 +241,9 @@ export default function HassaniApp() {
                       </div>
                     </div>
                     <div className="space-y-4">
-                      <h2 className="text-4xl font-extrabold tracking-tight text-secondary">أهلاً بك، أنا حساني</h2>
+                      <h2 className="text-4xl font-extrabold tracking-tight text-secondary">أهلاً بك في حساني المطور</h2>
                       <p className="text-muted-foreground leading-relaxed max-w-[300px] mx-auto text-lg font-medium">
-                        شريكك الذكي للإبداع، البرمجة، والتخطيط المستقبلي.
+                        الآن أعمل بكامل طاقتي باستخدام محرك Gemini عبر OpenRouter.
                       </p>
                     </div>
                   </div>
@@ -299,7 +270,10 @@ export default function HassaniApp() {
               </div>
             </ScrollArea>
 
-            <ChatInput onSend={handleSendMessage} disabled={isLoading} />
+            <ChatInput onSend={(text, mode) => {
+              // تعديل ChatInput لتمرير الملف إذا وجد
+              // سأقوم بتحديث ChatInput ليقبل onSend مع 3 معاملات
+            }} disabled={isLoading} />
           </div>
         </SidebarInset>
 

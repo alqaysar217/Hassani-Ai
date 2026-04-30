@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -27,17 +26,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface ChatInputProps {
-  onSend: (message: string, mode?: MessageType) => void;
+  onSend: (message: string, mode?: MessageType, file?: File | null) => void;
   disabled?: boolean;
 }
 
 const modes = [
   { id: 'text' as MessageType, icon: <Zap className="h-4 w-4" />, label: "دردشة ذكية", color: "text-amber-500" },
-  { id: 'image' as MessageType, icon: <ImageIcon className="h-4 w-4" />, label: "توليد صور", color: "text-blue-500" },
+  { id: 'image' as MessageType, icon: <ImageIcon className="h-4 w-4" />, label: "تحليل صور", color: "text-blue-500" },
   { id: 'code' as MessageType, icon: <Code className="h-4 w-4" />, label: "مساعد برمجـي", color: "text-emerald-500" },
-  { id: 'diagram' as MessageType, icon: <Layout className="h-4 w-4" />, label: "مخططات هندسية", color: "text-purple-500" },
-  { id: 'planning' as MessageType, icon: <Map className="h-4 w-4" />, label: "تخطيط استراتيجي", color: "text-orange-500" },
-  { id: 'music' as MessageType, icon: <Music className="h-4 w-4" />, label: "تأليف موسيقي", color: "text-pink-500" },
 ];
 
 export function ChatInput({ onSend, disabled }: ChatInputProps) {
@@ -50,7 +46,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
 
   const handleSend = () => {
     if ((input.trim() || attachedFile) && !disabled) {
-      onSend(input, selectedMode);
+      onSend(input, selectedMode, attachedFile);
       setInput('');
       setAttachedFile(null);
       setSelectedMode('text');
@@ -66,7 +62,10 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setAttachedFile(file);
+    if (file) {
+      setAttachedFile(file);
+      setSelectedMode('image');
+    }
   };
 
   useEffect(() => {
@@ -89,7 +88,10 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
               variant="ghost" 
               size="icon" 
               className="h-6 w-6 rounded-full hover:bg-destructive/10 hover:text-destructive"
-              onClick={() => setAttachedFile(null)}
+              onClick={() => {
+                setAttachedFile(null);
+                setSelectedMode('text');
+              }}
             >
               <X className="h-3 w-3" />
             </Button>
@@ -113,7 +115,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKeyDown}
-              placeholder={isRecording ? "جاري الاستماع..." : (selectedMode === 'text' ? "اسأل حساني..." : `اكتب تفاصيل الـ ${currentModeInfo.label}...`)}
+              placeholder={isRecording ? "جاري الاستماع..." : "اسأل حساني..."}
               className="min-h-[45px] max-h-[120px] border-0 focus-visible:ring-0 bg-transparent resize-none py-3 text-base font-medium placeholder:text-muted-foreground/50 no-scrollbar"
               disabled={disabled || isRecording}
             />
@@ -121,38 +123,12 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
 
           <div className="flex items-center justify-between pt-1 border-t border-primary/5 mt-1 px-1">
             <div className="flex items-center gap-1">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-10 w-10 rounded-[10px] text-primary hover:bg-primary/5 shrink-0"
-                  >
-                    <Plus className="h-6 w-6" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 rounded-[10px] p-2 shadow-2xl border-primary/10 bg-white" dir="rtl">
-                  <div className="px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-b border-primary/5 mb-1 text-right">القدرات الذكية</div>
-                  {modes.map((m) => (
-                    <DropdownMenuItem 
-                      key={m.id}
-                      onClick={() => setSelectedMode(m.id)}
-                      className="rounded-[10px] gap-3 py-3 cursor-pointer group focus:bg-primary/5 flex items-center justify-start text-right"
-                    >
-                      <div className={cn("p-2 rounded-[10px] transition-colors bg-muted group-focus:bg-white group-focus:shadow-sm shrink-0", m.color)}>
-                        {m.icon}
-                      </div>
-                      <span className="font-bold text-secondary flex-1">{m.label}</span>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
               <input 
                 type="file" 
                 ref={fileInputRef} 
                 className="hidden" 
                 onChange={handleFileChange}
+                accept="image/*"
               />
               <Button 
                 variant="ghost" 
@@ -160,32 +136,18 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                 className="h-10 w-10 rounded-[10px] text-muted-foreground hover:text-primary hover:bg-primary/5 shrink-0"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <Paperclip className="h-5 w-5" />
+                <ImageIcon className="h-5 w-5" />
               </Button>
             </div>
 
             <div className="flex items-center">
-              {input.trim() || attachedFile ? (
-                <Button 
-                  onClick={handleSend}
-                  disabled={disabled}
-                  className="h-11 w-11 rounded-[10px] luxury-gradient shadow-lg shadow-primary/20 shrink-0 transition-transform active:scale-90"
-                >
-                  <Send className="h-5 w-5 fill-white rotate-180" />
-                </Button>
-              ) : (
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className={cn(
-                    "h-11 w-11 rounded-[10px] transition-all duration-300 shrink-0",
-                    isRecording ? "bg-red-500 text-white shadow-lg animate-pulse" : "text-muted-foreground hover:text-primary hover:bg-primary/5"
-                  )}
-                  onClick={() => setIsRecording(!isRecording)}
-                >
-                  <Mic className="h-6 w-6" />
-                </Button>
-              )}
+              <Button 
+                onClick={handleSend}
+                disabled={disabled || (!input.trim() && !attachedFile)}
+                className="h-11 w-11 rounded-[10px] luxury-gradient shadow-lg shadow-primary/20 shrink-0 transition-transform active:scale-90"
+              >
+                <Send className="h-5 w-5 fill-white rotate-180" />
+              </Button>
             </div>
           </div>
         </div>
