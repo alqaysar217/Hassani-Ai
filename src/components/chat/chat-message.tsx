@@ -49,16 +49,19 @@ export function ChatMessage({ message }: ChatMessageProps) {
   return (
     <div className={cn(
       "flex w-full group animate-fade-in-up overflow-hidden mb-6",
-      isAI ? "justify-end" : "justify-start"
+      isAI ? "justify-end" : "justify-start" // حساني لليمين، المستخدم لليسار
     )}>
       <div className={cn(
         "relative flex flex-col gap-2 w-full max-w-[95%] md:max-w-[85%] min-w-0",
-        isAI ? "items-start" : "items-end"
+        isAI ? "items-end" : "items-start" // محاذاة المحتوى داخل الفقاعة
       )}>
         <div className={cn(
           "flex items-center gap-2 px-1",
-          isAI && "flex-row-reverse"
+          !isAI && "flex-row-reverse" // تعديل مكان الاسم والأفاتار
         )}>
+          <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">
+            {isAI ? "حساني" : "أنت"}
+          </span>
           <div className={cn(
             "h-7 w-7 rounded-full flex items-center justify-center overflow-hidden shadow-sm border border-primary/10 bg-card shrink-0",
           )}>
@@ -73,19 +76,17 @@ export function ChatMessage({ message }: ChatMessageProps) {
               </Avatar>
             )}
           </div>
-          <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">
-            {isAI ? "حساني" : "أنت"}
-          </span>
         </div>
 
         <div className={cn(
-          "px-4 md:px-6 py-4 md:py-5 shadow-sm transition-all duration-300 w-full overflow-hidden min-w-0",
+          "px-4 md:px-6 py-4 md:py-5 shadow-sm transition-all duration-300 w-full overflow-x-auto min-w-0 no-scrollbar",
           isAI ? "chat-bubble-ai" : "chat-bubble-user"
         )}>
-          <div className="prose prose-stone dark:prose-invert max-w-full overflow-x-auto no-scrollbar break-words">
+          <div className="prose prose-stone dark:prose-invert max-w-full overflow-hidden break-words">
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}
               components={{
+                // حل مشكلة Hydration: استخدام div بدلاً من p لتجنب تداخل div (مثل الكود) داخل p
                 p({ children }) {
                   return <div className="mb-4 last:mb-0 leading-relaxed text-base md:text-lg font-medium break-words">{children}</div>;
                 },
@@ -97,7 +98,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
 
                   return !inline ? (
                     <div className="my-4 rounded-xl overflow-hidden bg-secondary border border-white/5 shadow-xl w-full max-w-full" dir="ltr">
-                      <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5">
+                      <div className="flex items-center justify-between px-5 py-2 bg-white/5 border-b border-white/5">
                         <span className="text-[9px] font-black opacity-60 uppercase tracking-widest text-white">
                           {match ? match[1] : 'Code'}
                         </span>
@@ -135,10 +136,10 @@ export function ChatMessage({ message }: ChatMessageProps) {
                   return <thead className="bg-primary/5">{children}</thead>;
                 },
                 th({ children }) {
-                  return <th className="px-3 md:px-4 py-3 text-start text-[11px] md:text-xs font-black text-primary uppercase tracking-wider border-b border-primary/10 whitespace-nowrap">{children}</th>;
+                  return <th className="px-4 py-3 text-start text-[11px] md:text-xs font-black text-primary uppercase tracking-wider border-b border-primary/10 whitespace-nowrap">{children}</th>;
                 },
                 td({ children }) {
-                  return <td className="px-3 md:px-4 py-3 text-[12px] md:text-sm font-medium border-b border-primary/5 whitespace-nowrap">{children}</td>;
+                  return <td className="px-4 py-3 text-[12px] md:text-sm font-medium border-b border-primary/5 whitespace-nowrap">{children}</td>;
                 }
               }}
             >

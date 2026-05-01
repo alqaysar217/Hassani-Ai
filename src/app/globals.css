@@ -84,12 +84,13 @@
   padding-bottom: env(safe-area-inset-bottom, 1.5rem);
 }
 
+/* تعديل زوايا الفقاعات لتناسب الاتجاه المعكوس الجديد */
 .chat-bubble-user {
-  @apply bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-[22px] rounded-tr-sm shadow-lg shadow-primary/10;
+  @apply bg-gradient-to-br from-primary/90 to-primary text-primary-foreground rounded-[22px] rounded-tl-sm shadow-lg shadow-primary/10;
 }
 
 .chat-bubble-ai {
-  @apply bg-card text-foreground rounded-[22px] rounded-tl-sm border border-primary/10 shadow-sm overflow-hidden;
+  @apply bg-card text-foreground rounded-[22px] rounded-tr-sm border border-primary/10 shadow-sm overflow-hidden;
 }
 
 .glass-morphism {
@@ -121,6 +122,7 @@
   @apply max-w-full overflow-hidden break-words;
 }
 
+/* فرض التمرير الأفقي على الجداول والأكواد */
 .prose table {
   @apply block w-full overflow-x-auto no-scrollbar my-6 border-collapse;
   -webkit-overflow-scrolling: touch;

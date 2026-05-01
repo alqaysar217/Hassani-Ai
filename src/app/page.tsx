@@ -27,7 +27,6 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
 import { automaticIntentRouting } from '@/ai/flows/automatic-intent-routing';
-import { generateDiagram } from '@/ai/flows/ai-diagram-generation-flow';
 import { aiImageCreation } from '@/ai/flows/ai-image-creation-flow';
 import { aiPlanning } from '@/ai/flows/ai-planning-flow';
 import { Message, MessageType } from '@/lib/types';
@@ -142,6 +141,7 @@ export default function HassaniApp() {
   };
 
   const handleSendMessage = (text: string, type: MessageType = 'text', file: File | null = null) => {
+    setIsLoading(true); // تفعيل التحميل فوراً لتغيير الواجهة
     if (!currentId) {
       const newId = createNewConversation();
       if (newId) {
@@ -172,7 +172,6 @@ export default function HassaniApp() {
     };
 
     addMessage(convId, userMsg);
-    setIsLoading(true);
 
     try {
       let intent = type;
@@ -196,24 +195,6 @@ export default function HassaniApp() {
           aiResponse = lang === 'ar' ? "تفضل، لقد قمت بإنشاء هذه الصورة لك بناءً على طلبك:" : "Here is the image I created for you based on your request:";
           aiMetadata = { mediaUrl: imageResult?.media || "" };
           finalType = 'image';
-          break;
-        case 'diagram':
-          let dType = 'useCase';
-          const lowerText = text.toLowerCase();
-          if (lowerText.includes('erd') || lowerText.includes('قواعد')) dType = 'erd';
-          else if (lowerText.includes('dfd') || lowerText.includes('تدفق بيانات')) dType = 'dfd';
-          
-          const diagramResult = await generateDiagram({ description: text, diagramType: dType });
-          const syntax = diagramResult?.diagramSyntax || "";
-          const diagramExpl = diagramResult?.diagramExplanation || "";
-          
-          if (syntax) {
-            aiResponse = `${diagramExpl}\n\n\`\`\`mermaid\n${syntax}\n\`\`\``;
-            aiMetadata = { diagramSyntax: syntax, diagramExplanation: diagramExpl };
-          } else {
-            aiResponse = diagramExpl || (lang === 'ar' ? "عذراً، لم أتمكن من إنشاء المخطط." : "Sorry, I couldn't generate the diagram.");
-          }
-          finalType = 'diagram';
           break;
         case 'planning':
           const planningResult = await aiPlanning({ request: text });
@@ -366,7 +347,7 @@ export default function HassaniApp() {
                     ))}
                     {isLoading && (
                       <div className="flex justify-end items-center gap-3 animate-fade-in w-full">
-                        <div className="bg-card px-6 py-4 rounded-3xl rounded-tl-sm border border-primary/10 flex items-center gap-3 shadow-sm animate-pulse">
+                        <div className="bg-card px-6 py-4 rounded-3xl rounded-tr-sm border border-primary/10 flex items-center gap-3 shadow-sm animate-pulse">
                           <div className="flex gap-1">
                             <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce"></div>
                             <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.2s]"></div>
