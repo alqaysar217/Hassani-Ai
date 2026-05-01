@@ -115,3 +115,12 @@
 .luxury-gradient {
   background: linear-gradient(135deg, #C5A059 0%, #D4AF37 50%, #B8860B 100%);
 }
+
+/* Responsive Table and Code fixes */
+.prose table {
+  @apply block w-full overflow-x-auto no-scrollbar;
+}
+
+.prose pre {
+  @apply max-w-full overflow-x-auto no-scrollbar;
+}

@@ -52,7 +52,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
       isAI ? "justify-start" : "justify-end"
     )}>
       <div className={cn(
-        "relative flex flex-col gap-3 max-w-[96%] md:max-w-[85%]",
+        "relative flex flex-col gap-3 max-w-[92%] md:max-w-[85%]",
         isAI ? "items-start" : "items-end"
       )}>
         <div className={cn(
@@ -79,51 +79,53 @@ export function ChatMessage({ message }: ChatMessageProps) {
         </div>
 
         <div className={cn(
-          "px-6 py-5 shadow-sm transition-all duration-300 overflow-hidden",
-          isAI ? "chat-bubble-ai rounded-[28px] rounded-tr-sm" : "chat-bubble-user rounded-[28px] rounded-tl-sm"
+          "px-4 md:px-6 py-4 md:py-5 shadow-sm transition-all duration-300 w-full",
+          isAI ? "chat-bubble-ai rounded-[22px] rounded-tr-sm" : "chat-bubble-user rounded-[22px] rounded-tl-sm"
         )}>
-          <div className="prose prose-stone dark:prose-invert max-w-none prose-p:leading-relaxed prose-p:text-lg prose-p:font-medium prose-strong:font-black prose-headings:font-black prose-table:my-6 prose-table:border-collapse prose-table:rounded-xl prose-table:overflow-hidden">
+          <div className="prose prose-stone dark:prose-invert max-w-none overflow-x-hidden">
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}
               components={{
                 p({ children }) {
-                  return <div className="mb-4 last:mb-0 leading-relaxed text-lg font-medium">{children}</div>;
+                  // تحويل p إلى div لتجنب خطأ التعشيش مع العناصر الكبيرة
+                  return <div className="mb-4 last:mb-0 leading-relaxed text-base md:text-lg font-medium">{children}</div>;
                 },
                 code({ node, inline, className, children, ...props }: any) {
                   const match = /language-(\w+)/.exec(className || '');
                   const codeContent = String(children).replace(/\n$/, '');
                   
-                  // منع عرض كلمة undefined
                   if (codeContent === "undefined" || !codeContent) return null;
 
                   return !inline ? (
-                    <div className="my-4 rounded-2xl overflow-hidden bg-secondary border border-white/5 shadow-2xl" dir="ltr">
-                      <div className="flex items-center justify-between px-5 py-2 bg-white/5 border-b border-white/5">
-                        <span className="text-[10px] font-black opacity-60 uppercase tracking-widest text-white">
+                    <div className="my-4 rounded-xl overflow-hidden bg-secondary border border-white/5 shadow-xl max-w-full" dir="ltr">
+                      <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5">
+                        <span className="text-[9px] font-black opacity-60 uppercase tracking-widest text-white">
                           {match ? match[1] : 'Code'}
                         </span>
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="h-7 w-7 hover:bg-white/10 text-white/70 rounded-lg"
+                          className="h-6 w-6 hover:bg-white/10 text-white/70 rounded-lg"
                           onClick={() => copyToClipboard(codeContent)}
                         >
-                          {copied ? <Check className="h-3 w-3 text-green-400" /> : <Copy className="h-3 w-3" />}
+                          {copied ? <Check className="h-2.5 w-2.5 text-green-400" /> : <Copy className="h-2.5 w-2.5" />}
                         </Button>
                       </div>
-                      <pre className="p-4 font-code text-sm overflow-x-auto text-amber-50 no-scrollbar">
-                        <code>{children}</code>
-                      </pre>
+                      <div className="overflow-x-auto no-scrollbar bg-[#1e1e1e]">
+                        <pre className="p-4 font-code text-[12px] md:text-sm leading-normal text-amber-50 min-w-full">
+                          <code>{children}</code>
+                        </pre>
+                      </div>
                     </div>
                   ) : (
-                    <code className="bg-primary/10 text-primary px-1.5 py-0.5 rounded-md font-bold text-sm" {...props}>
+                    <code className="bg-primary/10 text-primary px-1.5 py-0.5 rounded-md font-bold text-xs md:text-sm" {...props}>
                       {children}
                     </code>
                   );
                 },
                 table({ children }) {
                   return (
-                    <div className="overflow-x-auto my-6 rounded-2xl border border-primary/10 bg-card shadow-lg">
+                    <div className="my-6 w-full overflow-x-auto no-scrollbar rounded-xl border border-primary/10 bg-card shadow-lg">
                       <table className="min-w-full divide-y divide-primary/10">
                         {children}
                       </table>
@@ -134,10 +136,10 @@ export function ChatMessage({ message }: ChatMessageProps) {
                   return <thead className="bg-primary/5">{children}</thead>;
                 },
                 th({ children }) {
-                  return <th className="px-4 py-3 text-start text-sm font-black text-primary uppercase tracking-wider border-b border-primary/10">{children}</th>;
+                  return <th className="px-3 md:px-4 py-3 text-start text-[11px] md:text-xs font-black text-primary uppercase tracking-wider border-b border-primary/10 whitespace-nowrap">{children}</th>;
                 },
                 td({ children }) {
-                  return <td className="px-4 py-3 text-sm font-medium border-b border-primary/5">{children}</td>;
+                  return <td className="px-3 md:px-4 py-3 text-[12px] md:text-sm font-medium border-b border-primary/5 whitespace-nowrap">{children}</td>;
                 }
               }}
             >
@@ -146,8 +148,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
           </div>
 
           {message.type === 'image' && message.metadata?.mediaUrl && (
-            <div className="mt-4 space-y-4">
-               <div className="relative aspect-square w-full min-w-[280px] rounded-2xl overflow-hidden border border-primary/5 shadow-2xl">
+            <div className="mt-4 w-full">
+               <div className="relative aspect-square w-full rounded-xl overflow-hidden border border-primary/5 shadow-xl">
                   <Image 
                     src={message.metadata.mediaUrl} 
                     alt="Hassani Media" 
