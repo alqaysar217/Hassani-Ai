@@ -1,6 +1,17 @@
 export type Role = 'user' | 'assistant';
 
-export type MessageType = 'text' | 'image' | 'code' | 'diagram' | 'music' | 'planning';
+export type MessageType = 
+  | 'text' 
+  | 'image' 
+  | 'code' 
+  | 'diagram' 
+  | 'diagram_usecase'
+  | 'diagram_erd'
+  | 'diagram_dfd'
+  | 'music' 
+  | 'planning'
+  | 'planning_db'
+  | 'planning_system';
 
 export interface Message {
   id: string;

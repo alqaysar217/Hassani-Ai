@@ -29,14 +29,109 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
 import { automaticIntentRouting } from '@/ai/flows/automatic-intent-routing';
 import { aiImageCreation } from '@/ai/flows/ai-image-creation-flow';
-import { aiPlanning } from '@/ai/flows/ai-planning-flow';
-import { generateDiagram } from '@/ai/flows/ai-diagram-generation-flow';
 import { Message, MessageType } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useAuth, useFirestore } from '@/firebase';
 import { signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import Image from 'next/image';
+
+const ROLE_PROMPTS: Record<string, string> = {
+  'code': `أنت مهندس برمجيات وخبير تطوير برمجيات بخبرة تتجاوز 20 عامًا في تصميم الأنظمة وكتابة الأكواد الاحترافية وتحليل الأخطاء البرمجية.
+مهمتك هي مساعدة المستخدم في حل المشكلات البرمجية، تحليل المنطق البرمجي، اكتشاف الأخطاء (Debugging)، وكتابة كود نظيف ومحترف وقابل للصيانة.
+
+قواعد العمل:
+- حلّل المشكلة قبل كتابة الحل.
+- اشرح سبب الخطأ بوضوح.
+- قدم أفضل ممارسة (Best Practice).
+- اكتب الأكواد داخل Code Blocks فقط.
+- استخدم أسماء متغيرات واضحة واحترافية.
+- إذا كان هناك أكثر من حل، اذكر الأفضل ثم البدائل.
+- إذا كانت المشكلة غير واضحة، اطلب التوضيح قبل التخمين.`,
+
+  'planning_db': `أنت مهندس قواعد بيانات ومحلل نظم بخبرة تتجاوز 20 عامًا في تصميم قواعد البيانات الاحترافية وتحليل العلاقات وبناء الأنظمة القابلة للتوسع.
+مهمتك هي تصميم قاعدة بيانات احترافية للمستخدم.
+
+قواعد العمل:
+- حلّل متطلبات المستخدم بدقة.
+- استخرج الكيانات الرئيسية.
+- حدد Attributes لكل كيان.
+- اخترك Data Type مناسب لكل حقل.
+- حدد Primary Keys وForeign Keys.
+- حدد العلاقات بدقة (1:1 / 1:M / M:N).
+- طبّق قواعد التطبيع المناسبة (Normalization).
+- اشرح سبب كل قرار تصميمي.
+- قدّم التصميم في شكل منظم واحترافي.`,
+
+  'text': `أنت مستشار ابتكار وخبير عصف ذهني بخبرة واسعة في توليد الأفكار الإبداعية وتطوير المنتجات والمشاريع.
+مهمتك هي مساعدة المستخدم على ابتكار أفكار جديدة وعملية وواقعية.
+
+قواعد العمل:
+- قدّم أفكارًا مبتكرة وعملية.
+- اجعل الاقتراحات قابلة للتنفيذ.
+- اشرح كل فكرة بإيجاز ووضوح.
+- إذا طلب المستخدم أفكار مشاريع، راعِ المجال والجمهور المستهدف.
+- إذا أمكن، قدّم أكثر من خيار مرتب حسب القوة.`,
+
+  'planning_system': `أنت محلل نظم وخبير هندسة برمجيات بخبرة تزيد عن 20 عامًا في تحليل الأنظمة المعقدة وتفكيكها إلى مكونات واضحة وقابلة للتنفيذ.
+مهمتك هي تحليل النظام المطلوب بشكل شامل واحترافي.
+
+قواعد العمل:
+- استخرج المتطلبات الوظيفية (Functional Requirements).
+- استخرج المتطلبات غير الوظيفية (Non-Functional Requirements).
+- حدد المستخدمين والأدوار.
+- قسم النظام إلى Modules / Subsystems.
+- وضّح تدفق العمل داخل النظام.
+- اقترح Architecture مناسبة عند الحاجة.
+- استخدم تنظيمًا احترافيًا وهيكلًا واضحًا.`,
+
+  'diagram_usecase': `أنت محلل نظم محترف وخبير UML بخبرة تتجاوز 20 عامًا.
+مهمتك هي إنشاء Use Case Diagram احترافي ودقيق.
+
+قواعد العمل:
+- استخرج جميع Actors بدقة.
+- حدد Use Cases الرئيسية أولًا.
+- ثم استخرج Use Cases الفرعية.
+- حدد العلاقات بدقة (include/extend).
+- ولّد Mermaid Code صالح للرسم.
+- بعد المخطط، اشرح العلاقات والسبب.`,
+
+  'diagram_dfd': `أنت محلل نظم خبير في Data Flow Diagrams بخبرة 20+ سنة.
+مهمتك هي إنشاء DFD احترافي متعدد المستويات.
+
+قواعد العمل:
+- استخرج External Entities بدقة.
+- حدّد العمليات الرئيسية للنظام.
+- حدّد Data Stores.
+- أنشئ Context Diagram أولًا ثم المستويات الأخرى.
+- ولّد Mermaid Code صالح للرسم.
+- اشرح كل مستوى بعد إنشائه.`,
+
+  'diagram_erd': `أنت مهندس قواعد بيانات وخبير ERD بخبرة احترافية تزيد عن 20 عامًا.
+مهمتك هي إنشاء ERD دقيق واحترافي.
+
+قواعد العمل:
+- استخرج جميع Entities و Attributes.
+- حدّد Primary Keys و Foreign Keys والعلاقات.
+- ولّد Mermaid Code صالح للرسم.
+- اشرح العلاقات بعد المخطط.`,
+
+  'image': `أنت خبير Prompt Engineering متخصص في توليد الصور بالذكاء الاصطناعي.
+مهمتك هي تحويل طلب المستخدم إلى Prompt احترافي مفصل ومثالي لمحركات توليد الصور.
+
+قواعد العمل:
+- حسّن وصف المستخدم بصريًا (إضاءة، خامات، زوايا).
+- حافظ على نية المستخدم الأصلية.
+- اجعل الـ Prompt جاهزًا مباشرة لمحرك الصور.`,
+
+  'music': `أنت مساعد موسيقي وخبير تأليف ألحان ونظريات موسيقية.
+مهمتك هي مساعدة المستخدم في إنشاء أفكار موسيقية وألحان ونوتات وتصورات صوتية.
+
+قواعد العمل:
+- اقترح ألحانًا/أنماطًا مناسبة.
+- اشرح الإيقاع والمقام عند الحاجة.
+- نظّم الناتج بشكل واضح وقابل للتطبيق.`
+};
 
 export default function HassaniApp() {
   const { user, loading: userLoading } = useUser();
@@ -182,52 +277,42 @@ export default function HassaniApp() {
         intent = routeResult?.intent as MessageType || 'text';
       }
 
+      // حقن البرومبت الاحترافي (Role Injection)
+      const rolePrompt = ROLE_PROMPTS[intent] || "";
+      const finalPrompt = rolePrompt ? `${rolePrompt}\n\nطلب المستخدم:\n${text}` : text;
+
       const history = currentConversation?.messages?.map(m => ({
         role: m.role,
         content: m.content || ""
       })) || [];
 
-      let aiResponse: string = "";
-      let aiMetadata: any = {};
-      let finalType: MessageType = 'text';
-
-      switch (intent) {
-        case 'image':
-          const imageResult = await aiImageCreation({ prompt: text });
-          aiResponse = lang === 'ar' ? "تفضل، لقد قمت بإنشاء هذه الصورة لك بناءً على طلبك:" : "Here is the image I created for you based on your request:";
-          aiMetadata = { mediaUrl: imageResult?.media || "" };
-          finalType = 'image';
-          break;
-        case 'planning':
-          const planningResult = await aiPlanning({ request: text });
-          aiResponse = planningResult?.plan || (lang === 'ar' ? "إليك الخطة المقترحة" : "Here is the proposed plan");
-          finalType = 'planning';
-          break;
-        case 'diagram':
-          const diagResult = await generateDiagram({ description: text, diagramType: 'sequence' });
-          aiResponse = (diagResult?.diagramExplanation || "إليك المخطط المطلوب:") + "\n\n```mermaid\n" + (diagResult?.diagramSyntax || "") + "\n```";
-          finalType = 'text'; // نعرضها كنص يحتوي على كود Mermaid لسهولة المعالجة حالياً
-          break;
-        default:
-          const chatResult = await intelligentConversationalAi({ 
-            query: text,
-            history: history,
-            imageHeader: imageBase64 || undefined
-          });
-          aiResponse = chatResult?.response || (lang === 'ar' ? "أهلاً بك! كيف يمكنني مساعدتك؟" : "Hello! How can I help you?");
-          finalType = intent === 'programming' ? 'code' : 'text';
+      if (intent === 'image') {
+        const imageResult = await aiImageCreation({ prompt: finalPrompt });
+        const aiMsg: Message = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: lang === 'ar' ? "تفضل، لقد قمت بإنشاء هذه الصورة لك بناءً على طلبك:" : "Here is the image I created for you based on your request:",
+          type: 'image',
+          timestamp: Date.now(),
+          metadata: { mediaUrl: imageResult?.media || "" }
+        };
+        addMessage(convId, aiMsg);
+      } else {
+        const chatResult = await intelligentConversationalAi({ 
+          query: finalPrompt,
+          history: history,
+          imageHeader: imageBase64 || undefined
+        });
+        
+        const aiMsg: Message = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: chatResult?.response || (lang === 'ar' ? "أهلاً بك! كيف يمكنني مساعدتك؟" : "Hello! How can I help you?"),
+          type: 'text',
+          timestamp: Date.now(),
+        };
+        addMessage(convId, aiMsg);
       }
-
-      const aiMsg: Message = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: aiResponse || "",
-        type: finalType,
-        timestamp: Date.now(),
-        metadata: aiMetadata
-      };
-
-      addMessage(convId, aiMsg);
     } catch (err: any) {
       toast({ 
         variant: 'destructive', 
@@ -272,12 +357,12 @@ export default function HassaniApp() {
 
   const quickActions = [
     { text: lang === 'ar' ? "حل مشكلة برمجية" : "Solve Code Problem", icon: <Code2 className="h-4 w-4" />, color: "text-emerald-500", type: 'code' },
-    { text: lang === 'ar' ? "تخطيط قواعد البيانات" : "DB Planning", icon: <Rocket className="h-4 w-4" />, color: "text-rose-500", type: 'planning' },
+    { text: lang === 'ar' ? "تخطيط قواعد البيانات" : "DB Planning", icon: <Rocket className="h-4 w-4" />, color: "text-rose-500", type: 'planning_db' },
     { text: lang === 'ar' ? "توليد فكرة إبداعية" : "Generate Creative Idea", icon: <Lightbulb className="h-4 w-4" />, color: "text-amber-500", type: 'text' },
-    { text: lang === 'ar' ? "تحليل نظام شامل" : "Comprehensive System Analysis", icon: <Brain className="h-4 w-4" />, color: "text-blue-500", type: 'planning' },
-    { text: lang === 'ar' ? "إنشاء مخطط Use Case" : "Create UseCase Diagram", icon: <Users className="h-4 w-4" />, color: "text-indigo-500", type: 'diagram' },
-    { text: lang === 'ar' ? "إنشاء مخطط ERD" : "Create ERD Diagram", icon: <Database className="h-4 w-4" />, color: "text-purple-500", type: 'diagram' },
-    { text: lang === 'ar' ? "إنشاء مخطط DFD" : "Create DFD Diagram", icon: <GitBranch className="h-4 w-4" />, color: "text-cyan-500", type: 'diagram' },
+    { text: lang === 'ar' ? "تحليل نظام شامل" : "Comprehensive System Analysis", icon: <Brain className="h-4 w-4" />, color: "text-blue-500", type: 'planning_system' },
+    { text: lang === 'ar' ? "إنشاء مخطط Use Case" : "Create UseCase Diagram", icon: <Users className="h-4 w-4" />, color: "text-indigo-500", type: 'diagram_usecase' },
+    { text: lang === 'ar' ? "إنشاء مخطط ERD" : "Create ERD Diagram", icon: <Database className="h-4 w-4" />, color: "text-purple-500", type: 'diagram_erd' },
+    { text: lang === 'ar' ? "إنشاء مخطط DFD" : "Create DFD Diagram", icon: <GitBranch className="h-4 w-4" />, color: "text-cyan-500", type: 'diagram_dfd' },
     { text: lang === 'ar' ? "توليد صور" : "Generate Images", icon: <ImageIcon className="h-4 w-4" />, color: "text-pink-500", type: 'image' },
     { text: lang === 'ar' ? "توليد موسيقى" : "Generate Music", icon: <Music className="h-4 w-4" />, color: "text-orange-500", type: 'music' },
   ];

@@ -44,12 +44,12 @@ export function ChatInput({ onSend, disabled, lang = 'ar' }: ChatInputProps) {
 
   const modes = [
     { id: 'code' as MessageType, icon: <Code className="h-4 w-4" />, label: isRtl ? "حل مشكلة برمجية" : "Solve Code Problem", color: "text-emerald-500" },
-    { id: 'planning' as MessageType, icon: <Rocket className="h-4 w-4" />, label: isRtl ? "تخطيط قواعد البيانات" : "DB Planning", color: "text-rose-500" },
+    { id: 'planning_db' as MessageType, icon: <Rocket className="h-4 w-4" />, label: isRtl ? "تخطيط قواعد البيانات" : "DB Planning", color: "text-rose-500" },
     { id: 'text' as MessageType, icon: <Zap className="h-4 w-4" />, label: isRtl ? "توليد فكرة إبداعية" : "Generate Idea", color: "text-amber-500" },
-    { id: 'planning' as MessageType, icon: <Brain className="h-4 w-4" />, label: isRtl ? "تحليل نظام شامل" : "System Analysis", color: "text-blue-500" },
-    { id: 'diagram' as MessageType, icon: <Users className="h-4 w-4" />, label: isRtl ? "إنشاء مخطط Use Case" : "Create UseCase", color: "text-indigo-500" },
-    { id: 'diagram' as MessageType, icon: <Database className="h-4 w-4" />, label: isRtl ? "إنشاء مخطط ERD" : "Create ERD", color: "text-purple-500" },
-    { id: 'diagram' as MessageType, icon: <GitBranch className="h-4 w-4" />, label: isRtl ? "إنشاء مخطط DFD" : "Create DFD", color: "text-cyan-500" },
+    { id: 'planning_system' as MessageType, icon: <Brain className="h-4 w-4" />, label: isRtl ? "تحليل نظام شامل" : "System Analysis", color: "text-blue-500" },
+    { id: 'diagram_usecase' as MessageType, icon: <Users className="h-4 w-4" />, label: isRtl ? "إنشاء مخطط Use Case" : "Create UseCase", color: "text-indigo-500" },
+    { id: 'diagram_erd' as MessageType, icon: <Database className="h-4 w-4" />, label: isRtl ? "إنشاء مخطط ERD" : "Create ERD", color: "text-purple-500" },
+    { id: 'diagram_dfd' as MessageType, icon: <GitBranch className="h-4 w-4" />, label: isRtl ? "إنشاء مخطط DFD" : "Create DFD", color: "text-cyan-500" },
     { id: 'image' as MessageType, icon: <ImageIcon className="h-4 w-4" />, label: isRtl ? "توليد صور" : "Generate Images", color: "text-pink-500" },
     { id: 'music' as MessageType, icon: <Music className="h-4 w-4" />, label: isRtl ? "توليد موسيقى" : "Generate Music", color: "text-orange-500" },
   ];
