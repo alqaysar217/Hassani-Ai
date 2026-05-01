@@ -1,9 +1,7 @@
 'use server';
 /**
- * @fileOverview يكتشف نية المستخدم باستخدام OpenRouter لضمان التجاوب الفوري.
+ * @fileOverview يكتشف نية المستخدم باستخدام المفتاح المحدث.
  */
-
-import { z } from 'zod';
 
 const OPENROUTER_API_KEY = "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";
 const MODEL = "google/gemini-2.0-flash-001";
@@ -24,7 +22,6 @@ export async function automaticIntentRouting(input: { query: string }) {
             content: `صنف طلب المستخدم التالي إلى واحد من هذه التصنيفات حصراً وأرجع التصنيف ككلمة واحدة فقط:
             - 'question': أسئلة عامة.
             - 'image': طلبات توليد صور.
-            - 'music': موسيقى.
             - 'programming': برمجة.
             - 'diagram': مخططات.
             - 'planning': تخطيط.`
@@ -32,12 +29,17 @@ export async function automaticIntentRouting(input: { query: string }) {
           { role: 'user', content: input.query }
         ],
         temperature: 0,
-      })
+      }),
+      signal: AbortSignal.timeout(5000) // مهلة قصيرة 5 ثواني
     });
 
     const data = await response.json();
     const intent = data.choices?.[0]?.message?.content?.toLowerCase().trim() || 'question';
-    return { intent: intent.includes('image') ? 'image' : intent.includes('diagram') ? 'diagram' : intent.includes('programming') ? 'programming' : 'question' };
+    
+    if (intent.includes('image')) return { intent: 'image' };
+    if (intent.includes('diagram')) return { intent: 'diagram' };
+    if (intent.includes('programming')) return { intent: 'programming' };
+    return { intent: 'question' };
   } catch (error) {
     return { intent: 'question' };
   }

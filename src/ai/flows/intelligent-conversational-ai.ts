@@ -1,6 +1,6 @@
 'use server';
 /**
- * @fileOverview المحرك الأساسي لحساني - يستخدم OpenRouter لضمان استقرار الردود وسرعتها.
+ * @fileOverview المحرك الأساسي لحساني - يستخدم OpenRouter مع المفتاح المحدث.
  */
 
 import { z } from 'zod';
@@ -72,16 +72,22 @@ export async function intelligentConversationalAi(input: z.infer<typeof Intellig
         model: MODEL,
         messages: messages,
         temperature: 0.7,
-      })
+      }),
+      signal: AbortSignal.timeout(30000) // مهلة 30 ثانية
     });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || `خطأ في السيرفر: ${response.status}`);
+    }
 
     const data = await response.json();
     if (data.choices && data.choices[0]) {
       return { response: data.choices[0].message.content };
     }
-    throw new Error(data.error?.message || "فشل في الحصول على رد");
+    throw new Error("فشل في الحصول على رد من الخادم");
   } catch (error: any) {
     console.error("Chat Error:", error);
-    return { response: "أعتذر، حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى." };
+    return { response: `أعتذر، حدث خطأ: ${error.message}. يرجى المحاولة مرة أخرى.` };
   }
 }

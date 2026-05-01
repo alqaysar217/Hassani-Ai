@@ -1,6 +1,6 @@
 'use server';
 /**
- * @fileOverview توليد مخططات Mermaid باستخدام OpenRouter.
+ * @fileOverview توليد مخططات Mermaid باستخدام المفتاح المحدث.
  */
 
 const OPENROUTER_API_KEY = "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";
@@ -28,14 +28,15 @@ export async function generateDiagram(input: { description: string, diagramType:
           { role: 'user', content: input.description }
         ],
         response_format: { type: 'json_object' }
-      })
+      }),
+      signal: AbortSignal.timeout(20000)
     });
 
     const data = await response.json();
     if (data.choices && data.choices[0]) {
       return JSON.parse(data.choices[0].message.content);
     }
-    throw new Error(data.error?.message || "فشل في توليد المخطط");
+    throw new Error("فشل في توليد المخطط");
   } catch (error: any) {
     throw new Error("خطأ في توليد المخطط: " + error.message);
   }
