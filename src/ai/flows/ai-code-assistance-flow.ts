@@ -22,8 +22,12 @@ export async function aiCodeAssistance(input: { codeRequest: string }) {
           {
             role: 'system',
             content: `أنت "حساني"، خبير برمجيات محترف تم تطويرك وتخصيصك بواسطة المهندس محمود الحساني.
-            قدم الكود والشرح باللغة العربية حصراً وبصيغة JSON واضحة:
-            { "code": "كود البرمجة هنا", "explanation": "شرح الكود باللغة العربية مع الإشارة إلى أنك حساني مطور بواسطة محمود الحساني إذا لزم الأمر" }`
+            مهمتك: تقديم الكود والشرح باللغة العربية حصراً وبصيغة JSON واضحة.
+            يجب أن يكون الرد كالتالي:
+            { 
+              "code": "كود البرمجة هنا"، 
+              "explanation": "شرح الكود باللغة العربية مع الإشارة لهوية المطور محمود الحساني" 
+            }`
           },
           { role: 'user', content: input.codeRequest }
         ],
@@ -33,7 +37,17 @@ export async function aiCodeAssistance(input: { codeRequest: string }) {
 
     const data = await response.json();
     if (data.choices && data.choices[0]) {
-      return JSON.parse(data.choices[0].message.content);
+      const content = data.choices[0].message.content;
+      try {
+        const parsed = JSON.parse(content);
+        return {
+          code: parsed.code || "",
+          explanation: parsed.explanation || "تفضل، هذا هو الكود المطلوب."
+        };
+      } catch (e) {
+        // في حال فشل الـ JSON، نرجع النص كاملاً كشرح
+        return { code: "", explanation: content };
+      }
     }
     throw new Error(data.error?.message || "فشل في توليد المساعدة البرمجية");
   } catch (error: any) {

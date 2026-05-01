@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -198,7 +197,7 @@ export default function HassaniApp() {
           const codeResult = await aiCodeAssistance({ codeRequest: text });
           const codeSnippet = codeResult?.code || "";
           const expl = codeResult?.explanation || "";
-          // دمج الشرح والكود في رسالة واحدة باستخدام Markdown
+          // دمج الشرح والكود في رسالة واحدة متكاملة ومنسقة
           aiResponse = `${expl}\n\n\`\`\`\n${codeSnippet}\n\`\`\``;
           aiMetadata = { 
             code: codeSnippet, 
@@ -221,7 +220,7 @@ export default function HassaniApp() {
           const diagramResult = await generateDiagram({ description: text, diagramType: dType });
           const syntax = diagramResult?.diagramSyntax || "";
           const diagramExpl = diagramResult?.diagramExplanation || "";
-          // دمج شرح المخطط والكود البرمجي له في رسالة واحدة
+          // دمج شرح المخطط والكود في رسالة واحدة
           aiResponse = `${diagramExpl}\n\n\`\`\`mermaid\n${syntax}\n\`\`\``;
           aiMetadata = { 
             diagramSyntax: syntax, 
@@ -240,7 +239,7 @@ export default function HassaniApp() {
             history: history,
             imageHeader: imageBase64 || undefined
           });
-          aiResponse = chatResult?.response || (lang === 'ar' ? "عذراً، لم أتمكن من معالجة الطلب." : "Sorry, I couldn't process the request.");
+          aiResponse = chatResult?.response || (lang === 'ar' ? "أهلاً بك! كيف يمكنني مساعدتك؟" : "Hello! How can I help you?");
       }
 
       const aiMsg: Message = {
