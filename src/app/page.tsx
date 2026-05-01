@@ -263,10 +263,10 @@ export default function HassaniApp() {
       metadata: file ? { mediaUrl: imageBase64 } : {}
     };
 
-    const newConvId = await addMessage(activeId, userMsg);
-    if (!activeId && newConvId) activeId = newConvId;
-
     try {
+      const newConvId = await addMessage(activeId, userMsg);
+      if (!activeId && newConvId) activeId = newConvId;
+
       let intent = type;
       if (type === 'text') {
         const routeResult = await automaticIntentRouting({ query: text }).catch(() => ({ intent: 'question' }));
@@ -276,8 +276,8 @@ export default function HassaniApp() {
       const rolePrompt = ROLE_PROMPTS[intent] || "";
       const finalPrompt = rolePrompt ? `${rolePrompt}\n\nطلب المستخدم:\n${text}` : text;
 
-      const history = currentConversation?.messages?.map(m => ({
-        role: m.role,
+      const history = currentConversation?.messages?.slice(-10).map(m => ({
+        role: m.role as 'user' | 'assistant',
         content: m.content || ""
       })) || [];
 

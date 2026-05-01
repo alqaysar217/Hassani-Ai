@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview يكتشف هذا التدفق نية المستخدم باستخدام OpenRouter.
@@ -48,9 +49,12 @@ export async function automaticIntentRouting(
       })
     });
 
+    if (!response.ok) return { intent: 'question' };
+
     const data = await response.json();
     if (data.choices && data.choices[0]) {
-      return JSON.parse(data.choices[0].message.content);
+      const result = JSON.parse(data.choices[0].message.content);
+      return { intent: result.intent || 'question' };
     }
     return { intent: 'question' };
   } catch (error) {

@@ -61,25 +61,25 @@ export async function intelligentConversationalAi(
       }
     ];
 
+    // إضافة تاريخ المحادثة
     if (input.history && input.history.length > 0) {
       input.history.forEach(msg => {
         messages.push({ role: msg.role, content: msg.content });
       });
     }
 
-    const currentContent: any[] = [];
-    if (input.query) {
-      currentContent.push({ type: 'text', text: input.query });
-    }
-    
+    // تجهيز محتوى الرسالة الحالية
+    let userContent: any;
     if (input.imageHeader) {
-      currentContent.push({
-        type: 'image_url',
-        image_url: { url: input.imageHeader }
-      });
+      userContent = [
+        { type: 'text', text: input.query },
+        { type: 'image_url', image_url: { url: input.imageHeader } }
+      ];
+    } else {
+      userContent = input.query;
     }
 
-    messages.push({ role: 'user', content: currentContent });
+    messages.push({ role: 'user', content: userContent });
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -93,17 +93,24 @@ export async function intelligentConversationalAi(
         model: MODEL,
         messages: messages,
         temperature: 0.7,
+        max_tokens: 4000
       })
     });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || `خطأ في الخادم: ${response.status}`);
+    }
 
     const data = await response.json();
     
     if (data.choices && data.choices[0]) {
       return { response: data.choices[0].message.content };
     } else {
-      throw new Error("فشل الاتصال بمحرك الاستجابة");
+      throw new Error("لم يتم استلام أي رد من محرك الذكاء الاصطناعي.");
     }
   } catch (error: any) {
-    return { response: "عذراً، حدث خطأ في الاتصال: " + error.message };
+    console.error("Chat Error:", error);
+    return { response: `عذراً، واجهت مشكلة تقنية: ${error.message}. يرجى المحاولة مرة أخرى.` };
   }
 }
