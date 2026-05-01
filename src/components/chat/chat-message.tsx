@@ -83,11 +83,14 @@ export function ChatMessage({ message }: ChatMessageProps) {
           "px-6 py-5 shadow-sm transition-all duration-300 overflow-hidden",
           isAI ? "chat-bubble-ai rounded-[28px] rounded-tr-sm" : "chat-bubble-user rounded-[28px] rounded-tl-sm"
         )}>
-          {/* عرض المحتوى الأساسي باستخدام Markdown - يدعم النصوص والأكواد والجداول في رسالة واحدة */}
           <div className="prose prose-stone dark:prose-invert max-w-none prose-p:leading-relaxed prose-p:text-lg prose-p:font-medium prose-strong:font-black prose-headings:font-black prose-table:my-6 prose-table:border-collapse prose-table:rounded-xl prose-table:overflow-hidden">
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}
               components={{
+                // حل مشكلة التداخل: استخدام div بدلاً من p لتجنب أخطاء Hydration
+                p({ children }) {
+                  return <div className="mb-4 last:mb-0 leading-relaxed text-lg font-medium">{children}</div>;
+                },
                 code({ node, inline, className, children, ...props }: any) {
                   const match = /language-(\w+)/.exec(className || '');
                   return !inline ? (
@@ -139,7 +142,6 @@ export function ChatMessage({ message }: ChatMessageProps) {
             </ReactMarkdown>
           </div>
 
-          {/* عرض الصورة إذا كانت موجودة */}
           {message.type === 'image' && message.metadata?.mediaUrl && (
             <div className="mt-4 space-y-4">
                <div className="relative aspect-square w-full min-w-[280px] rounded-2xl overflow-hidden border border-primary/5 shadow-2xl">
