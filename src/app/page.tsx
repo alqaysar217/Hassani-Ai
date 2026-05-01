@@ -365,8 +365,8 @@ export default function HassaniApp() {
                       <ChatMessage key={msg.id} message={msg} />
                     ))}
                     {isLoading && (
-                      <div className="flex justify-start items-center gap-3 animate-fade-in w-full">
-                        <div className="bg-card px-6 py-4 rounded-3xl rounded-tr-sm border border-primary/10 flex items-center gap-3 shadow-sm animate-pulse">
+                      <div className="flex justify-end items-center gap-3 animate-fade-in w-full">
+                        <div className="bg-card px-6 py-4 rounded-3xl rounded-tl-sm border border-primary/10 flex items-center gap-3 shadow-sm animate-pulse">
                           <div className="flex gap-1">
                             <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce"></div>
                             <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.2s]"></div>

@@ -85,11 +85,11 @@
 }
 
 .chat-bubble-user {
-  @apply bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-[22px] rounded-tl-sm shadow-lg shadow-primary/10;
+  @apply bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-[22px] rounded-tr-sm shadow-lg shadow-primary/10;
 }
 
 .chat-bubble-ai {
-  @apply bg-card text-foreground rounded-[22px] rounded-tr-sm border border-primary/10 shadow-sm overflow-hidden;
+  @apply bg-card text-foreground rounded-[22px] rounded-tl-sm border border-primary/10 shadow-sm overflow-hidden;
 }
 
 .glass-morphism {
@@ -117,7 +117,6 @@
   background: linear-gradient(135deg, #C5A059 0%, #D4AF37 50%, #B8860B 100%);
 }
 
-/* التنسيقات القوية للتجاوب */
 .prose {
   @apply max-w-full overflow-hidden break-words;
 }
@@ -136,7 +135,6 @@
   @apply max-w-full h-auto rounded-xl;
 }
 
-/* ضمان عدم تمدد الحاويات المرنة */
 .min-w-0-fix {
   min-width: 0;
 }

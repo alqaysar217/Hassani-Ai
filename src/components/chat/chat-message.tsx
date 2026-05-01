@@ -49,7 +49,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
   return (
     <div className={cn(
       "flex w-full group animate-fade-in-up overflow-hidden mb-6",
-      isAI ? "justify-start" : "justify-end"
+      isAI ? "justify-end" : "justify-start"
     )}>
       <div className={cn(
         "relative flex flex-col gap-2 w-full max-w-[95%] md:max-w-[85%] min-w-0",
@@ -57,7 +57,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
       )}>
         <div className={cn(
           "flex items-center gap-2 px-1",
-          !isAI && "flex-row-reverse"
+          isAI && "flex-row-reverse"
         )}>
           <div className={cn(
             "h-7 w-7 rounded-full flex items-center justify-center overflow-hidden shadow-sm border border-primary/10 bg-card shrink-0",
@@ -87,7 +87,6 @@ export function ChatMessage({ message }: ChatMessageProps) {
               remarkPlugins={[remarkGfm]}
               components={{
                 p({ children }) {
-                  // استخدام div بدلاً من p لتجنب مشاكل التداخل البرمجي
                   return <div className="mb-4 last:mb-0 leading-relaxed text-base md:text-lg font-medium break-words">{children}</div>;
                 },
                 code({ node, inline, className, children, ...props }: any) {
