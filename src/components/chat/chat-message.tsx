@@ -23,14 +23,15 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const { user } = useUser();
   const db = useFirestore();
   const [copied, setCopied] = React.useState(false);
+  const [fullCopied, setFullCopied] = React.useState(false);
   const [userProfile, setUserProfile] = useState<{ photoURL?: string, displayName?: string } | null>(null);
 
   const isAI = message.role === 'assistant';
 
   useEffect(() => {
     if (!isAI && user) {
-      const unsubscribe = onSnapshot(doc(db, 'users', user.uid), (doc) => {
-        if (doc.exists()) setUserProfile(doc.data());
+      const unsubscribe = onSnapshot(doc(db, 'users', user.uid), (docSnapshot) => {
+        if (docSnapshot.exists()) setUserProfile(docSnapshot.data() as any);
       });
       return () => unsubscribe();
     }
@@ -40,8 +41,16 @@ export function ChatMessage({ message }: ChatMessageProps) {
     if (!text || text === "undefined") return;
     navigator.clipboard.writeText(text);
     setCopied(true);
-    toast({ title: "تم النسخ" });
+    toast({ title: "تم نسخ الكود" });
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const copyFullMessage = () => {
+    if (!message.content) return;
+    navigator.clipboard.writeText(message.content);
+    setFullCopied(true);
+    toast({ title: "تم نسخ الرسالة بالكامل" });
+    setTimeout(() => setFullCopied(false), 2000);
   };
 
   const userPhoto = userProfile?.photoURL || user?.photoURL || undefined;
@@ -77,6 +86,15 @@ export function ChatMessage({ message }: ChatMessageProps) {
               </Avatar>
             )}
           </div>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity rounded-full hover:bg-primary/10"
+            onClick={copyFullMessage}
+            title="نسخ الرسالة بالكامل"
+          >
+            {fullCopied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3 text-muted-foreground" />}
+          </Button>
         </div>
 
         <div className={cn(
@@ -90,6 +108,9 @@ export function ChatMessage({ message }: ChatMessageProps) {
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}
               components={{
+                div({ children }) {
+                  return <div className="mb-4 last:mb-0 leading-relaxed text-base md:text-lg font-medium break-words" style={{ unicodeBidi: 'isolate' }}>{children}</div>;
+                },
                 p({ children }) {
                   return <div className="mb-4 last:mb-0 leading-relaxed text-base md:text-lg font-medium break-words" style={{ unicodeBidi: 'isolate' }}>{children}</div>;
                 },
@@ -108,7 +129,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
                     <div className="my-4 rounded-xl overflow-hidden bg-secondary border border-white/5 shadow-xl w-full max-w-full" dir="ltr">
                       <div className="flex items-center justify-between px-5 py-2 bg-white/5 border-b border-white/5">
                         <span className="text-[9px] font-black opacity-60 uppercase tracking-widest text-white">
-                          {match ? match[1] : 'Code'}
+                          {match ? match[1] : 'Link/Code'}
                         </span>
                         <Button 
                           variant="ghost" 
