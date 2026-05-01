@@ -49,11 +49,11 @@ export function ChatMessage({ message }: ChatMessageProps) {
   return (
     <div className={cn(
       "flex w-full group animate-fade-in-up overflow-hidden mb-6",
-      isAI ? "justify-end" : "justify-start" // حساني لليمين، المستخدم لليسار
-    )}>
+      isAI ? "justify-end" : "justify-start"
+    )} dir="rtl">
       <div className={cn(
         "relative flex flex-col gap-2 w-full max-w-[95%] md:max-w-[85%] min-w-0",
-        isAI ? "items-end text-start" : "items-start text-start" // محاذاة العناصر والنص للبداية (اليمين في RTL)
+        isAI ? "items-end" : "items-start"
       )}>
         <div className={cn(
           "flex items-center gap-2 px-1",
@@ -79,16 +79,21 @@ export function ChatMessage({ message }: ChatMessageProps) {
         </div>
 
         <div className={cn(
-          "px-4 md:px-6 py-4 md:py-5 shadow-sm transition-all duration-300 w-full overflow-x-auto min-w-0 no-scrollbar text-start",
+          "px-4 md:px-6 py-4 md:py-5 shadow-sm transition-all duration-300 w-full overflow-x-auto min-w-0 no-scrollbar text-right",
           isAI ? "chat-bubble-ai" : "chat-bubble-user"
         )}>
-          <div className="prose prose-stone dark:prose-invert max-w-full overflow-hidden break-words text-start">
+          <div className="prose prose-stone dark:prose-invert max-w-full overflow-hidden break-words text-right">
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}
               components={{
                 p({ children }) {
-                  return <div className="mb-4 last:mb-0 leading-relaxed text-base md:text-lg font-medium break-words text-start">{children}</div>;
+                  return <div className="mb-4 last:mb-0 leading-relaxed text-base md:text-lg font-medium break-words text-right">{children}</div>;
                 },
+                h1({ children }) { return <h1 className="text-right font-black mb-4">{children}</h1> },
+                h2({ children }) { return <h2 className="text-right font-black mb-3">{children}</h2> },
+                h3({ children }) { return <h3 className="text-right font-black mb-2">{children}</h3> },
+                ul({ children }) { return <ul className="text-right list-disc list-inside mb-4">{children}</ul> },
+                ol({ children }) { return <ol className="text-right list-decimal list-inside mb-4">{children}</ol> },
                 code({ node, inline, className, children, ...props }: any) {
                   const match = /language-(\w+)/.exec(className || '');
                   const codeContent = String(children).replace(/\n$/, '');
@@ -124,7 +129,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
                 },
                 table({ children }) {
                   return (
-                    <div className="my-6 w-full overflow-x-auto no-scrollbar rounded-xl border border-primary/10 bg-card shadow-lg">
+                    <div className="my-6 w-full overflow-x-auto no-scrollbar rounded-xl border border-primary/10 bg-card shadow-lg" dir="rtl">
                       <table className="min-w-full divide-y divide-primary/10 border-collapse">
                         {children}
                       </table>
@@ -135,10 +140,10 @@ export function ChatMessage({ message }: ChatMessageProps) {
                   return <thead className="bg-primary/5">{children}</thead>;
                 },
                 th({ children }) {
-                  return <th className="px-4 py-3 text-start text-[11px] md:text-xs font-black text-primary uppercase tracking-wider border-b border-primary/10 whitespace-nowrap">{children}</th>;
+                  return <th className="px-4 py-3 text-right text-[11px] md:text-xs font-black text-primary uppercase tracking-wider border-b border-primary/10 whitespace-nowrap">{children}</th>;
                 },
                 td({ children }) {
-                  return <td className="px-4 py-3 text-[12px] md:text-sm font-medium border-b border-primary/5 whitespace-nowrap">{children}</td>;
+                  return <td className="px-4 py-3 text-right text-[12px] md:text-sm font-medium border-b border-primary/5 whitespace-nowrap">{children}</td>;
                 }
               }}
             >
