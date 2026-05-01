@@ -24,7 +24,8 @@ import {
   Users,
   Database,
   GitBranch,
-  Home
+  ArrowRight,
+  ArrowLeft
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
@@ -102,8 +103,8 @@ const ROLE_PROMPTS: Record<string, string> = {
 
 قواعد العمل:
 - استخرج External Entities بدقة.
-- حدّد العمليات الرئيسية للنظام.
-- حدّد Data Stores.
+- حدّبد العمليات الرئيسية للنظام.
+- حدّبد Data Stores.
 - أنشئ Context Diagram أولًا ثم المستويات الأخرى.
 - ولّد Mermaid Code صالح للرسم.
 - اشرح كل مستوى بعد إنشائه.`,
@@ -161,7 +162,7 @@ export default function HassaniApp() {
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
-    const savedLang = localStorage.getItem('lang') as 'ar' | 'en' || 'ar';
+    const savedLang = (localStorage.getItem('lang') as 'ar' | 'en') || 'ar';
     setLang(savedLang);
     if (savedTheme === 'dark') document.documentElement.classList.add('dark');
     document.documentElement.dir = savedLang === 'ar' ? 'rtl' : 'ltr';
@@ -240,6 +241,7 @@ export default function HassaniApp() {
   };
 
   const handleSendMessage = async (text: string, type: MessageType = 'text', file: File | null = null) => {
+    if (!text && !file) return;
     setIsLoading(true);
     let activeId = currentId;
 
@@ -261,15 +263,14 @@ export default function HassaniApp() {
       metadata: file ? { mediaUrl: imageBase64 } : {}
     };
 
-    // إضافة الرسالة (ستنشئ محادثة تلقائياً إذا لم تكن موجودة)
     const newConvId = await addMessage(activeId, userMsg);
     if (!activeId && newConvId) activeId = newConvId;
 
     try {
       let intent = type;
       if (type === 'text') {
-        const routeResult = await automaticIntentRouting({ query: text });
-        intent = routeResult?.intent as MessageType || 'text';
+        const routeResult = await automaticIntentRouting({ query: text }).catch(() => ({ intent: 'question' }));
+        intent = (routeResult?.intent as MessageType) || 'text';
       }
 
       const rolePrompt = ROLE_PROMPTS[intent] || "";
@@ -290,7 +291,7 @@ export default function HassaniApp() {
           timestamp: Date.now(),
           metadata: { mediaUrl: imageResult?.media || "" }
         };
-        if (activeId) addMessage(activeId, aiMsg);
+        if (activeId) await addMessage(activeId, aiMsg);
       } else {
         const chatResult = await intelligentConversationalAi({ 
           query: finalPrompt,
@@ -305,7 +306,7 @@ export default function HassaniApp() {
           type: 'text',
           timestamp: Date.now(),
         };
-        if (activeId) addMessage(activeId, aiMsg);
+        if (activeId) await addMessage(activeId, aiMsg);
       }
     } catch (err: any) {
       toast({ 
@@ -383,14 +384,16 @@ export default function HassaniApp() {
         <SidebarInset className="flex flex-col h-full w-full relative overflow-hidden bg-background" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
           <header className="h-14 flex items-center justify-between px-5 glass-morphism sticky top-0 z-30 shrink-0">
             <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-8 w-8 rounded-lg hover:bg-primary/10"
-                onClick={() => setCurrentId(null)}
-              >
-                <Home className="h-4 w-4 text-primary" />
-              </Button>
+              {currentId && (
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-8 w-8 rounded-lg hover:bg-primary/10"
+                  onClick={() => setCurrentId(null)}
+                >
+                  {lang === 'ar' ? <ArrowRight className="h-4 w-4 text-primary" /> : <ArrowLeft className="h-4 w-4 text-primary" />}
+                </Button>
+              )}
               <div className="relative h-6 w-6 overflow-hidden rounded-full shadow-lg border border-primary/10">
                 <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" />
               </div>
