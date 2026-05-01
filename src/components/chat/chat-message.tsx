@@ -53,11 +53,11 @@ export function ChatMessage({ message }: ChatMessageProps) {
     )}>
       <div className={cn(
         "relative flex flex-col gap-2 w-full max-w-[95%] md:max-w-[85%] min-w-0",
-        isAI ? "items-end" : "items-start" // محاذاة المحتوى داخل الفقاعة
+        isAI ? "items-end text-start" : "items-start text-start" // محاذاة العناصر والنص للبداية (اليمين في RTL)
       )}>
         <div className={cn(
           "flex items-center gap-2 px-1",
-          !isAI && "flex-row-reverse" // تعديل مكان الاسم والأفاتار
+          !isAI && "flex-row-reverse"
         )}>
           <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">
             {isAI ? "حساني" : "أنت"}
@@ -79,16 +79,15 @@ export function ChatMessage({ message }: ChatMessageProps) {
         </div>
 
         <div className={cn(
-          "px-4 md:px-6 py-4 md:py-5 shadow-sm transition-all duration-300 w-full overflow-x-auto min-w-0 no-scrollbar",
+          "px-4 md:px-6 py-4 md:py-5 shadow-sm transition-all duration-300 w-full overflow-x-auto min-w-0 no-scrollbar text-start",
           isAI ? "chat-bubble-ai" : "chat-bubble-user"
         )}>
-          <div className="prose prose-stone dark:prose-invert max-w-full overflow-hidden break-words">
+          <div className="prose prose-stone dark:prose-invert max-w-full overflow-hidden break-words text-start">
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}
               components={{
-                // حل مشكلة Hydration: استخدام div بدلاً من p لتجنب تداخل div (مثل الكود) داخل p
                 p({ children }) {
-                  return <div className="mb-4 last:mb-0 leading-relaxed text-base md:text-lg font-medium break-words">{children}</div>;
+                  return <div className="mb-4 last:mb-0 leading-relaxed text-base md:text-lg font-medium break-words text-start">{children}</div>;
                 },
                 code({ node, inline, className, children, ...props }: any) {
                   const match = /language-(\w+)/.exec(className || '');
