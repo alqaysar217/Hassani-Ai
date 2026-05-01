@@ -1,44 +1,44 @@
 'use server';
 /**
- * @fileOverview يكتشف نية المستخدم باستخدام Genkit لضمان التجاوب الفوري.
+ * @fileOverview يكتشف نية المستخدم باستخدام OpenRouter لضمان التجاوب الفوري.
  */
 
-import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 
-const AutomaticIntentRoutingOutputSchema = z.object({
-  intent: z
-    .enum(['question', 'image', 'music', 'programming', 'diagram', 'planning'])
-    .describe('النية المكتشفة من طلب المستخدم.'),
-});
-export type AutomaticIntentRoutingOutput = z.infer<typeof AutomaticIntentRoutingOutputSchema>;
+const OPENROUTER_API_KEY = "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";
+const MODEL = "google/gemini-2.0-flash-001";
 
-export async function automaticIntentRouting(
-  input: { query: string },
-): Promise<AutomaticIntentRoutingOutput> {
-  return automaticIntentRoutingFlow(input);
-}
-
-const automaticIntentRoutingFlow = ai.defineFlow(
-  {
-    name: 'automaticIntentRoutingFlow',
-    inputSchema: z.object({ query: z.string() }),
-    outputSchema: AutomaticIntentRoutingOutputSchema,
-  },
-  async (input) => {
-    const { output } = await ai.generate({
-      prompt: `صنف طلب المستخدم التالي إلى واحد من هذه التصنيفات حصراً:
-      - 'question': أسئلة عامة أو دردشة.
-      - 'image': طلبات توليد أو تعديل صور.
-      - 'music': طلبات متعلقة بالموسيقى أو الألحان.
-      - 'programming': مساعدة برمجية أو إصلاح أكواد.
-      - 'diagram': طلب مخططات (ERD, DFD, Use Case).
-      - 'planning': تخطيط أنظمة أو قواعد بيانات.
-      
-      طلب المستخدم: ${input.query}`,
-      output: { schema: AutomaticIntentRoutingOutputSchema }
+export async function automaticIntentRouting(input: { query: string }) {
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [
+          {
+            role: 'system',
+            content: `صنف طلب المستخدم التالي إلى واحد من هذه التصنيفات حصراً وأرجع التصنيف ككلمة واحدة فقط:
+            - 'question': أسئلة عامة.
+            - 'image': طلبات توليد صور.
+            - 'music': موسيقى.
+            - 'programming': برمجة.
+            - 'diagram': مخططات.
+            - 'planning': تخطيط.`
+          },
+          { role: 'user', content: input.query }
+        ],
+        temperature: 0,
+      })
     });
 
-    return output || { intent: 'question' };
+    const data = await response.json();
+    const intent = data.choices?.[0]?.message?.content?.toLowerCase().trim() || 'question';
+    return { intent: intent.includes('image') ? 'image' : intent.includes('diagram') ? 'diagram' : intent.includes('programming') ? 'programming' : 'question' };
+  } catch (error) {
+    return { intent: 'question' };
   }
-);
+}

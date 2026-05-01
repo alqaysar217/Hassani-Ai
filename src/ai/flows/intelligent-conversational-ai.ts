@@ -1,10 +1,9 @@
 'use server';
 /**
- * @fileOverview المحرك الأساسي لحساني - يستخدم Genkit لضمان استقرار الردود وسرعتها.
+ * @fileOverview المحرك الأساسي لحساني - يستخدم OpenRouter لضمان استقرار الردود وسرعتها.
  */
 
-import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 
 const MessageSchema = z.object({
   role: z.enum(['user', 'assistant']),
@@ -12,22 +11,13 @@ const MessageSchema = z.object({
 });
 
 const IntelligentConversationalAiInputSchema = z.object({
-  query: z.string().describe('سؤال المستخدم أو طلبه.'),
-  history: z.array(MessageSchema).optional().describe('تاريخ المحادثة السابقة لسياق الذاكرة.'),
-  imageHeader: z.string().optional().describe('بيانات الصورة بتنسيق base64 (اختياري).'),
+  query: z.string(),
+  history: z.array(MessageSchema).optional(),
+  imageHeader: z.string().optional(),
 });
-export type IntelligentConversationalAiInput = z.infer<typeof IntelligentConversationalAiInputSchema>;
 
-const IntelligentConversationalAiOutputSchema = z.object({
-  response: z.string().describe('رد المساعد الذكي.'),
-});
-export type IntelligentConversationalAiOutput = z.infer<typeof IntelligentConversationalAiOutputSchema>;
-
-export async function intelligentConversationalAi(
-  input: IntelligentConversationalAiInput
-): Promise<IntelligentConversationalAiOutput> {
-  return intelligentConversationalAiFlow(input);
-}
+const OPENROUTER_API_KEY = "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";
+const MODEL = "google/gemini-2.0-flash-001";
 
 const SYSTEM_PROMPT = `أنت "حساني"، مساعد ذكي متطور تمتلك شخصية مستقلة صممها المهندس محمود الحساني.
 
@@ -47,34 +37,51 @@ const SYSTEM_PROMPT = `أنت "حساني"، مساعد ذكي متطور تمت
 - الحسابات الرسمية:
   - يوتيوب: \`https://www.youtube.com/@mahmoud_code\`
   - إنستغرام: \`https://www.instagram.com/mahmoud_codes/\`
-  - فيسبوك: \`https://www.facebook.com/pr.mahmoud.20\``;
+  - فيسبوك: \`https://www.facebook.com/pr.mahmoud.20\`
 
-const intelligentConversationalAiFlow = ai.defineFlow(
-  {
-    name: 'intelligentConversationalAiFlow',
-    inputSchema: IntelligentConversationalAiInputSchema,
-    outputSchema: IntelligentConversationalAiOutputSchema,
-  },
-  async (input) => {
-    const history = input.history?.map(m => ({
-      role: m.role,
-      content: [{ text: m.content }]
-    })) || [];
+عند كتابة نصوص مختلطة (عربي وإنجليزي):
+- حافظ على اتجاه RTL للنص العربي.
+- اعزل المصطلحات الإنجليزية لتبدو مرتبة.
+- ضع علامات الترقيم في نهاية الجمل العربية بشكل صحيح.`;
 
-    const promptParts: any[] = [{ text: input.query }];
-    if (input.imageHeader) {
-      promptParts.push({ media: { url: input.imageHeader, contentType: 'image/jpeg' } });
-    }
-
-    const { text } = await ai.generate({
-      system: SYSTEM_PROMPT,
-      history: history as any,
-      prompt: promptParts,
-      config: {
-        temperature: 0.7,
+export async function intelligentConversationalAi(input: z.infer<typeof IntelligentConversationalAiInputSchema>) {
+  try {
+    const messages = [
+      { role: 'system', content: SYSTEM_PROMPT },
+      ...(input.history?.map(h => ({ role: h.role, content: h.content })) || []),
+      { 
+        role: 'user', 
+        content: input.imageHeader 
+          ? [
+              { type: 'text', text: input.query },
+              { type: 'image_url', image_url: { url: input.imageHeader } }
+            ]
+          : input.query 
       }
+    ];
+
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://hassani-ai.web.app',
+        'X-Title': 'Hassani AI'
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: messages,
+        temperature: 0.7,
+      })
     });
 
-    return { response: text || "أهلاً بك! كيف يمكنني مساعدتك؟" };
+    const data = await response.json();
+    if (data.choices && data.choices[0]) {
+      return { response: data.choices[0].message.content };
+    }
+    throw new Error(data.error?.message || "فشل في الحصول على رد");
+  } catch (error: any) {
+    console.error("Chat Error:", error);
+    return { response: "أعتذر، حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى." };
   }
-);
+}
