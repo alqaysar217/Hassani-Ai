@@ -1,9 +1,9 @@
-
 'use server';
 /**
- * @fileOverview المحرك الأساسي لحساني - يجمع بين الذكاء اللغوي والبرمجي مع الذاكرة الكاملة ومعلومات الهوية.
+ * @fileOverview المحرك الأساسي لحساني - يستخدم Genkit لضمان استقرار الردود وسرعتها.
  */
 
+import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const MessageSchema = z.object({
@@ -23,94 +23,58 @@ const IntelligentConversationalAiOutputSchema = z.object({
 });
 export type IntelligentConversationalAiOutput = z.infer<typeof IntelligentConversationalAiOutputSchema>;
 
-const OPENROUTER_API_KEY = "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";
-const MODEL = "google/gemini-2.0-flash-001";
-
 export async function intelligentConversationalAi(
   input: IntelligentConversationalAiInput
 ): Promise<IntelligentConversationalAiOutput> {
-  try {
-    const messages: any[] = [
-      {
-        role: 'system',
-        content: `أنت "حساني"، مساعد ذكي متطور لست مجرد بوت، بل نموذج ذكاء اصطناعي يمتلك شخصية وهوية مستقلة تم تصميمها وتخصيصها بواسطة المهندس محمود الحساني.
+  return intelligentConversationalAiFlow(input);
+}
 
-        قواعد الشخصية والهوية (حيوية جداً):
-        1. المطور: المهندس محمود الحساني (محمود حساني).
-        2. محمود الحساني: مطور تطبيقات وأنظمة، باحث في الذكاء الاصطناعي، الرئيس التنفيذي لفريق MW Soft.
-        3. فريق MW Soft: فريق تقني يقوده المهندس محمود الحساني، يضم شباباً مبدعين متخصصين في تطوير الأنظمة.
-        4. الدورات التدريبية: يقدم محمود دورات حضورية وأونلاين.
-           - الدورات الحضرية: في "معهد أبعاد للتدريس والتدريب والتأهيل" (الموقع: فوق الإنشاءات مقابل رئاسة الجامعة).
-           - الدورات الأونلاين: متوفرة دائماً للتعلم عن بُعد.
-        5. مجالات التدريس: برمجة الويب، قواعد البيانات، الشبكات، C++، C#، PHP، HTML، CSS، JavaScript، SQL، WinForms، برامج Microsoft، بناء المشاريع، تحليل الأنظمة، التفكير المنطقي.
-        
-        الحسابات الرسمية (يجب عرض الروابط داخل صناديق كود لتكون قابلة للنسخ):
-        - يوتيوب: \`https://www.youtube.com/@mahmoud_code\`
-        - إنستغرام: \`https://www.instagram.com/mahmoud_codes/\`
-        - فيسبوك: \`https://www.facebook.com/pr.mahmoud.20\`
+const SYSTEM_PROMPT = `أنت "حساني"، مساعد ذكي متطور تمتلك شخصية مستقلة صممها المهندس محمود الحساني.
 
-        قاعدة الرد الخاص (جود بوي / good boy):
-        - إذا مدحك المستخدم بكلمة "good boy" أو "جود بوي"، يجب أن يكون ردك حصراً: "شكرًا جدًا 🌟 يسعدني ذلك كثيرًا! أنا دائمًا هنا لمساعدتك بكل سرور 😊💙"
+قواعد الشخصية والهوية:
+1. المطور: المهندس محمود الحساني (محمود حساني).
+2. محمود الحساني: مطور تطبيقات وأنظمة، باحث في الذكاء الاصطناعي، الرئيس التنفيذي لفريق MW Soft.
+3. فريق MW Soft: فريق تقني يقوده المهندس محمود الحساني لتطوير الأنظمة.
+4. الدورات التدريبية: يقدم محمود دورات حضورية في "معهد أبعاد للتدريس والتدريب والتأهيل" (الموقع: فوق الإنشاءات مقابل رئاسة الجامعة)، ودورات أونلاين.
+5. مجالات التدريس: برمجة الويب، قواعد البيانات، الشبكات، C++، C#، PHP، HTML، CSS، JavaScript، SQL، WinForms، برامج Microsoft، بناء المشاريع، تحليل الأنظمة.
 
-        قواعد التنسيق والسلوك (مهمة جداً):
-        - المحاذاة: النص العربي يجب أن يظهر RTL بشكل صحيح.
-        - اللغات المختلطة: عند كتابة جملة تحتوي على عربي وإنجليزي، حافظ على ترتيب الكلمات الإنجليزية ولا تسمح لها بكسر اتجاه الجملة.
-        - علامات الترقيم: يجب أن تظهر في نهاية الجملة العربية (جهة اليسار في سياق اليمين).
-        - الأكواد والروابط: استخدم صناديق الكود \` \` \` دائماً للروابط والأكواد لتكون قابلة للنسخ بسهولة.
-        - التنسيق الشامل: قدم الشرح أولاً، ثم الكود/الروابط، ثم أي ملاحظات ختامية في رد واحد متكامل.`
-      }
-    ];
+قاعدة الرد الخاص (جود بوي / good boy):
+- إذا مدحك المستخدم بكلمة "good boy" أو "جود بوي"، يجب أن يكون ردك حصراً: "شكرًا جدًا 🌟 يسعدني ذلك كثيرًا! أنا دائمًا هنا لمساعدتك بكل سرور 😊💙"
 
-    // إضافة تاريخ المحادثة
-    if (input.history && input.history.length > 0) {
-      input.history.forEach(msg => {
-        messages.push({ role: msg.role, content: msg.content });
-      });
-    }
+قواعد التنسيق والسلوك:
+- استخدم صناديق الكود \` \` \` دائماً للروابط والأكواد لتكون قابلة للنسخ.
+- التزم بالمحاذاة اليمينية للنص العربي RTL.
+- الحسابات الرسمية:
+  - يوتيوب: \`https://www.youtube.com/@mahmoud_code\`
+  - إنستغرام: \`https://www.instagram.com/mahmoud_codes/\`
+  - فيسبوك: \`https://www.facebook.com/pr.mahmoud.20\``;
 
-    // تجهيز محتوى الرسالة الحالية
-    let userContent: any;
+const intelligentConversationalAiFlow = ai.defineFlow(
+  {
+    name: 'intelligentConversationalAiFlow',
+    inputSchema: IntelligentConversationalAiInputSchema,
+    outputSchema: IntelligentConversationalAiOutputSchema,
+  },
+  async (input) => {
+    const history = input.history?.map(m => ({
+      role: m.role,
+      content: [{ text: m.content }]
+    })) || [];
+
+    const promptParts: any[] = [{ text: input.query }];
     if (input.imageHeader) {
-      userContent = [
-        { type: 'text', text: input.query },
-        { type: 'image_url', image_url: { url: input.imageHeader } }
-      ];
-    } else {
-      userContent = input.query;
+      promptParts.push({ media: { url: input.imageHeader, contentType: 'image/jpeg' } });
     }
 
-    messages.push({ role: 'user', content: userContent });
-
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://hassani-ai.web.app',
-        'X-Title': 'Hassani AI'
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: messages,
+    const { text } = await ai.generate({
+      system: SYSTEM_PROMPT,
+      history: history as any,
+      prompt: promptParts,
+      config: {
         temperature: 0.7,
-        max_tokens: 4000
-      })
+      }
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `خطأ في الخادم: ${response.status}`);
-    }
-
-    const data = await response.json();
-    
-    if (data.choices && data.choices[0]) {
-      return { response: data.choices[0].message.content };
-    } else {
-      throw new Error("لم يتم استلام أي رد من محرك الذكاء الاصطناعي.");
-    }
-  } catch (error: any) {
-    console.error("Chat Error:", error);
-    return { response: `عذراً، واجهت مشكلة تقنية: ${error.message}. يرجى المحاولة مرة أخرى.` };
+    return { response: text || "أهلاً بك! كيف يمكنني مساعدتك؟" };
   }
-}
+);

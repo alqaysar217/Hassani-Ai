@@ -1,13 +1,10 @@
-
 'use server';
 /**
- * @fileOverview يكتشف هذا التدفق نية المستخدم باستخدام OpenRouter.
+ * @fileOverview يكتشف نية المستخدم باستخدام Genkit لضمان التجاوب الفوري.
  */
 
+import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-
-const OPENROUTER_API_KEY = "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";
-const MODEL = "google/gemini-2.0-flash-001";
 
 const AutomaticIntentRoutingOutputSchema = z.object({
   intent: z
@@ -19,45 +16,29 @@ export type AutomaticIntentRoutingOutput = z.infer<typeof AutomaticIntentRouting
 export async function automaticIntentRouting(
   input: { query: string },
 ): Promise<AutomaticIntentRoutingOutput> {
-  try {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://hassani-ai.web.app',
-        'X-Title': 'Hassani AI'
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [
-          {
-            role: 'system',
-            content: `صنف طلب المستخدم إلى واحد من هذه التصنيفات حصراً وارجع النتيجة بصيغة JSON:
-            { "intent": "التصنيف" }
-            التصنيفات:
-            - 'question': أسئلة عامة.
-            - 'image': طلبات توليد صور.
-            - 'music': طلبات موسيقى.
-            - 'programming': مساعدة برمجية.
-            - 'diagram': مخططات.
-            - 'planning': تخطيط واستراتيجية.`
-          },
-          { role: 'user', content: input.query }
-        ],
-        response_format: { type: 'json_object' }
-      })
+  return automaticIntentRoutingFlow(input);
+}
+
+const automaticIntentRoutingFlow = ai.defineFlow(
+  {
+    name: 'automaticIntentRoutingFlow',
+    inputSchema: z.object({ query: z.string() }),
+    outputSchema: AutomaticIntentRoutingOutputSchema,
+  },
+  async (input) => {
+    const { output } = await ai.generate({
+      prompt: `صنف طلب المستخدم التالي إلى واحد من هذه التصنيفات حصراً:
+      - 'question': أسئلة عامة أو دردشة.
+      - 'image': طلبات توليد أو تعديل صور.
+      - 'music': طلبات متعلقة بالموسيقى أو الألحان.
+      - 'programming': مساعدة برمجية أو إصلاح أكواد.
+      - 'diagram': طلب مخططات (ERD, DFD, Use Case).
+      - 'planning': تخطيط أنظمة أو قواعد بيانات.
+      
+      طلب المستخدم: ${input.query}`,
+      output: { schema: AutomaticIntentRoutingOutputSchema }
     });
 
-    if (!response.ok) return { intent: 'question' };
-
-    const data = await response.json();
-    if (data.choices && data.choices[0]) {
-      const result = JSON.parse(data.choices[0].message.content);
-      return { intent: result.intent || 'question' };
-    }
-    return { intent: 'question' };
-  } catch (error) {
-    return { intent: 'question' };
+    return output || { intent: 'question' };
   }
-}
+);
