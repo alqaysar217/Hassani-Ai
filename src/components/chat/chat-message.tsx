@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -53,7 +52,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
       isAI ? "justify-start" : "justify-end"
     )}>
       <div className={cn(
-        "relative flex flex-col gap-3 max-w-[94%] md:max-w-[85%]",
+        "relative flex flex-col gap-3 max-w-[96%] md:max-w-[85%]",
         isAI ? "items-start" : "items-end"
       )}>
         <div className={cn(
@@ -83,8 +82,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
           "px-6 py-5 shadow-sm transition-all duration-300 overflow-hidden",
           isAI ? "chat-bubble-ai rounded-[28px] rounded-tr-sm" : "chat-bubble-user rounded-[28px] rounded-tl-sm"
         )}>
-          {(message.type === 'text' || message.type === 'planning') && (
-            <div className="prose prose-stone dark:prose-invert max-w-none prose-p:leading-relaxed prose-p:text-lg prose-p:font-medium prose-strong:font-black prose-headings:font-black prose-table:border prose-table:rounded-xl prose-th:bg-muted/50 prose-th:p-3 prose-td:p-3 prose-td:border-t">
+          {(message.type === 'text' || message.type === 'planning' || isAI) && (
+            <div className="prose prose-stone dark:prose-invert max-w-none prose-p:leading-relaxed prose-p:text-lg prose-p:font-medium prose-strong:font-black prose-headings:font-black prose-table:my-6 prose-table:border-collapse prose-table:rounded-xl prose-table:overflow-hidden">
               <ReactMarkdown 
                 remarkPlugins={[remarkGfm]}
                 components={{
@@ -117,12 +116,21 @@ export function ChatMessage({ message }: ChatMessageProps) {
                   },
                   table({ children }) {
                     return (
-                      <div className="overflow-x-auto my-6 rounded-2xl border border-primary/10 bg-card/50">
-                        <table className="w-full text-sm text-start border-collapse">
+                      <div className="overflow-x-auto my-6 rounded-2xl border border-primary/10 bg-card shadow-lg">
+                        <table className="min-w-full divide-y divide-primary/10">
                           {children}
                         </table>
                       </div>
                     );
+                  },
+                  thead({ children }) {
+                    return <thead className="bg-primary/5">{children}</thead>;
+                  },
+                  th({ children }) {
+                    return <th className="px-4 py-3 text-start text-sm font-black text-primary uppercase tracking-wider border-b border-primary/10">{children}</th>;
+                  },
+                  td({ children }) {
+                    return <td className="px-4 py-3 text-sm font-medium border-b border-primary/5">{children}</td>;
                   }
                 }}
               >
@@ -131,13 +139,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
             </div>
           )}
 
-          {message.type === 'code' && (
+          {message.type === 'code' && !isAI && (
             <div className="space-y-4">
-              {message.metadata?.explanation && (
-                <p className="text-lg leading-relaxed mb-3 font-medium">
-                  {message.metadata.explanation}
-                </p>
-              )}
               <div className="rounded-2xl overflow-hidden bg-secondary border border-white/5 shadow-2xl" dir="ltr">
                 <div className="flex items-center justify-between px-5 py-3 bg-white/5 border-b border-white/5">
                   <span className="text-xs font-black opacity-60 uppercase tracking-widest text-white">Source Code</span>
@@ -153,38 +156,6 @@ export function ChatMessage({ message }: ChatMessageProps) {
                 <pre className="p-6 font-code text-sm overflow-x-auto text-amber-50 no-scrollbar">
                   <code>{message.metadata?.code || message.content || ""}</code>
                 </pre>
-              </div>
-            </div>
-          )}
-
-          {message.type === 'diagram' && (
-            <div className="space-y-4">
-              {message.metadata?.diagramExplanation && (
-                <p className="text-lg leading-relaxed mb-3 font-medium">
-                  {message.metadata.diagramExplanation}
-                </p>
-              )}
-              <div className="rounded-2xl overflow-hidden bg-secondary border border-white/5 shadow-2xl">
-                <div className="flex items-center justify-between px-5 py-3 bg-white/5 border-b border-white/5">
-                  <div className="flex items-center gap-2">
-                    <Layout className="h-4 w-4 text-primary" />
-                    <span className="text-xs font-black opacity-60 uppercase tracking-widest text-white">Mermaid Diagram</span>
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-9 w-9 hover:bg-white/10 text-white/70 rounded-xl"
-                    onClick={() => copyToClipboard(message.metadata?.diagramSyntax || "")}
-                  >
-                    {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
-                  </Button>
-                </div>
-                <div className="p-6 bg-white flex flex-col items-center justify-center overflow-x-auto">
-                   <pre className="text-[10px] text-slate-800 font-code" dir="ltr">
-                     {message.metadata?.diagramSyntax}
-                   </pre>
-                   <p className="mt-4 text-[10px] text-slate-400 italic font-medium">(Diagram Render Preview - Copy syntax to view in Mermaid editor)</p>
-                </div>
               </div>
             </div>
           )}
