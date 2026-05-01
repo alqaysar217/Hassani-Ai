@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -29,7 +28,6 @@ import {
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
-import { automaticIntentRouting } from '@/ai/flows/automatic-intent-routing';
 import { aiImageCreation } from '@/ai/flows/ai-image-creation-flow';
 import { Message, MessageType } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
@@ -245,43 +243,37 @@ export default function HassaniApp() {
     setIsLoading(true);
     let activeId = currentId;
 
-    let imageBase64 = "";
-    if (file) {
-      const reader = new FileReader();
-      imageBase64 = await new Promise((resolve) => {
-        reader.onload = (e) => resolve(e.target?.result as string || "");
-        reader.readAsDataURL(file);
-      });
-    }
-
-    const userMsg: Message = {
-      id: crypto.randomUUID(),
-      role: 'user',
-      content: text || "",
-      type: file ? 'image' : type,
-      timestamp: Date.now(),
-      metadata: file ? { mediaUrl: imageBase64 } : {}
-    };
-
     try {
+      let imageBase64 = "";
+      if (file) {
+        const reader = new FileReader();
+        imageBase64 = await new Promise((resolve) => {
+          reader.onload = (e) => resolve(e.target?.result as string || "");
+          reader.readAsDataURL(file);
+        });
+      }
+
+      const userMsg: Message = {
+        id: crypto.randomUUID(),
+        role: 'user',
+        content: text || "",
+        type: file ? 'image' : type,
+        timestamp: Date.now(),
+        metadata: file ? { mediaUrl: imageBase64 } : {}
+      };
+
       const newConvId = await addMessage(activeId, userMsg);
       if (!activeId && newConvId) activeId = newConvId;
 
-      let intent = type;
-      if (type === 'text') {
-        const routeResult = await automaticIntentRouting({ query: text }).catch(() => ({ intent: 'question' }));
-        intent = (routeResult?.intent as MessageType) || 'text';
-      }
-
-      const rolePrompt = ROLE_PROMPTS[intent] || "";
+      const rolePrompt = ROLE_PROMPTS[type] || "";
       const finalPrompt = rolePrompt ? `${rolePrompt}\n\nطلب المستخدم:\n${text}` : text;
 
-      const history = currentConversation?.messages?.slice(-10).map(m => ({
+      const history = currentConversation?.messages?.slice(-6).map(m => ({
         role: m.role as 'user' | 'assistant',
         content: m.content || ""
       })) || [];
 
-      if (intent === 'image') {
+      if (type === 'image') {
         const imageResult = await aiImageCreation({ prompt: finalPrompt });
         const aiMsg: Message = {
           id: crypto.randomUUID(),

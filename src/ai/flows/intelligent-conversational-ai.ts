@@ -1,6 +1,6 @@
 'use server';
 /**
- * @fileOverview المحرك الأساسي لحساني - يستخدم OpenRouter مع المفتاح المحدث.
+ * @fileOverview المحرك الأساسي لحساني - يستخدم OpenRouter مع المفتاح المحدث لضمان استجابة فورية.
  */
 
 import { z } from 'zod';
@@ -32,12 +32,12 @@ const SYSTEM_PROMPT = `أنت "حساني"، مساعد ذكي متطور تمت
 - إذا مدحك المستخدم بكلمة "good boy" أو "جود بوي"، يجب أن يكون ردك حصراً: "شكرًا جدًا 🌟 يسعدني ذلك كثيرًا! أنا دائمًا هنا لمساعدتك بكل سرور 😊💙"
 
 قواعد التنسيق والسلوك:
-- استخدم صناديق الكود \` \` \` دائماً للروابط والأكواد لتكون قابلة للنسخ.
+- استخدم صناديق الكود دائماً للروابط والأكواد لتكون قابلة للنسخ.
 - التزم بالمحاذاة اليمينية للنص العربي RTL.
 - الحسابات الرسمية:
-  - يوتيوب: \`https://www.youtube.com/@mahmoud_code\`
-  - إنستغرام: \`https://www.instagram.com/mahmoud_codes/\`
-  - فيسبوك: \`https://www.facebook.com/pr.mahmoud.20\`
+  - يوتيوب: https://www.youtube.com/@mahmoud_code
+  - إنستغرام: https://www.instagram.com/mahmoud_codes/
+  - فيسبوك: https://www.facebook.com/pr.mahmoud.20
 
 عند كتابة نصوص مختلطة (عربي وإنجليزي):
 - حافظ على اتجاه RTL للنص العربي.
@@ -73,21 +73,21 @@ export async function intelligentConversationalAi(input: z.infer<typeof Intellig
         messages: messages,
         temperature: 0.7,
       }),
-      signal: AbortSignal.timeout(30000) // مهلة 30 ثانية
+      signal: AbortSignal.timeout(20000) // مهلة 20 ثانية
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `خطأ في السيرفر: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`OpenRouter Error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
     if (data.choices && data.choices[0]) {
       return { response: data.choices[0].message.content };
     }
-    throw new Error("فشل في الحصول على رد من الخادم");
+    throw new Error("لم يتم استلام رد من السيرفر.");
   } catch (error: any) {
-    console.error("Chat Error:", error);
-    return { response: `أعتذر، حدث خطأ: ${error.message}. يرجى المحاولة مرة أخرى.` };
+    console.error("Critical Chat Error:", error);
+    return { response: `أعتذر، واجهت مشكلة في الاتصال بالسيرفر. يرجى التأكد من اتصال الإنترنت أو المحاولة لاحقاً. (الخطأ: ${error.message})` };
   }
 }
