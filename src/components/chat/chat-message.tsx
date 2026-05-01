@@ -1,10 +1,11 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react';
 import { Message } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Copy, Check, Layout, MoreHorizontal } from 'lucide-react';
+import { Copy, Check } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore } from '@/firebase';
@@ -82,108 +83,76 @@ export function ChatMessage({ message }: ChatMessageProps) {
           "px-6 py-5 shadow-sm transition-all duration-300 overflow-hidden",
           isAI ? "chat-bubble-ai rounded-[28px] rounded-tr-sm" : "chat-bubble-user rounded-[28px] rounded-tl-sm"
         )}>
-          {(message.type === 'text' || message.type === 'planning' || isAI) && (
-            <div className="prose prose-stone dark:prose-invert max-w-none prose-p:leading-relaxed prose-p:text-lg prose-p:font-medium prose-strong:font-black prose-headings:font-black prose-table:my-6 prose-table:border-collapse prose-table:rounded-xl prose-table:overflow-hidden">
-              <ReactMarkdown 
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  code({ node, inline, className, children, ...props }: any) {
-                    const match = /language-(\w+)/.exec(className || '');
-                    return !inline ? (
-                      <div className="my-4 rounded-2xl overflow-hidden bg-secondary border border-white/5 shadow-2xl" dir="ltr">
-                        <div className="flex items-center justify-between px-5 py-2 bg-white/5 border-b border-white/5">
-                          <span className="text-[10px] font-black opacity-60 uppercase tracking-widest text-white">
-                            {match ? match[1] : 'Code'}
-                          </span>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-7 w-7 hover:bg-white/10 text-white/70 rounded-lg"
-                            onClick={() => copyToClipboard(String(children).replace(/\n$/, ''))}
-                          >
-                            <Copy className="h-3 w-3" />
-                          </Button>
-                        </div>
-                        <pre className="p-4 font-code text-sm overflow-x-auto text-amber-50 no-scrollbar">
-                          <code>{children}</code>
-                        </pre>
+          {/* عرض المحتوى الأساسي باستخدام Markdown - يدعم النصوص والأكواد والجداول في رسالة واحدة */}
+          <div className="prose prose-stone dark:prose-invert max-w-none prose-p:leading-relaxed prose-p:text-lg prose-p:font-medium prose-strong:font-black prose-headings:font-black prose-table:my-6 prose-table:border-collapse prose-table:rounded-xl prose-table:overflow-hidden">
+            <ReactMarkdown 
+              remarkPlugins={[remarkGfm]}
+              components={{
+                code({ node, inline, className, children, ...props }: any) {
+                  const match = /language-(\w+)/.exec(className || '');
+                  return !inline ? (
+                    <div className="my-4 rounded-2xl overflow-hidden bg-secondary border border-white/5 shadow-2xl" dir="ltr">
+                      <div className="flex items-center justify-between px-5 py-2 bg-white/5 border-b border-white/5">
+                        <span className="text-[10px] font-black opacity-60 uppercase tracking-widest text-white">
+                          {match ? match[1] : 'Code'}
+                        </span>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-7 w-7 hover:bg-white/10 text-white/70 rounded-lg"
+                          onClick={() => copyToClipboard(String(children).replace(/\n$/, ''))}
+                        >
+                          {copied ? <Check className="h-3 w-3 text-green-400" /> : <Copy className="h-3 w-3" />}
+                        </Button>
                       </div>
-                    ) : (
-                      <code className="bg-primary/10 text-primary px-1.5 py-0.5 rounded-md font-bold text-sm" {...props}>
+                      <pre className="p-4 font-code text-sm overflow-x-auto text-amber-50 no-scrollbar">
+                        <code>{children}</code>
+                      </pre>
+                    </div>
+                  ) : (
+                    <code className="bg-primary/10 text-primary px-1.5 py-0.5 rounded-md font-bold text-sm" {...props}>
+                      {children}
+                    </code>
+                  );
+                },
+                table({ children }) {
+                  return (
+                    <div className="overflow-x-auto my-6 rounded-2xl border border-primary/10 bg-card shadow-lg">
+                      <table className="min-w-full divide-y divide-primary/10">
                         {children}
-                      </code>
-                    );
-                  },
-                  table({ children }) {
-                    return (
-                      <div className="overflow-x-auto my-6 rounded-2xl border border-primary/10 bg-card shadow-lg">
-                        <table className="min-w-full divide-y divide-primary/10">
-                          {children}
-                        </table>
-                      </div>
-                    );
-                  },
-                  thead({ children }) {
-                    return <thead className="bg-primary/5">{children}</thead>;
-                  },
-                  th({ children }) {
-                    return <th className="px-4 py-3 text-start text-sm font-black text-primary uppercase tracking-wider border-b border-primary/10">{children}</th>;
-                  },
-                  td({ children }) {
-                    return <td className="px-4 py-3 text-sm font-medium border-b border-primary/5">{children}</td>;
-                  }
-                }}
-              >
-                {message.content || ""}
-              </ReactMarkdown>
-            </div>
-          )}
+                      </table>
+                    </div>
+                  );
+                },
+                thead({ children }) {
+                  return <thead className="bg-primary/5">{children}</thead>;
+                },
+                th({ children }) {
+                  return <th className="px-4 py-3 text-start text-sm font-black text-primary uppercase tracking-wider border-b border-primary/10">{children}</th>;
+                },
+                td({ children }) {
+                  return <td className="px-4 py-3 text-sm font-medium border-b border-primary/5">{children}</td>;
+                }
+              }}
+            >
+              {message.content || ""}
+            </ReactMarkdown>
+          </div>
 
-          {message.type === 'code' && !isAI && (
-            <div className="space-y-4">
-              <div className="rounded-2xl overflow-hidden bg-secondary border border-white/5 shadow-2xl" dir="ltr">
-                <div className="flex items-center justify-between px-5 py-3 bg-white/5 border-b border-white/5">
-                  <span className="text-xs font-black opacity-60 uppercase tracking-widest text-white">Source Code</span>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-9 w-9 hover:bg-white/10 text-white/70 rounded-xl"
-                    onClick={() => copyToClipboard(message.metadata?.code || "")}
-                  >
-                    {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
-                  </Button>
-                </div>
-                <pre className="p-6 font-code text-sm overflow-x-auto text-amber-50 no-scrollbar">
-                  <code>{message.metadata?.code || message.content || ""}</code>
-                </pre>
-              </div>
-            </div>
-          )}
-
-          {message.type === 'image' && (
-            <div className="space-y-4">
+          {/* عرض الصورة إذا كانت موجودة */}
+          {message.type === 'image' && message.metadata?.mediaUrl && (
+            <div className="mt-4 space-y-4">
                <div className="relative aspect-square w-full min-w-[280px] rounded-2xl overflow-hidden border border-primary/5 shadow-2xl">
-                  {message.metadata?.mediaUrl && (
-                    <Image 
-                      src={message.metadata.mediaUrl} 
-                      alt="Hassani Vision" 
-                      fill 
-                      className="object-cover"
-                      unoptimized
-                    />
-                  )}
+                  <Image 
+                    src={message.metadata.mediaUrl} 
+                    alt="Hassani Media" 
+                    fill 
+                    className="object-cover"
+                    unoptimized
+                  />
                </div>
             </div>
           )}
-        </div>
-
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2 mt-1">
-          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-primary/5 text-muted-foreground" onClick={() => copyToClipboard(message.content || "")}>
-            <Copy className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-primary/5 text-muted-foreground">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
         </div>
       </div>
     </div>

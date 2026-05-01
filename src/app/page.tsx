@@ -196,10 +196,13 @@ export default function HassaniApp() {
       switch (intent) {
         case 'code':
           const codeResult = await aiCodeAssistance({ codeRequest: text });
-          aiResponse = codeResult?.explanation || (lang === 'ar' ? "إليك الكود المطلوب" : "Here is the requested code");
+          const codeSnippet = codeResult?.code || "";
+          const expl = codeResult?.explanation || "";
+          // دمج الشرح والكود في رسالة واحدة باستخدام Markdown
+          aiResponse = `${expl}\n\n\`\`\`\n${codeSnippet}\n\`\`\``;
           aiMetadata = { 
-            code: codeResult?.code || "", 
-            explanation: codeResult?.explanation || "" 
+            code: codeSnippet, 
+            explanation: expl 
           };
           finalType = 'code';
           break;
@@ -216,10 +219,13 @@ export default function HassaniApp() {
           else if (lowerText.includes('dfd') || lowerText.includes('تدفق بيانات')) dType = 'dfd';
           
           const diagramResult = await generateDiagram({ description: text, diagramType: dType });
-          aiResponse = diagramResult?.diagramExplanation || (lang === 'ar' ? "تفضل المخطط المطلوب:" : "Here is the requested diagram:");
+          const syntax = diagramResult?.diagramSyntax || "";
+          const diagramExpl = diagramResult?.diagramExplanation || "";
+          // دمج شرح المخطط والكود البرمجي له في رسالة واحدة
+          aiResponse = `${diagramExpl}\n\n\`\`\`mermaid\n${syntax}\n\`\`\``;
           aiMetadata = { 
-            diagramSyntax: diagramResult?.diagramSyntax || "", 
-            diagramExplanation: diagramResult?.diagramExplanation || "" 
+            diagramSyntax: syntax, 
+            diagramExplanation: diagramExpl 
           };
           finalType = 'diagram';
           break;
