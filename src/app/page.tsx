@@ -325,9 +325,9 @@ export default function HassaniApp() {
             </SidebarTrigger>
           </header>
 
-          <div className="flex-1 flex flex-col relative overflow-hidden bg-[radial-gradient(circle_at_top_right,rgba(197,160,89,0.04),transparent)]">
-            <ScrollArea ref={scrollRef} className="flex-1 w-full">
-              <div className="max-w-3xl mx-auto px-4 py-8 space-y-8 w-full overflow-x-hidden">
+          <div className="flex-1 flex flex-col relative overflow-hidden bg-background">
+            <ScrollArea ref={scrollRef} className="flex-1 w-full overflow-x-hidden">
+              <div className="max-w-3xl mx-auto px-4 py-8 space-y-8 w-full min-w-0">
                 {showGreeting ? (
                   <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-8 animate-fade-in-up w-full">
                     <div className="h-16 w-16 bg-card rounded-full flex items-center justify-center shadow-2xl overflow-hidden border border-primary/10 relative">
@@ -360,7 +360,7 @@ export default function HassaniApp() {
                     </div>
                   </div>
                 ) : (
-                  <>
+                  <div className="w-full flex flex-col gap-6 min-w-0">
                     {currentConversation?.messages?.map((msg) => (
                       <ChatMessage key={msg.id} message={msg} />
                     ))}
@@ -375,7 +375,7 @@ export default function HassaniApp() {
                         </div>
                       </div>
                     )}
-                  </>
+                  </div>
                 )}
               </div>
             </ScrollArea>

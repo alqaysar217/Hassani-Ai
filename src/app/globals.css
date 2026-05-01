@@ -70,8 +70,9 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground overflow-hidden;
+    @apply bg-background text-foreground overflow-x-hidden;
     font-family: 'Tajawal', sans-serif;
+    width: 100vw;
   }
 }
 
@@ -116,19 +117,26 @@
   background: linear-gradient(135deg, #C5A059 0%, #D4AF37 50%, #B8860B 100%);
 }
 
-/* Responsive Overrides */
+/* التنسيقات القوية للتجاوب */
 .prose {
-  @apply max-w-full overflow-x-hidden break-words;
+  @apply max-w-full overflow-hidden break-words;
 }
 
 .prose table {
-  @apply block w-full overflow-x-auto no-scrollbar my-4;
+  @apply block w-full overflow-x-auto no-scrollbar my-6 border-collapse;
+  -webkit-overflow-scrolling: touch;
 }
 
 .prose pre {
   @apply max-w-full overflow-x-auto no-scrollbar rounded-xl;
+  -webkit-overflow-scrolling: touch;
 }
 
 .prose img {
   @apply max-w-full h-auto rounded-xl;
+}
+
+/* ضمان عدم تمدد الحاويات المرنة */
+.min-w-0-fix {
+  min-width: 0;
 }

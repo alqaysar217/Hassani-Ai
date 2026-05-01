@@ -48,11 +48,11 @@ export function ChatMessage({ message }: ChatMessageProps) {
 
   return (
     <div className={cn(
-      "flex w-full group animate-fade-in-up overflow-hidden",
+      "flex w-full group animate-fade-in-up overflow-hidden mb-6",
       isAI ? "justify-start" : "justify-end"
     )}>
       <div className={cn(
-        "relative flex flex-col gap-2 w-full max-w-[95%] md:max-w-[85%]",
+        "relative flex flex-col gap-2 w-full max-w-[95%] md:max-w-[85%] min-w-0",
         isAI ? "items-start" : "items-end"
       )}>
         <div className={cn(
@@ -79,14 +79,15 @@ export function ChatMessage({ message }: ChatMessageProps) {
         </div>
 
         <div className={cn(
-          "px-4 md:px-6 py-4 md:py-5 shadow-sm transition-all duration-300 w-full overflow-hidden",
+          "px-4 md:px-6 py-4 md:py-5 shadow-sm transition-all duration-300 w-full overflow-hidden min-w-0",
           isAI ? "chat-bubble-ai" : "chat-bubble-user"
         )}>
-          <div className="prose prose-stone dark:prose-invert max-w-full overflow-x-hidden break-words">
+          <div className="prose prose-stone dark:prose-invert max-w-full overflow-x-auto no-scrollbar break-words">
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}
               components={{
                 p({ children }) {
+                  // استخدام div بدلاً من p لتجنب مشاكل التداخل البرمجي
                   return <div className="mb-4 last:mb-0 leading-relaxed text-base md:text-lg font-medium break-words">{children}</div>;
                 },
                 code({ node, inline, className, children, ...props }: any) {
