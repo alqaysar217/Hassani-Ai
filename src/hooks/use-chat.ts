@@ -92,7 +92,6 @@ export function useChat() {
     return { ...conv, messages };
   }, [conversations, currentId, messages]);
 
-  // جعل إنشاء المحادثة لحظياً تماماً
   const createNewConversation = () => {
     if (!db || !user) return null;
     
@@ -104,7 +103,6 @@ export function useChat() {
       updatedAt: Date.now()
     };
 
-    // تنفيذ التخزين في الخلفية دون انتظار
     setDoc(docRef, data).catch(async () => {
       const permissionError = new FirestorePermissionError({
         path: docRef.path,
@@ -114,23 +112,36 @@ export function useChat() {
       errorEmitter.emit('permission-error', permissionError);
     });
 
-    // تعيين المعرف فوراً لتحديث الواجهة في الحال
     setCurrentId(id);
     return id;
+  };
+
+  const sanitizeObject = (obj: any) => {
+    const sanitized: any = {};
+    for (const key in obj) {
+      if (obj[key] !== undefined) {
+        if (typeof obj[key] === 'object' && obj[key] !== null) {
+          sanitized[key] = sanitizeObject(obj[key]);
+        } else {
+          sanitized[key] = obj[key];
+        }
+      }
+    }
+    return sanitized;
   };
 
   const addMessage = (conversationId: string, message: Message) => {
     if (!db) return;
 
     const messageRef = doc(db, 'conversations', conversationId, 'messages', message.id);
+    const sanitizedMessage = sanitizeObject(message);
     
-    // تخزين الرسالة دون انتظار
-    setDoc(messageRef, message)
+    setDoc(messageRef, sanitizedMessage)
       .catch(async () => {
         const permissionError = new FirestorePermissionError({
           path: messageRef.path,
           operation: 'create',
-          requestResourceData: message,
+          requestResourceData: sanitizedMessage,
         });
         errorEmitter.emit('permission-error', permissionError);
       });
@@ -138,9 +149,8 @@ export function useChat() {
     const conversationRef = doc(db, 'conversations', conversationId);
     const updateData: any = { updatedAt: Date.now() };
     
-    // تحديث عنوان المحادثة بناءً على أول رسالة
     if (message.role === 'user' && (!messages.length || messages.length === 0)) {
-      updateData.title = message.content.slice(0, 30) + (message.content.length > 30 ? '...' : '');
+      updateData.title = (message.content || "").slice(0, 30) + ((message.content || "").length > 30 ? '...' : '');
     }
 
     updateDoc(conversationRef, updateData)

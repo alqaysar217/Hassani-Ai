@@ -145,7 +145,6 @@ export default function HassaniApp() {
 
   const handleSendMessage = (text: string, type: MessageType = 'text', file: File | null = null) => {
     if (!currentId) {
-      // إنشاء المحادثة لحظياً دون انتظار await
       const newId = createNewConversation();
       if (newId) {
         processMessage(newId, text, type, file);
@@ -160,7 +159,7 @@ export default function HassaniApp() {
     if (file) {
       const reader = new FileReader();
       imageBase64 = await new Promise((resolve) => {
-        reader.onload = (e) => resolve(e.target?.result as string);
+        reader.onload = (e) => resolve(e.target?.result as string || "");
         reader.readAsDataURL(file);
       });
     }
@@ -168,7 +167,7 @@ export default function HassaniApp() {
     const userMsg: Message = {
       id: crypto.randomUUID(),
       role: 'user',
-      content: text,
+      content: text || "",
       type: file ? 'image' : type,
       timestamp: Date.now(),
       metadata: file ? { mediaUrl: imageBase64 } : {}
@@ -180,14 +179,14 @@ export default function HassaniApp() {
     try {
       let intent = type;
       if (type === 'text') {
-        const { intent: detectedIntent } = await automaticIntentRouting({ query: text });
+        const routeResult = await automaticIntentRouting({ query: text });
+        const detectedIntent = routeResult?.intent || 'question';
         intent = detectedIntent === 'programming' ? 'code' : detectedIntent as MessageType;
       }
 
-      // جلب التاريخ للميموري من المحادثة الحالية (إذا كانت موجودة)
       const history = currentConversation?.messages?.map(m => ({
         role: m.role,
-        content: m.content
+        content: m.content || ""
       })) || [];
 
       let aiResponse: string = "";
@@ -197,45 +196,51 @@ export default function HassaniApp() {
       switch (intent) {
         case 'code':
           const codeResult = await aiCodeAssistance({ codeRequest: text });
-          aiResponse = codeResult.explanation;
-          aiMetadata = { code: codeResult.code, explanation: codeResult.explanation };
+          aiResponse = codeResult?.explanation || (lang === 'ar' ? "إليك الكود المطلوب" : "Here is the requested code");
+          aiMetadata = { 
+            code: codeResult?.code || "", 
+            explanation: codeResult?.explanation || "" 
+          };
           finalType = 'code';
           break;
         case 'image':
           const imageResult = await aiImageCreation({ prompt: text });
           aiResponse = lang === 'ar' ? "تفضل، لقد قمت بإنشاء هذه الصورة لك بناءً على طلبك:" : "Here is the image I created for you based on your request:";
-          aiMetadata = { mediaUrl: imageResult.media };
+          aiMetadata = { mediaUrl: imageResult?.media || "" };
           finalType = 'image';
           break;
         case 'diagram':
-          let dType: 'useCase' | 'erd' | 'dfd' = 'useCase';
+          let dType = 'useCase';
           const lowerText = text.toLowerCase();
           if (lowerText.includes('erd') || lowerText.includes('قواعد')) dType = 'erd';
           else if (lowerText.includes('dfd') || lowerText.includes('تدفق بيانات')) dType = 'dfd';
           
           const diagramResult = await generateDiagram({ description: text, diagramType: dType });
-          aiResponse = diagramResult.diagramExplanation || (lang === 'ar' ? "تفضل المخطط المطلوب:" : "Here is the requested diagram:");
-          aiMetadata = { diagramSyntax: diagramResult.diagramSyntax, diagramExplanation: diagramResult.diagramExplanation };
+          aiResponse = diagramResult?.diagramExplanation || (lang === 'ar' ? "تفضل المخطط المطلوب:" : "Here is the requested diagram:");
+          aiMetadata = { 
+            diagramSyntax: diagramResult?.diagramSyntax || "", 
+            diagramExplanation: diagramResult?.diagramExplanation || "" 
+          };
           finalType = 'diagram';
           break;
         case 'planning':
           const planningResult = await aiPlanning({ request: text });
-          aiResponse = planningResult.plan;
+          aiResponse = planningResult?.plan || (lang === 'ar' ? "إليك الخطة المقترحة" : "Here is the proposed plan");
           finalType = 'planning';
           break;
         default:
-          const { response } = await intelligentConversationalAi({ 
+          const chatResult = await intelligentConversationalAi({ 
             query: text,
             history: history,
             imageHeader: imageBase64 || undefined
           });
-          aiResponse = response;
+          aiResponse = chatResult?.response || (lang === 'ar' ? "عذراً، لم أتمكن من معالجة الطلب." : "Sorry, I couldn't process the request.");
       }
 
       const aiMsg: Message = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: aiResponse,
+        content: aiResponse || "",
         type: finalType,
         timestamp: Date.now(),
         metadata: aiMetadata
@@ -243,7 +248,11 @@ export default function HassaniApp() {
 
       addMessage(convId, aiMsg);
     } catch (err: any) {
-      toast({ variant: 'destructive', title: lang === 'ar' ? "خطأ في الاتصال" : "Connection Error", description: err.message });
+      toast({ 
+        variant: 'destructive', 
+        title: lang === 'ar' ? "خطأ في الاتصال" : "Connection Error", 
+        description: err.message 
+      });
     } finally {
       setIsLoading(false);
     }
@@ -292,7 +301,6 @@ export default function HassaniApp() {
     { text: lang === 'ar' ? "توليد موسيقى" : "Generate Music", icon: <Music className="h-4 w-4" />, color: "text-orange-500", type: 'music' },
   ];
 
-  // التعديل هنا: إذا كان هناك معرف أو تحميل، ننتقل فوراً لشاشة المحادثة
   const showGreeting = !currentId && !isLoading;
 
   return (
