@@ -301,11 +301,21 @@ export default function HassaniApp() {
         if (activeId) await addMessage(activeId, aiMsg);
       }
     } catch (err: any) {
+      console.error("Message Error:", err);
       toast({ 
         variant: 'destructive', 
-        title: lang === 'ar' ? "خطأ في الاتصال" : "Connection Error", 
+        title: lang === 'ar' ? "خطأ تقني" : "Technical Error", 
         description: err.message 
       });
+      // إضافة رسالة خطأ في الشات لتوضيح السبب للمستخدم
+      const errorMsg: Message = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: lang === 'ar' ? `⚠️ عذراً، حدث خطأ في النظام: ${err.message}` : `⚠️ Sorry, a system error occurred: ${err.message}`,
+        type: 'text',
+        timestamp: Date.now(),
+      };
+      if (activeId) await addMessage(activeId, errorMsg);
     } finally {
       setIsLoading(false);
     }

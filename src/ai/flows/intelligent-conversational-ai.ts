@@ -1,6 +1,6 @@
 'use server';
 /**
- * @fileOverview المحرك الأساسي لحساني - يستخدم OpenRouter مع المفتاح المحدث لضمان استجابة فورية.
+ * @fileOverview المحرك الأساسي لحساني - يستخدم OpenRouter مع معالجة أخطاء شفافة وتنبيهات فورية.
  */
 
 import { z } from 'zod';
@@ -41,7 +41,7 @@ const SYSTEM_PROMPT = `أنت "حساني"، مساعد ذكي متطور تمت
 
 عند كتابة نصوص مختلطة (عربي وإنجليزي):
 - حافظ على اتجاه RTL للنص العربي.
-- اعزل المصطلحات الإنجليزية لتبدو مرتبة.
+- اعزل المصطلحات الإنجليزية لتبدو مرتبة باستخدام unicode-bidi: isolate.
 - ضع علامات الترقيم في نهاية الجمل العربية بشكل صحيح.`;
 
 export async function intelligentConversationalAi(input: z.infer<typeof IntelligentConversationalAiInputSchema>) {
@@ -60,6 +60,8 @@ export async function intelligentConversationalAi(input: z.infer<typeof Intellig
       }
     ];
 
+    console.log("Starting OpenRouter Request...");
+    
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -73,21 +75,29 @@ export async function intelligentConversationalAi(input: z.infer<typeof Intellig
         messages: messages,
         temperature: 0.7,
       }),
-      signal: AbortSignal.timeout(20000) // مهلة 20 ثانية
+      signal: AbortSignal.timeout(15000) // تقليل المهلة لـ 15 ثانية لكشف المشاكل بسرعة
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`OpenRouter Error: ${response.status} - ${errorText}`);
+      const errorData = await response.json().catch(() => ({}));
+      const errorMsg = errorData.error?.message || response.statusText;
+      console.error(`OpenRouter API Error: ${response.status}`, errorData);
+      return { 
+        response: `⚠️ خطأ من السيرفر (${response.status}): ${errorMsg}\n\nيرجى التحقق من صلاحية مفتاح API أو الرصيد في OpenRouter.` 
+      };
     }
 
     const data = await response.json();
     if (data.choices && data.choices[0]) {
       return { response: data.choices[0].message.content };
     }
-    throw new Error("لم يتم استلام رد من السيرفر.");
+    
+    return { response: "⚠️ تلقيت رداً فارغاً من السيرفر. يرجى المحاولة مرة أخرى." };
   } catch (error: any) {
     console.error("Critical Chat Error:", error);
-    return { response: `أعتذر، واجهت مشكلة في الاتصال بالسيرفر. يرجى التأكد من اتصال الإنترنت أو المحاولة لاحقاً. (الخطأ: ${error.message})` };
+    if (error.name === 'TimeoutError') {
+      return { response: "⏳ عذراً، انتهت مهلة الانتظار (15 ثانية) دون رد من السيرفر. يرجى التحقق من استقرار الإنترنت أو حالة OpenRouter." };
+    }
+    return { response: `❌ حدث خطأ غير متوقع: ${error.message}` };
   }
 }
