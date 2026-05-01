@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -29,6 +30,7 @@ import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversation
 import { automaticIntentRouting } from '@/ai/flows/automatic-intent-routing';
 import { aiImageCreation } from '@/ai/flows/ai-image-creation-flow';
 import { aiPlanning } from '@/ai/flows/ai-planning-flow';
+import { generateDiagram } from '@/ai/flows/ai-diagram-generation-flow';
 import { Message, MessageType } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useAuth, useFirestore } from '@/firebase';
@@ -141,7 +143,7 @@ export default function HassaniApp() {
   };
 
   const handleSendMessage = (text: string, type: MessageType = 'text', file: File | null = null) => {
-    setIsLoading(true); // تفعيل التحميل فوراً لتغيير الواجهة
+    setIsLoading(true);
     if (!currentId) {
       const newId = createNewConversation();
       if (newId) {
@@ -200,6 +202,11 @@ export default function HassaniApp() {
           const planningResult = await aiPlanning({ request: text });
           aiResponse = planningResult?.plan || (lang === 'ar' ? "إليك الخطة المقترحة" : "Here is the proposed plan");
           finalType = 'planning';
+          break;
+        case 'diagram':
+          const diagResult = await generateDiagram({ description: text, diagramType: 'sequence' });
+          aiResponse = (diagResult?.diagramExplanation || "إليك المخطط المطلوب:") + "\n\n```mermaid\n" + (diagResult?.diagramSyntax || "") + "\n```";
+          finalType = 'text'; // نعرضها كنص يحتوي على كود Mermaid لسهولة المعالجة حالياً
           break;
         default:
           const chatResult = await intelligentConversationalAi({ 
@@ -346,7 +353,7 @@ export default function HassaniApp() {
                       <ChatMessage key={msg.id} message={msg} />
                     ))}
                     {isLoading && (
-                      <div className="flex justify-end items-center gap-3 animate-fade-in w-full">
+                      <div className="flex justify-start items-center gap-3 animate-fade-in w-full">
                         <div className="bg-card px-6 py-4 rounded-3xl rounded-tr-sm border border-primary/10 flex items-center gap-3 shadow-sm animate-pulse">
                           <div className="flex gap-1">
                             <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce"></div>
