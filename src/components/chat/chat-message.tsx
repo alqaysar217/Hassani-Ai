@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -37,7 +36,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
   }, [isAI, user, db]);
 
   const copyToClipboard = (text: string) => {
-    if (!text) return;
+    if (!text || text === "undefined") return;
     navigator.clipboard.writeText(text);
     setCopied(true);
     toast({ title: "تم النسخ" });
@@ -87,12 +86,16 @@ export function ChatMessage({ message }: ChatMessageProps) {
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}
               components={{
-                // حل مشكلة التداخل: استخدام div بدلاً من p لتجنب أخطاء Hydration
                 p({ children }) {
                   return <div className="mb-4 last:mb-0 leading-relaxed text-lg font-medium">{children}</div>;
                 },
                 code({ node, inline, className, children, ...props }: any) {
                   const match = /language-(\w+)/.exec(className || '');
+                  const codeContent = String(children).replace(/\n$/, '');
+                  
+                  // منع عرض كلمة undefined
+                  if (codeContent === "undefined" || !codeContent) return null;
+
                   return !inline ? (
                     <div className="my-4 rounded-2xl overflow-hidden bg-secondary border border-white/5 shadow-2xl" dir="ltr">
                       <div className="flex items-center justify-between px-5 py-2 bg-white/5 border-b border-white/5">
@@ -103,7 +106,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
                           variant="ghost" 
                           size="icon" 
                           className="h-7 w-7 hover:bg-white/10 text-white/70 rounded-lg"
-                          onClick={() => copyToClipboard(String(children).replace(/\n$/, ''))}
+                          onClick={() => copyToClipboard(codeContent)}
                         >
                           {copied ? <Check className="h-3 w-3 text-green-400" /> : <Copy className="h-3 w-3" />}
                         </Button>

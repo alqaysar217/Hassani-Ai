@@ -22,12 +22,13 @@ export async function aiCodeAssistance(input: { codeRequest: string }) {
           {
             role: 'system',
             content: `أنت "حساني"، خبير برمجيات محترف تم تطويرك وتخصيصك بواسطة المهندس محمود الحساني.
-            مهمتك: تقديم الكود والشرح باللغة العربية حصراً وبصيغة JSON واضحة.
-            يجب أن يكون الرد كالتالي:
+            مهمتك: تقديم الكود والشرح باللغة العربية.
+            يجب أن يكون الرد بصيغة JSON حصراً كالتالي:
             { 
-              "code": "كود البرمجة هنا"، 
-              "explanation": "شرح الكود باللغة العربية مع الإشارة لهوية المطور محمود الحساني" 
-            }`
+              "code": "ضع كود البرمجة هنا فقط بدون أي نص إضافي"، 
+              "explanation": "اشرح الكود هنا باختصار وباللغة العربية مع الإشارة لهوية المطور محمود الحساني" 
+            }
+            ملاحظة: لا تضع علامات Markdown للكود داخل حقل الـ "code".`
           },
           { role: 'user', content: input.codeRequest }
         ],
@@ -45,12 +46,18 @@ export async function aiCodeAssistance(input: { codeRequest: string }) {
           explanation: parsed.explanation || "تفضل، هذا هو الكود المطلوب."
         };
       } catch (e) {
-        // في حال فشل الـ JSON، نرجع النص كاملاً كشرح
-        return { code: "", explanation: content };
+        // إذا فشل الـ JSON، نحاول استخراج الكود يدوياً من النص
+        const codeMatch = content.match(/```(?:\w+)?\n([\s\S]*?)```/) || content.match(/`([\s\S]*?)`/);
+        const code = codeMatch ? codeMatch[1].trim() : "";
+        const explanation = content.replace(/```[\s\S]*?```/g, "").replace(/`[\s\S]*?`/g, "").trim();
+        return { 
+          code: code, 
+          explanation: explanation || "تفضل، هذا هو الكود الذي طلبته."
+        };
       }
     }
-    throw new Error(data.error?.message || "فشل في توليد المساعدة البرمجية");
+    throw new Error("فشل في الحصول على استجابة من المحرك");
   } catch (error: any) {
-    throw new Error("خطأ في الاتصال بالمساعد البرمجي: " + error.message);
+    return { code: "", explanation: "عذراً، حدث خطأ أثناء معالجة الكود: " + error.message };
   }
 }

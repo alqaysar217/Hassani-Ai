@@ -196,13 +196,14 @@ export default function HassaniApp() {
         case 'code':
           const codeResult = await aiCodeAssistance({ codeRequest: text });
           const codeSnippet = codeResult?.code || "";
-          const expl = codeResult?.explanation || "";
-          // دمج الشرح والكود في رسالة واحدة متكاملة ومنسقة
-          aiResponse = `${expl}\n\n\`\`\`\n${codeSnippet}\n\`\`\``;
-          aiMetadata = { 
-            code: codeSnippet, 
-            explanation: expl 
-          };
+          const expl = codeResult?.explanation || (lang === 'ar' ? "تفضل، هذا هو الكود المطلوب." : "Here is the code you requested.");
+          
+          if (codeSnippet) {
+            aiResponse = `${expl}\n\n\`\`\`\n${codeSnippet}\n\`\`\``;
+            aiMetadata = { code: codeSnippet, explanation: expl };
+          } else {
+            aiResponse = expl;
+          }
           finalType = 'code';
           break;
         case 'image':
@@ -220,12 +221,13 @@ export default function HassaniApp() {
           const diagramResult = await generateDiagram({ description: text, diagramType: dType });
           const syntax = diagramResult?.diagramSyntax || "";
           const diagramExpl = diagramResult?.diagramExplanation || "";
-          // دمج شرح المخطط والكود في رسالة واحدة
-          aiResponse = `${diagramExpl}\n\n\`\`\`mermaid\n${syntax}\n\`\`\``;
-          aiMetadata = { 
-            diagramSyntax: syntax, 
-            diagramExplanation: diagramExpl 
-          };
+          
+          if (syntax) {
+            aiResponse = `${diagramExpl}\n\n\`\`\`mermaid\n${syntax}\n\`\`\``;
+            aiMetadata = { diagramSyntax: syntax, diagramExplanation: diagramExpl };
+          } else {
+            aiResponse = diagramExpl || (lang === 'ar' ? "عذراً، لم أتمكن من إنشاء المخطط." : "Sorry, I couldn't generate the diagram.");
+          }
           finalType = 'diagram';
           break;
         case 'planning':
