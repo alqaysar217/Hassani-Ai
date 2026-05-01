@@ -1,3 +1,4 @@
+
 export type Role = 'user' | 'assistant';
 
 export type MessageType = 
@@ -32,7 +33,9 @@ export interface Conversation {
   id: string;
   title: string;
   updatedAt: number;
-  messages: Message[];
+  userId: string;
+  pinned?: boolean;
+  messages?: Message[];
 }
 
 export interface UserSettings {

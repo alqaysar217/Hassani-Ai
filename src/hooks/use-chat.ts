@@ -12,7 +12,8 @@ import {
   doc, 
   setDoc, 
   deleteDoc, 
-  updateDoc 
+  updateDoc,
+  serverTimestamp 
 } from 'firebase/firestore';
 import { useFirestore, useUser } from '@/firebase';
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -25,6 +26,7 @@ export function useChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentId, setCurrentId] = useState<string | null>(null);
 
+  // جلب المحادثات مع فرز ذكي (المثبت أولاً ثم الأحدث)
   useEffect(() => {
     if (!db || !user) return;
 
@@ -42,7 +44,15 @@ export function useChat() {
           id: doc.id,
           ...doc.data()
         })) as Conversation[];
-        setConversations(convs);
+        
+        // فرز المحادثات: المثبت أولاً
+        const sortedConvs = convs.sort((a, b) => {
+          if (a.pinned && !b.pinned) return -1;
+          if (!a.pinned && b.pinned) return 1;
+          return (b.updatedAt || 0) - (a.updatedAt || 0);
+        });
+        
+        setConversations(sortedConvs);
       },
       async (error) => {
         const permissionError = new FirestorePermissionError({
@@ -56,6 +66,7 @@ export function useChat() {
     return () => unsubscribe();
   }, [db, user]);
 
+  // جلب الرسائل للمحادثة الحالية
   useEffect(() => {
     if (!db || !currentId) {
       setMessages([]);
@@ -92,28 +103,10 @@ export function useChat() {
     return { ...conv, messages };
   }, [conversations, currentId, messages]);
 
+  // العودة للرئيسية يعني تصفير المعرف الحالي
   const createNewConversation = () => {
-    if (!db || !user) return null;
-    
-    const id = crypto.randomUUID();
-    const docRef = doc(db, 'conversations', id);
-    const data = {
-      title: 'محادثة جديدة',
-      userId: user.uid,
-      updatedAt: Date.now()
-    };
-
-    setDoc(docRef, data).catch(async () => {
-      const permissionError = new FirestorePermissionError({
-        path: docRef.path,
-        operation: 'create',
-        requestResourceData: data,
-      });
-      errorEmitter.emit('permission-error', permissionError);
-    });
-
-    setCurrentId(id);
-    return id;
+    setCurrentId(null);
+    return null;
   };
 
   const sanitizeObject = (obj: any) => {
@@ -130,10 +123,26 @@ export function useChat() {
     return sanitized;
   };
 
-  const addMessage = (conversationId: string, message: Message) => {
-    if (!db) return;
+  const addMessage = async (conversationId: string | null, message: Message) => {
+    if (!db || !user) return null;
 
-    const messageRef = doc(db, 'conversations', conversationId, 'messages', message.id);
+    let targetId = conversationId;
+
+    // إذا لم تكن هناك محادثة، ننشئ واحدة جديدة
+    if (!targetId) {
+      targetId = crypto.randomUUID();
+      const convRef = doc(db, 'conversations', targetId);
+      const convData = {
+        title: message.content.slice(0, 30) || "محادثة جديدة",
+        userId: user.uid,
+        updatedAt: Date.now(),
+        pinned: false
+      };
+      await setDoc(convRef, convData);
+      setCurrentId(targetId);
+    }
+
+    const messageRef = doc(db, 'conversations', targetId, 'messages', message.id);
     const sanitizedMessage = sanitizeObject(message);
     
     setDoc(messageRef, sanitizedMessage)
@@ -146,22 +155,10 @@ export function useChat() {
         errorEmitter.emit('permission-error', permissionError);
       });
 
-    const conversationRef = doc(db, 'conversations', conversationId);
-    const updateData: any = { updatedAt: Date.now() };
-    
-    if (message.role === 'user' && (!messages.length || messages.length === 0)) {
-      updateData.title = (message.content || "").slice(0, 30) + ((message.content || "").length > 30 ? '...' : '');
-    }
+    const conversationRef = doc(db, 'conversations', targetId);
+    updateDoc(conversationRef, { updatedAt: Date.now() });
 
-    updateDoc(conversationRef, updateData)
-      .catch(async () => {
-        const permissionError = new FirestorePermissionError({
-          path: conversationRef.path,
-          operation: 'update',
-          requestResourceData: updateData,
-        });
-        errorEmitter.emit('permission-error', permissionError);
-      });
+    return targetId;
   };
 
   const deleteConversation = (id: string) => {
@@ -192,6 +189,19 @@ export function useChat() {
       });
   };
 
+  const togglePin = (id: string, currentPinned: boolean) => {
+    if (!db) return;
+    const docRef = doc(db, 'conversations', id);
+    updateDoc(docRef, { pinned: !currentPinned })
+      .catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'update',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+  };
+
   return {
     conversations,
     currentId,
@@ -201,5 +211,6 @@ export function useChat() {
     addMessage,
     deleteConversation,
     renameConversation,
+    togglePin,
   };
 }

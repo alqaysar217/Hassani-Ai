@@ -23,7 +23,8 @@ import {
   Music,
   Users,
   Database,
-  GitBranch
+  GitBranch,
+  Home
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
@@ -145,7 +146,8 @@ export default function HassaniApp() {
     createNewConversation, 
     addMessage,
     deleteConversation,
-    renameConversation
+    renameConversation,
+    togglePin
   } = useChat();
   
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -237,19 +239,10 @@ export default function HassaniApp() {
     }
   };
 
-  const handleSendMessage = (text: string, type: MessageType = 'text', file: File | null = null) => {
+  const handleSendMessage = async (text: string, type: MessageType = 'text', file: File | null = null) => {
     setIsLoading(true);
-    if (!currentId) {
-      const newId = createNewConversation();
-      if (newId) {
-        processMessage(newId, text, type, file);
-      }
-    } else {
-      processMessage(currentId, text, type, file);
-    }
-  };
+    let activeId = currentId;
 
-  const processMessage = async (convId: string, text: string, type: MessageType, file: File | null) => {
     let imageBase64 = "";
     if (file) {
       const reader = new FileReader();
@@ -268,7 +261,9 @@ export default function HassaniApp() {
       metadata: file ? { mediaUrl: imageBase64 } : {}
     };
 
-    addMessage(convId, userMsg);
+    // إضافة الرسالة (ستنشئ محادثة تلقائياً إذا لم تكن موجودة)
+    const newConvId = await addMessage(activeId, userMsg);
+    if (!activeId && newConvId) activeId = newConvId;
 
     try {
       let intent = type;
@@ -277,7 +272,6 @@ export default function HassaniApp() {
         intent = routeResult?.intent as MessageType || 'text';
       }
 
-      // حقن البرومبت الاحترافي (Role Injection)
       const rolePrompt = ROLE_PROMPTS[intent] || "";
       const finalPrompt = rolePrompt ? `${rolePrompt}\n\nطلب المستخدم:\n${text}` : text;
 
@@ -296,7 +290,7 @@ export default function HassaniApp() {
           timestamp: Date.now(),
           metadata: { mediaUrl: imageResult?.media || "" }
         };
-        addMessage(convId, aiMsg);
+        if (activeId) addMessage(activeId, aiMsg);
       } else {
         const chatResult = await intelligentConversationalAi({ 
           query: finalPrompt,
@@ -311,7 +305,7 @@ export default function HassaniApp() {
           type: 'text',
           timestamp: Date.now(),
         };
-        addMessage(convId, aiMsg);
+        if (activeId) addMessage(activeId, aiMsg);
       }
     } catch (err: any) {
       toast({ 
@@ -379,6 +373,7 @@ export default function HassaniApp() {
           onNew={createNewConversation}
           onDelete={deleteConversation}
           onRename={renameConversation}
+          onPin={togglePin}
           onOpenSettings={() => setIsSettingsOpen(true)}
           user={user}
           onLogout={handleLogout}
@@ -388,6 +383,14 @@ export default function HassaniApp() {
         <SidebarInset className="flex flex-col h-full w-full relative overflow-hidden bg-background" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
           <header className="h-14 flex items-center justify-between px-5 glass-morphism sticky top-0 z-30 shrink-0">
             <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 rounded-lg hover:bg-primary/10"
+                onClick={() => setCurrentId(null)}
+              >
+                <Home className="h-4 w-4 text-primary" />
+              </Button>
               <div className="relative h-6 w-6 overflow-hidden rounded-full shadow-lg border border-primary/10">
                 <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" />
               </div>

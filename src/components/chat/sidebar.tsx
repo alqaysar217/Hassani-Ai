@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -6,7 +7,13 @@ import {
   Plus, 
   MessageSquare, 
   Settings,
-  LogOut
+  LogOut,
+  MoreVertical,
+  Pin,
+  Edit2,
+  Trash2,
+  Check,
+  X as CloseIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -23,6 +30,13 @@ import { Separator } from '@/components/ui/separator';
 import { useFirestore } from '@/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 import Image from 'next/image';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from '@/components/ui/input';
 
 interface ChatSidebarProps {
   conversations: Conversation[];
@@ -31,6 +45,7 @@ interface ChatSidebarProps {
   onNew: () => void;
   onDelete: (id: string) => void;
   onRename: (id: string, title: string) => void;
+  onPin: (id: string, pinned: boolean) => void;
   onOpenSettings: () => void;
   user: User;
   onLogout: () => void;
@@ -42,6 +57,9 @@ export function ChatSidebar({
   currentId, 
   onSelect, 
   onNew, 
+  onDelete,
+  onRename,
+  onPin,
   onOpenSettings,
   user,
   onLogout,
@@ -50,6 +68,8 @@ export function ChatSidebar({
   const { setOpenMobile } = useSidebar();
   const db = useFirestore();
   const [profile, setProfile] = useState<{ displayName?: string, photoURL?: string } | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -65,6 +85,18 @@ export function ChatSidebar({
     setOpenMobile(false);
   };
 
+  const startEditing = (c: Conversation) => {
+    setEditingId(c.id);
+    setEditValue(c.title);
+  };
+
+  const saveRename = (id: string) => {
+    if (editValue.trim()) {
+      onRename(id, editValue.trim());
+    }
+    setEditingId(null);
+  };
+
   const displayName = profile?.displayName || user.displayName || (lang === 'ar' ? "مستخدم حساني" : "Hassani User");
   const photoURL = profile?.photoURL || user.photoURL || undefined;
 
@@ -78,7 +110,6 @@ export function ChatSidebar({
               alt="Hassani" 
               fill 
               className="object-cover" 
-              onError={(e) => { e.currentTarget.src = "https://picsum.photos/seed/hassani/40/40"; }} 
             />
           </div>
           <span className="text-lg font-black text-foreground tracking-tighter">{lang === 'ar' ? 'حساني' : 'Hassani'}</span>
@@ -101,9 +132,55 @@ export function ChatSidebar({
           ) : (
             <div className="space-y-1">
               {conversations.map((c) => (
-                <div key={c.id} className={cn("group relative flex items-center rounded-2xl px-4 py-4 text-sm transition-all cursor-pointer", currentId === c.id ? "bg-primary/10 text-primary font-bold shadow-sm" : "hover:bg-muted/50 text-muted-foreground")} onClick={() => handleSelect(c.id)}>
-                  <MessageSquare className={cn("h-5 w-5 opacity-60", lang === 'ar' ? 'ml-3' : 'mr-3')} />
-                  <span className="truncate flex-1 font-bold">{c.title}</span>
+                <div 
+                  key={c.id} 
+                  className={cn(
+                    "group relative flex items-center rounded-2xl px-3 py-3 text-sm transition-all cursor-pointer", 
+                    currentId === c.id ? "bg-primary/10 text-primary font-bold" : "hover:bg-muted/50 text-muted-foreground"
+                  )} 
+                >
+                  <div className="flex-1 flex items-center min-w-0" onClick={() => handleSelect(c.id)}>
+                    <MessageSquare className={cn("h-4 w-4 shrink-0 opacity-60", lang === 'ar' ? 'ml-3' : 'mr-3')} />
+                    {editingId === c.id ? (
+                      <Input 
+                        className="h-7 py-0 px-1 bg-transparent border-primary/20 focus-visible:ring-1 focus-visible:ring-primary text-xs"
+                        autoFocus
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onBlur={() => saveRename(c.id)}
+                        onKeyDown={(e) => e.key === 'Enter' && saveRename(c.id)}
+                      />
+                    ) : (
+                      <span className="truncate font-bold flex items-center gap-2">
+                        {c.title}
+                        {c.pinned && <Pin className="h-2.5 w-2.5 fill-primary" />}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg hover:bg-primary/10">
+                          <MoreVertical className="h-3.5 w-3.5" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-40 rounded-xl border-primary/10 shadow-xl bg-popover/95 backdrop-blur-md">
+                        <DropdownMenuItem onClick={() => onPin(c.id, !!c.pinned)} className="gap-2 cursor-pointer font-bold py-2 rounded-lg">
+                          <Pin className={cn("h-3.5 w-3.5", c.pinned && "fill-primary text-primary")} />
+                          {c.pinned ? (lang === 'ar' ? 'إلغاء التثبيت' : 'Unpin') : (lang === 'ar' ? 'تثبيت' : 'Pin')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => startEditing(c)} className="gap-2 cursor-pointer font-bold py-2 rounded-lg">
+                          <Edit2 className="h-3.5 w-3.5" />
+                          {lang === 'ar' ? 'إعادة تسمية' : 'Rename'}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onDelete(c.id)} className="gap-2 cursor-pointer font-bold py-2 rounded-lg text-destructive focus:bg-destructive/10">
+                          <Trash2 className="h-3.5 w-3.5" />
+                          {lang === 'ar' ? 'حذف' : 'Delete'}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
               ))}
             </div>

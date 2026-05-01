@@ -18,7 +18,8 @@
       "properties": {
         "title": { "type": "string", "description": "عنوان المحادثة" },
         "userId": { "type": "string", "description": "معرف المستخدم صاحب المحادثة" },
-        "updatedAt": { "type": "number" }
+        "updatedAt": { "type": "number" },
+        "pinned": { "type": "boolean", "description": "هل المحادثة مثبتة في الأعلى" }
       },
       "required": ["title", "userId", "updatedAt"]
     },
