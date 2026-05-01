@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -27,7 +28,6 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { intelligentConversationalAi } from '@/ai/flows/intelligent-conversational-ai';
 import { automaticIntentRouting } from '@/ai/flows/automatic-intent-routing';
-import { aiCodeAssistance } from '@/ai/flows/ai-code-assistance-flow';
 import { generateDiagram } from '@/ai/flows/ai-diagram-generation-flow';
 import { aiImageCreation } from '@/ai/flows/ai-image-creation-flow';
 import { aiPlanning } from '@/ai/flows/ai-planning-flow';
@@ -179,8 +179,7 @@ export default function HassaniApp() {
       let intent = type;
       if (type === 'text') {
         const routeResult = await automaticIntentRouting({ query: text });
-        const detectedIntent = routeResult?.intent || 'question';
-        intent = detectedIntent === 'programming' ? 'code' : detectedIntent as MessageType;
+        intent = routeResult?.intent as MessageType || 'text';
       }
 
       const history = currentConversation?.messages?.map(m => ({
@@ -193,19 +192,6 @@ export default function HassaniApp() {
       let finalType: MessageType = 'text';
 
       switch (intent) {
-        case 'code':
-          const codeResult = await aiCodeAssistance({ codeRequest: text });
-          const codeSnippet = codeResult?.code || "";
-          const expl = codeResult?.explanation || (lang === 'ar' ? "تفضل، هذا هو الكود المطلوب." : "Here is the code you requested.");
-          
-          if (codeSnippet) {
-            aiResponse = `${expl}\n\n\`\`\`\n${codeSnippet}\n\`\`\``;
-            aiMetadata = { code: codeSnippet, explanation: expl };
-          } else {
-            aiResponse = expl;
-          }
-          finalType = 'code';
-          break;
         case 'image':
           const imageResult = await aiImageCreation({ prompt: text });
           aiResponse = lang === 'ar' ? "تفضل، لقد قمت بإنشاء هذه الصورة لك بناءً على طلبك:" : "Here is the image I created for you based on your request:";
@@ -236,12 +222,14 @@ export default function HassaniApp() {
           finalType = 'planning';
           break;
         default:
+          // استخدام المحركConversational الذكي للبرمجة والدردشة العامة لدعم الذاكرة والتنسيق الكامل
           const chatResult = await intelligentConversationalAi({ 
             query: text,
             history: history,
             imageHeader: imageBase64 || undefined
           });
           aiResponse = chatResult?.response || (lang === 'ar' ? "أهلاً بك! كيف يمكنني مساعدتك؟" : "Hello! How can I help you?");
+          finalType = intent === 'programming' ? 'code' : 'text';
       }
 
       const aiMsg: Message = {
