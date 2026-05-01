@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -104,7 +105,7 @@ export function useChat() {
 
     try {
       await setDoc(docRef, data);
-      setCurrentId(id);
+      setCurrentId(id); // التحديث هنا يؤدي لتغيير الواجهة فوراً
       return id;
     } catch (error) {
       const permissionError = new FirestorePermissionError({
@@ -135,7 +136,8 @@ export function useChat() {
     const conversationRef = doc(db, 'conversations', conversationId);
     const updateData: any = { updatedAt: Date.now() };
     
-    if (messages.length === 0 && message.role === 'user') {
+    // تحديث عنوان المحادثة بناءً على أول رسالة
+    if (message.role === 'user' && (!currentConversation?.messages?.length || currentConversation.messages.length <= 1)) {
       updateData.title = message.content.slice(0, 30) + (message.content.length > 30 ? '...' : '');
     }
 

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -144,8 +145,13 @@ export default function HassaniApp() {
 
   const handleSendMessage = async (text: string, type: MessageType = 'text', file: File | null = null) => {
     if (!currentId) {
+      setIsLoading(true); // بدء التحميل فوراً للانتقال للواجهة
       const newId = await createNewConversation();
-      if (newId) processMessage(newId, text, type, file);
+      if (newId) {
+        processMessage(newId, text, type, file);
+      } else {
+        setIsLoading(false);
+      }
     } else {
       processMessage(currentId, text, type, file);
     }
@@ -180,7 +186,7 @@ export default function HassaniApp() {
         intent = detectedIntent === 'programming' ? 'code' : detectedIntent as MessageType;
       }
 
-      // جلب التاريخ للميموري
+      // جلب التاريخ للميموري من المحادثة الحالية (إذا كانت موجودة)
       const history = currentConversation?.messages?.map(m => ({
         role: m.role,
         content: m.content
@@ -205,8 +211,9 @@ export default function HassaniApp() {
           break;
         case 'diagram':
           let dType: 'useCase' | 'erd' | 'dfd' = 'useCase';
-          if (text.toLowerCase().includes('erd') || text.includes('قواعد')) dType = 'erd';
-          else if (text.toLowerCase().includes('dfd') || text.includes('بيانات')) dType = 'dfd';
+          const lowerText = text.toLowerCase();
+          if (lowerText.includes('erd') || lowerText.includes('قواعد')) dType = 'erd';
+          else if (lowerText.includes('dfd') || lowerText.includes('تدفق بيانات')) dType = 'dfd';
           
           const diagramResult = await generateDiagram({ description: text, diagramType: dType });
           aiResponse = diagramResult.diagramExplanation || (lang === 'ar' ? "تفضل المخطط المطلوب:" : "Here is the requested diagram:");
@@ -221,7 +228,7 @@ export default function HassaniApp() {
         default:
           const { response } = await intelligentConversationalAi({ 
             query: text,
-            history: history, // إرسال التاريخ هنا لتفعيل الذاكرة
+            history: history,
             imageHeader: imageBase64 || undefined
           });
           aiResponse = response;
@@ -257,7 +264,7 @@ export default function HassaniApp() {
       <div className="h-svh w-full flex flex-col items-center justify-center bg-background px-6">
         <div className="max-w-md w-full space-y-10 text-center">
           <div className="space-y-6 animate-fade-in flex flex-col items-center">
-            <div className="relative h-20 w-20 shadow-2xl rounded-2xl overflow-hidden mb-4 border border-primary/10">
+            <div className="relative h-20 w-20 shadow-2xl rounded-full overflow-hidden mb-4 border border-primary/10">
                <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" />
             </div>
             <h1 className="text-5xl font-black text-foreground tracking-tighter dark:text-foreground">{lang === 'ar' ? 'حساني' : 'Hassani'}</h1>
@@ -287,6 +294,9 @@ export default function HassaniApp() {
     { text: lang === 'ar' ? "توليد موسيقى" : "Generate Music", icon: <Music className="h-4 w-4" />, color: "text-orange-500", type: 'music' },
   ];
 
+  // شرط العرض المحدث لضمان الانتقال الفوري
+  const showGreeting = !currentId && (!currentConversation?.messages?.length || currentConversation.messages.length === 0) && !isLoading;
+
   return (
     <SidebarProvider defaultOpen={false}>
       <div className="flex w-full h-svh bg-background overflow-hidden relative" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
@@ -306,7 +316,7 @@ export default function HassaniApp() {
         <SidebarInset className="flex flex-col h-full w-full relative overflow-hidden" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
           <header className="h-14 flex items-center justify-between px-5 glass-morphism sticky top-0 z-30 shrink-0">
             <div className="flex items-center gap-2">
-              <div className="relative h-6 w-6 overflow-hidden rounded-lg shadow-lg border border-primary/10">
+              <div className="relative h-6 w-6 overflow-hidden rounded-full shadow-lg border border-primary/10">
                 <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" />
               </div>
               <h1 className="text-base font-black text-foreground tracking-tight dark:text-foreground">{lang === 'ar' ? 'حساني' : 'Hassani'}</h1>
@@ -319,9 +329,9 @@ export default function HassaniApp() {
           <div className="flex-1 flex flex-col relative overflow-hidden bg-[radial-gradient(circle_at_top_right,rgba(197,160,89,0.04),transparent)]">
             <ScrollArea ref={scrollRef} className="flex-1">
               <div className="max-w-3xl mx-auto px-5 py-8 space-y-8">
-                {(!currentConversation || currentConversation.messages.length === 0) ? (
+                {showGreeting ? (
                   <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-8 animate-fade-in-up">
-                    <div className="h-16 w-16 bg-card rounded-2xl flex items-center justify-center shadow-2xl overflow-hidden border border-primary/10 relative">
+                    <div className="h-16 w-16 bg-card rounded-full flex items-center justify-center shadow-2xl overflow-hidden border border-primary/10 relative">
                       <Image src="/logo-hassani.png" alt="Hassani" fill className="object-cover" />
                     </div>
                     <div className="space-y-3">
@@ -351,18 +361,22 @@ export default function HassaniApp() {
                     </div>
                   </div>
                 ) : (
-                  currentConversation.messages.map((msg) => <ChatMessage key={msg.id} message={msg} />)
-                )}
-                {isLoading && (
-                  <div className="flex justify-start items-center gap-3">
-                    <div className="bg-card px-6 py-4 rounded-3xl rounded-tr-sm border border-primary/10 flex items-center gap-3 shadow-sm animate-pulse">
-                      <div className="flex gap-1">
-                        <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce"></div>
-                        <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                  <>
+                    {currentConversation?.messages?.map((msg) => (
+                      <ChatMessage key={msg.id} message={msg} />
+                    ))}
+                    {isLoading && (
+                      <div className="flex justify-start items-center gap-3 animate-fade-in">
+                        <div className="bg-card px-6 py-4 rounded-3xl rounded-tr-sm border border-primary/10 flex items-center gap-3 shadow-sm animate-pulse">
+                          <div className="flex gap-1">
+                            <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce"></div>
+                            <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                          </div>
+                          <span className="text-xs text-muted-foreground font-bold italic">{lang === 'ar' ? 'حساني يفكر...' : 'Hassani thinking...'}</span>
+                        </div>
                       </div>
-                      <span className="text-xs text-muted-foreground font-bold italic">{lang === 'ar' ? 'حساني يفكر...' : 'Hassani thinking...'}</span>
-                    </div>
-                  </div>
+                    )}
+                  </>
                 )}
               </div>
             </ScrollArea>
