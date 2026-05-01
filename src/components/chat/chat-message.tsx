@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -49,11 +50,11 @@ export function ChatMessage({ message }: ChatMessageProps) {
   return (
     <div className={cn(
       "flex w-full group animate-fade-in-up overflow-hidden mb-6",
-      isAI ? "justify-end" : "justify-start"
+      isAI ? "justify-start" : "justify-end"
     )} dir="rtl">
       <div className={cn(
         "relative flex flex-col gap-2 w-full max-w-[95%] md:max-w-[85%] min-w-0",
-        isAI ? "items-end" : "items-start"
+        isAI ? "items-start" : "items-end"
       )}>
         <div className={cn(
           "flex items-center gap-2 px-1",
@@ -82,18 +83,18 @@ export function ChatMessage({ message }: ChatMessageProps) {
           "px-4 md:px-6 py-4 md:py-5 shadow-sm transition-all duration-300 w-full overflow-x-auto min-w-0 no-scrollbar text-right",
           isAI ? "chat-bubble-ai" : "chat-bubble-user"
         )}>
-          <div className="prose prose-stone dark:prose-invert max-w-full overflow-hidden break-words text-right">
+          <div className="prose prose-stone dark:prose-invert max-w-full overflow-hidden break-words text-right" style={{ direction: 'rtl', unicodeBidi: 'isolate' }}>
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}
               components={{
                 p({ children }) {
-                  return <div className="mb-4 last:mb-0 leading-relaxed text-base md:text-lg font-medium break-words text-right">{children}</div>;
+                  return <div className="mb-4 last:mb-0 leading-relaxed text-base md:text-lg font-medium break-words text-right" style={{ direction: 'rtl', unicodeBidi: 'isolate' }}>{children}</div>;
                 },
-                h1({ children }) { return <h1 className="text-right font-black mb-4">{children}</h1> },
-                h2({ children }) { return <h2 className="text-right font-black mb-3">{children}</h2> },
-                h3({ children }) { return <h3 className="text-right font-black mb-2">{children}</h3> },
-                ul({ children }) { return <ul className="text-right list-disc list-inside mb-4">{children}</ul> },
-                ol({ children }) { return <ol className="text-right list-decimal list-inside mb-4">{children}</ol> },
+                h1({ children }) { return <h1 className="text-right font-black mb-4" style={{ direction: 'rtl', unicodeBidi: 'isolate' }}>{children}</h1> },
+                h2({ children }) { return <h2 className="text-right font-black mb-3" style={{ direction: 'rtl', unicodeBidi: 'isolate' }}>{children}</h2> },
+                h3({ children }) { return <h3 className="text-right font-black mb-2" style={{ direction: 'rtl', unicodeBidi: 'isolate' }}>{children}</h3> },
+                ul({ children }) { return <ul className="text-right list-disc list-inside mb-4" style={{ direction: 'rtl' }}>{children}</ul> },
+                ol({ children }) { return <ol className="text-right list-decimal list-inside mb-4" style={{ direction: 'rtl' }}>{children}</ol> },
                 code({ node, inline, className, children, ...props }: any) {
                   const match = /language-(\w+)/.exec(className || '');
                   const codeContent = String(children).replace(/\n$/, '');
@@ -122,7 +123,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
                       </div>
                     </div>
                   ) : (
-                    <code className="bg-primary/10 text-primary px-1.5 py-0.5 rounded-md font-bold text-xs md:text-sm break-all" {...props}>
+                    <code className="bg-primary/10 text-primary px-1.5 py-0.5 rounded-md font-bold text-xs md:text-sm break-all" style={{ direction: 'ltr', display: 'inline-block' }} {...props}>
                       {children}
                     </code>
                   );
