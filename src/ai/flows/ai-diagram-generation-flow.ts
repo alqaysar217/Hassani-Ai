@@ -3,7 +3,7 @@
  * @fileOverview توليد مخططات Mermaid باستخدام OpenRouter.
  */
 
-const OPENROUTER_API_KEY = "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";
+const OPENROUTER_API_KEY = "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";
 const MODEL = "google/gemini-2.0-flash-001";
 
 export async function generateDiagram(input: { description: string, diagramType: string }) {
