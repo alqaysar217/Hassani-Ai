@@ -143,14 +143,12 @@ export default function HassaniApp() {
     }
   };
 
-  const handleSendMessage = async (text: string, type: MessageType = 'text', file: File | null = null) => {
+  const handleSendMessage = (text: string, type: MessageType = 'text', file: File | null = null) => {
     if (!currentId) {
-      setIsLoading(true); // بدء التحميل فوراً للانتقال للواجهة
-      const newId = await createNewConversation();
+      // إنشاء المحادثة لحظياً دون انتظار await
+      const newId = createNewConversation();
       if (newId) {
         processMessage(newId, text, type, file);
-      } else {
-        setIsLoading(false);
       }
     } else {
       processMessage(currentId, text, type, file);
@@ -294,8 +292,8 @@ export default function HassaniApp() {
     { text: lang === 'ar' ? "توليد موسيقى" : "Generate Music", icon: <Music className="h-4 w-4" />, color: "text-orange-500", type: 'music' },
   ];
 
-  // شرط العرض المحدث لضمان الانتقال الفوري
-  const showGreeting = !currentId && (!currentConversation?.messages?.length || currentConversation.messages.length === 0) && !isLoading;
+  // التعديل هنا: إذا كان هناك معرف أو تحميل، ننتقل فوراً لشاشة المحادثة
+  const showGreeting = !currentId && !isLoading;
 
   return (
     <SidebarProvider defaultOpen={false}>

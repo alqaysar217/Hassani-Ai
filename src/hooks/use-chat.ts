@@ -92,7 +92,8 @@ export function useChat() {
     return { ...conv, messages };
   }, [conversations, currentId, messages]);
 
-  const createNewConversation = async () => {
+  // جعل إنشاء المحادثة لحظياً تماماً
+  const createNewConversation = () => {
     if (!db || !user) return null;
     
     const id = crypto.randomUUID();
@@ -103,19 +104,19 @@ export function useChat() {
       updatedAt: Date.now()
     };
 
-    try {
-      await setDoc(docRef, data);
-      setCurrentId(id); // التحديث هنا يؤدي لتغيير الواجهة فوراً
-      return id;
-    } catch (error) {
+    // تنفيذ التخزين في الخلفية دون انتظار
+    setDoc(docRef, data).catch(async () => {
       const permissionError = new FirestorePermissionError({
         path: docRef.path,
         operation: 'create',
         requestResourceData: data,
       });
       errorEmitter.emit('permission-error', permissionError);
-      return null;
-    }
+    });
+
+    // تعيين المعرف فوراً لتحديث الواجهة في الحال
+    setCurrentId(id);
+    return id;
   };
 
   const addMessage = (conversationId: string, message: Message) => {
@@ -123,6 +124,7 @@ export function useChat() {
 
     const messageRef = doc(db, 'conversations', conversationId, 'messages', message.id);
     
+    // تخزين الرسالة دون انتظار
     setDoc(messageRef, message)
       .catch(async () => {
         const permissionError = new FirestorePermissionError({
@@ -137,7 +139,7 @@ export function useChat() {
     const updateData: any = { updatedAt: Date.now() };
     
     // تحديث عنوان المحادثة بناءً على أول رسالة
-    if (message.role === 'user' && (!currentConversation?.messages?.length || currentConversation.messages.length <= 1)) {
+    if (message.role === 'user' && (!messages.length || messages.length === 0)) {
       updateData.title = message.content.slice(0, 30) + (message.content.length > 30 ? '...' : '');
     }
 
