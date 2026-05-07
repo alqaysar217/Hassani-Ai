@@ -59,7 +59,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
   return (
     <div className={cn(
       "flex w-full group animate-fade-in-up overflow-hidden mb-6",
-      isAI ? "justify-end" : "justify-start"
+      isAI ? "justify-start" : "justify-end"
     )} dir="rtl">
       <div className={cn(
         "relative flex flex-col gap-2 w-full max-w-[95%] md:max-w-[85%] min-w-0",
@@ -99,26 +99,23 @@ export function ChatMessage({ message }: ChatMessageProps) {
 
         <div className={cn(
           "px-4 md:px-6 py-4 md:py-5 shadow-sm transition-all duration-300 w-full overflow-x-auto min-w-0 no-scrollbar",
-          isAI ? "text-right chat-bubble-ai" : "text-left chat-bubble-user"
+          isAI ? "text-right chat-bubble-ai" : "text-right chat-bubble-user"
         )}>
-          <div className={cn(
-            "prose prose-stone dark:prose-invert max-w-full overflow-hidden break-words",
-            isAI ? "text-right" : "text-left"
-          )} style={{ unicodeBidi: 'isolate' }}>
+          <div className="prose prose-stone dark:prose-invert max-w-full overflow-hidden break-words text-right" style={{ unicodeBidi: 'isolate' }}>
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}
               components={{
                 div({ children }) {
-                  return <div className="mb-4 last:mb-0 leading-relaxed text-base md:text-lg font-medium break-words" style={{ unicodeBidi: 'isolate' }}>{children}</div>;
+                  return <div className="mb-4 last:mb-0 leading-relaxed text-base md:text-lg font-medium break-words text-right" style={{ unicodeBidi: 'isolate' }}>{children}</div>;
                 },
                 p({ children }) {
-                  return <div className="mb-4 last:mb-0 leading-relaxed text-base md:text-lg font-medium break-words" style={{ unicodeBidi: 'isolate' }}>{children}</div>;
+                  return <div className="mb-4 last:mb-0 leading-relaxed text-base md:text-lg font-medium break-words text-right" style={{ unicodeBidi: 'isolate' }}>{children}</div>;
                 },
-                h1({ children }) { return <h1 className="font-black mb-4" style={{ unicodeBidi: 'isolate' }}>{children}</h1> },
-                h2({ children }) { return <h2 className="font-black mb-3" style={{ unicodeBidi: 'isolate' }}>{children}</h2> },
-                h3({ children }) { return <h3 className="font-black mb-2" style={{ unicodeBidi: 'isolate' }}>{children}</h3> },
-                ul({ children }) { return <ul className="list-disc list-inside mb-4">{children}</ul> },
-                ol({ children }) { return <ol className="list-decimal list-inside mb-4">{children}</ol> },
+                h1({ children }) { return <h1 className="font-black mb-4 text-right" style={{ unicodeBidi: 'isolate' }}>{children}</h1> },
+                h2({ children }) { return <h2 className="font-black mb-3 text-right" style={{ unicodeBidi: 'isolate' }}>{children}</h2> },
+                h3({ children }) { return <h3 className="font-black mb-2 text-right" style={{ unicodeBidi: 'isolate' }}>{children}</h3> },
+                ul({ children }) { return <ul className="list-disc list-inside mb-4 text-right">{children}</ul> },
+                ol({ children }) { return <ol className="list-decimal list-inside mb-4 text-right">{children}</ol> },
                 code({ node, inline, className, children, ...props }: any) {
                   const match = /language-(\w+)/.exec(className || '');
                   const codeContent = String(children).replace(/\n$/, '');
