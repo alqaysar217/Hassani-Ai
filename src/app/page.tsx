@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -125,7 +126,7 @@ const ROLE_PROMPTS: Record<string, string> = {
 - اجعل الـ Prompt جاهزًا مباشرة لمحرك الصور.`,
 
   'music': `أنت مساعد موسيقي وخبير تأليف ألحان ونظريات موسيقية.
-مهمتك هي مساعدة المستخدم في إنشاء أفكار موسيقية وألحان ونوتات وتصورات صوتية.
+مهمتك هي مساعدة المستخدم في إنشاء أفكار موسيية وألحان ونوتات وتصورات صوتية.
 
 قواعد العمل:
 - اقترح ألحانًا/أنماطًا مناسبة.
@@ -307,7 +308,6 @@ export default function HassaniApp() {
         title: lang === 'ar' ? "خطأ تقني" : "Technical Error", 
         description: err.message 
       });
-      // إضافة رسالة خطأ في الشات لتوضيح السبب للمستخدم
       const errorMsg: Message = {
         id: crypto.randomUUID(),
         role: 'assistant',
@@ -446,7 +446,7 @@ export default function HassaniApp() {
                       <ChatMessage key={msg.id} message={msg} />
                     ))}
                     {isLoading && (
-                      <div className="flex justify-start items-center gap-3 animate-fade-in w-full">
+                      <div className="flex justify-start items-center gap-3 animate-fade-in w-full" dir="rtl">
                         <div className="bg-card px-6 py-4 rounded-3xl rounded-tr-sm border border-primary/10 flex items-center gap-3 shadow-sm animate-pulse">
                           <div className="flex gap-1">
                             <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce"></div>
